@@ -44,6 +44,7 @@ export default function SearchFilter({
           >
             <option value="" style={{ backgroundColor: 'hsl(var(--color-background))', color: 'hsl(var(--color-foreground))' }}>All Tasks</option>
             <option value="pending" style={{ backgroundColor: 'hsl(var(--color-background))', color: 'hsl(var(--color-foreground))' }}>Pending</option>
+            <option value="progress" style={{ backgroundColor: 'hsl(var(--color-background))', color: 'hsl(var(--color-foreground))' }}>Progress</option>
             <option value="completed" style={{ backgroundColor: 'hsl(var(--color-background))', color: 'hsl(var(--color-foreground))' }}>Completed</option>
           </Select>
         </div>

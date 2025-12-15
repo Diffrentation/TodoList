@@ -100,6 +100,7 @@ export default function TaskForm({ onSubmit, initialData = null, onCancel }) {
           className="w-32 h-9 text-sm border-0 bg-muted/50 focus:bg-background focus:ring-2 focus:ring-primary rounded-lg"
         >
           <option value="pending">Pending</option>
+          <option value="progress">Progress</option>
           <option value="completed">Completed</option>
         </Select>
 

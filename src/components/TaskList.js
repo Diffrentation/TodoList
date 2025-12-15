@@ -7,7 +7,7 @@ import api from "@/lib/axios";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, Circle, MoreVertical, Plus, X, Edit, Trash2 } from "lucide-react";
+import { CheckCircle2, Circle, MoreVertical, Plus, X, Edit, Trash2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus = "" }) {
@@ -72,14 +72,27 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
       }
     } catch (error) {
       console.error("[TaskList] Update error:", error);
-      toast.error(error.response?.data?.message || error.message || "Failed to save task");
+      console.error("[TaskList] Error response:", error.response?.data);
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.errors?.join(", ") ||
+                          error.message || 
+                          "Failed to save task";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   const toggleStatus = async (task) => {
-    const newStatus = task.status === "completed" ? "pending" : "completed";
+    // Cycle through: pending -> progress -> completed -> pending
+    let newStatus;
+    if (task.status === "pending") {
+      newStatus = "progress";
+    } else if (task.status === "progress") {
+      newStatus = "completed";
+    } else {
+      newStatus = "pending";
+    }
     try {
       const response = await api.put(`/tasks/${task._id}`, { status: newStatus });
       const updatedTasks = tasks.map((t) =>
@@ -93,12 +106,15 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
   };
 
   const pendingTasks = tasks.filter((t) => t.status === "pending");
+  const progressTasks = tasks.filter((t) => t.status === "progress");
   const completedTasks = tasks.filter((t) => t.status === "completed");
 
   // Filter tasks based on filterStatus
   const filteredTasks = filterStatus
     ? filterStatus === "pending"
       ? pendingTasks
+      : filterStatus === "progress"
+      ? progressTasks
       : filterStatus === "completed"
       ? completedTasks
       : tasks
@@ -106,6 +122,7 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
 
   // Determine which sections to show
   const showPending = !filterStatus || filterStatus === "pending";
+  const showProgress = !filterStatus || filterStatus === "progress";
   const showCompleted = !filterStatus || filterStatus === "completed";
 
   return (
@@ -229,6 +246,32 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
         </div>
       )}
 
+      {/* Progress Tasks */}
+      {showProgress && progressTasks.length > 0 && (
+        <div className={cn("space-y-2", !filterStatus && "pt-6 border-t border-border/50")}>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+            Progress ({progressTasks.length})
+          </h2>
+          <AnimatePresence>
+            {progressTasks.map((task, index) => (
+              <TaskItem
+                key={task._id}
+                task={task}
+                index={index}
+                onToggle={toggleStatus}
+                onEdit={() => setEditingTask(task)}
+                onDelete={handleDelete}
+                expanded={expandedTask === task._id}
+                onExpand={() =>
+                  setExpandedTask(expandedTask === task._id ? null : task._id)
+                }
+                loading={loading}
+              />
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+
       {/* Completed Tasks */}
       {showCompleted && completedTasks.length > 0 && (
         <div className={cn("space-y-2", !filterStatus && "pt-6 border-t border-border/50")}>
@@ -301,6 +344,14 @@ function TaskItem({
                 >
                   <CheckCircle2 className="h-5 w-5 text-primary" />
                 </motion.div>
+              ) : task.status === "progress" ? (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <Clock className="h-5 w-5 text-primary" />
+                </motion.div>
               ) : (
                 <Circle className="h-5 w-5 text-muted-foreground" />
               )}
@@ -347,9 +398,11 @@ function TaskItem({
                 </span>
                 <span
                   className={cn(
-                    "px-2 py-1 text-xs font-medium rounded-full",
+                    "px-2 py-1 text-xs font-medium rounded-full capitalize",
                     task.status === "completed"
                       ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      : task.status === "progress"
+                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                       : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
                   )}
                 >

@@ -92,7 +92,17 @@ export async function PUT(req, { params }) {
     }
 
     const body = await req.json();
-    const { title, description, status } = body;
+    let { title, description, status } = body;
+
+    // Normalize status to lowercase if provided
+    if (status !== undefined && typeof status === 'string') {
+      status = status.toLowerCase().trim();
+      if (status === '') {
+        status = undefined;
+      }
+    }
+
+    console.log("[TASKS PUT] Updating task with status:", status);
 
     console.log("[TASKS PUT] Updating task:", {
       id,
@@ -136,9 +146,9 @@ export async function PUT(req, { params }) {
     }
 
     if (status !== undefined) {
-      if (status !== "pending" && status !== "completed") {
+      if (status !== "pending" && status !== "progress" && status !== "completed") {
         return NextResponse.json(
-          { success: false, message: "Status must be pending or completed" },
+          { success: false, message: "Status must be pending, progress, or completed" },
           { status: 400 }
         );
       }

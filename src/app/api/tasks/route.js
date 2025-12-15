@@ -32,7 +32,7 @@ export async function GET(req) {
 
     // Build query
     const query = { user: user._id };
-    if (status && (status === "pending" || status === "completed")) {
+    if (status && (status === "pending" || status === "progress" || status === "completed")) {
       query.status = status;
     }
     if (search && search.trim()) {
@@ -75,7 +75,19 @@ export async function POST(req) {
     }
 
     const body = await req.json();
-    const { title, description, status } = body;
+    let { title, description, status } = body;
+
+    // Normalize status to lowercase and handle empty strings
+    if (status && typeof status === 'string') {
+      status = status.toLowerCase().trim();
+      if (status === '') {
+        status = undefined;
+      }
+    } else {
+      status = undefined;
+    }
+
+    console.log("[TASKS POST] Creating task with status:", status, "Type:", typeof status);
 
     // Validation
     const titleValidation = validateTaskTitle(title);
@@ -94,9 +106,10 @@ export async function POST(req) {
       );
     }
 
-    if (status && status !== "pending" && status !== "completed") {
+    if (status && status !== "pending" && status !== "progress" && status !== "completed") {
+      console.log("[TASKS POST] Invalid status:", status);
       return NextResponse.json(
-        { success: false, message: "Status must be pending or completed" },
+        { success: false, message: "Status must be pending, progress, or completed" },
         { status: 400 }
       );
     }
@@ -108,6 +121,8 @@ export async function POST(req) {
       status: status || "pending",
       user: user._id,
     });
+    
+    console.log("[TASKS POST] Task created successfully:", task._id, "Status:", task.status);
 
     return NextResponse.json(
       {

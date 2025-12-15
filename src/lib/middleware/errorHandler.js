@@ -7,11 +7,13 @@ export function errorHandler(err) {
   // Mongoose validation error
   if (err.name === "ValidationError") {
     const errors = Object.values(err.errors).map((e) => e.message);
+    console.error("Mongoose Validation Error:", err.errors);
     return NextResponse.json(
       {
         success: false,
         message: "Validation error",
         errors,
+        details: err.errors,
       },
       { status: 400 }
     );
