@@ -10,13 +10,13 @@ export default function ProtectedRoute({ children }) {
   const [authenticated, setAuthenticated] = useState(false);
 
   const redirectToLogin = useCallback(() => {
-    // Only redirect if not already on login/register page
+    // Only redirect if not already on login/signup page
     if (
       typeof window !== "undefined" &&
-      window.location.pathname !== "/login" &&
-      window.location.pathname !== "/register"
+      window.location.pathname !== "/auth/login" &&
+      window.location.pathname !== "/auth/signup"
     ) {
-      router.push("/login");
+      router.push("/auth/login");
     }
   }, [router]);
 

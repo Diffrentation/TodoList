@@ -85,10 +85,11 @@ api.interceptors.response.use(
         if (typeof window !== "undefined") {
           const currentPath = window.location.pathname;
           const isAuthPage =
-            currentPath === "/login" ||
-            currentPath === "/register" ||
-            currentPath === "/verify-otp" ||
-            currentPath === "/login-otp";
+            currentPath === "/auth/login" ||
+            currentPath === "/auth/signup" ||
+            currentPath === "/auth/otp" ||
+            currentPath === "/auth/forgot-password" ||
+            currentPath === "/auth/change-password";
           const isProtectedRouteCheck =
             originalRequest.url?.includes("/auth/profile");
 
@@ -100,8 +101,8 @@ api.interceptors.response.use(
               localStorage.removeItem("user");
             }
             // Only redirect if not already redirecting
-            if (currentPath !== "/login") {
-              window.location.href = "/login";
+            if (currentPath !== "/auth/login") {
+              window.location.href = "/auth/login";
             }
           }
         }

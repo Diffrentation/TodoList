@@ -52,6 +52,27 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Select dropdown styling for dark mode */
+select {
+  background-color: hsl(var(--color-background));
+  color: hsl(var(--color-foreground));
+}
+
+select option {
+  background-color: hsl(var(--color-background));
+  color: hsl(var(--color-foreground));
+}
+
+.dark select {
+  background-color: hsl(var(--color-background));
+  color: hsl(var(--color-foreground));
+}
+
+.dark select option {
+  background-color: hsl(var(--color-background));
+  color: hsl(var(--color-foreground));
+}
+
 @keyframes caret-blink {
   0%, 100% {
     opacity: 1;

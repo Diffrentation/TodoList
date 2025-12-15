@@ -36,11 +36,15 @@ export default function SearchFilter({
             value={status}
             onChange={(e) => onStatusChange(e.target.value)}
             suppressHydrationWarning
-            className="pl-12 h-12 text-base border-0 bg-muted/50 focus:bg-background focus:ring-2 focus:ring-primary rounded-xl transition-all appearance-none cursor-pointer"
+            className="pl-12 h-12 text-base border-0 bg-muted/50 dark:bg-background dark:text-foreground focus:bg-background dark:focus:bg-background focus:ring-2 focus:ring-primary rounded-xl transition-all appearance-none cursor-pointer"
+            style={{
+              backgroundColor: 'hsl(var(--color-background))',
+              color: 'hsl(var(--color-foreground))',
+            }}
           >
-            <option value="">All Tasks</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
+            <option value="" style={{ backgroundColor: 'hsl(var(--color-background))', color: 'hsl(var(--color-foreground))' }}>All Tasks</option>
+            <option value="pending" style={{ backgroundColor: 'hsl(var(--color-background))', color: 'hsl(var(--color-foreground))' }}>Pending</option>
+            <option value="completed" style={{ backgroundColor: 'hsl(var(--color-background))', color: 'hsl(var(--color-foreground))' }}>Completed</option>
           </Select>
         </div>
       </div>

@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { FaRegEyeSlash, FaRegEye, FaCamera, FaUser } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { motion } from "framer-motion";
 
 export default function Signup() {
   const [showPass, setShowPass] = useState(false);
@@ -177,199 +179,289 @@ export default function Signup() {
   const handleLogin = () => router.push("/auth/login");
 
   return (
-    <div className="shadow-input mx-auto mt-20 sm:mt-24 md:mt-26 w-[95vw] sm:w-[90vw] md:w-[85vw] lg:w-[70vw] xl:w-[55vw] 2xl:w-[50vw] max-w-5xl rounded-lg sm:rounded-xl md:rounded-2xl bg-white p-4 sm:p-6 md:p-8 lg:p-10 dark:bg-black">
-      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-neutral-800 dark:text-neutral-200">
-        Create Your Account
-      </h2>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12 relative">
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
+        <ThemeToggle />
+      </div>
 
-      <form className="mt-8" onSubmit={handleSubmit}>
-        {/* Profile Image Upload */}
-        <div className="flex justify-center mb-4 sm:mb-6">
-          <div className="relative">
-            <div
-              className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-blue-500 transition-colors bg-gray-50 dark:bg-gray-800 dark:border-gray-600"
-              onClick={handleImageClick}
-            >
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Profile preview"
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <div className="text-center">
-                  <FaUser className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400 mx-auto" />
-                  <span className="text-[10px] sm:text-xs text-gray-500 mt-1 block">
-                    Add Photo
-                  </span>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className={cn(
+          "w-full max-w-3xl rounded-2xl border border-border bg-card shadow-xl shadow-primary/5",
+          "p-6 sm:p-8 md:p-10"
+        )}
+      >
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+            Create Your Account
+          </h2>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Fill in your details to get started
+          </p>
+        </motion.div>
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {/* Profile Image Upload */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex justify-center"
+          >
+            <div className="relative">
+              <div
+                className={cn(
+                  "w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-dashed",
+                  "border-border flex items-center justify-center cursor-pointer",
+                  "hover:border-primary transition-colors bg-muted/50",
+                  "hover:bg-muted"
+                )}
+                onClick={handleImageClick}
+              >
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Profile preview"
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="text-center">
+                    <FaUser className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground mx-auto" />
+                    <span className="text-xs text-muted-foreground mt-1 block">
+                      Add Photo
+                    </span>
+                  </div>
+                )}
+
+                <div className="absolute bottom-0 right-0 bg-primary rounded-full p-2 cursor-pointer hover:bg-primary/90 transition-colors shadow-lg">
+                  <FaCamera className="w-3 h-3 text-primary-foreground" />
                 </div>
-              )}
-
-              <div className="absolute bottom-0 right-0 bg-blue-500 rounded-full p-1.5 sm:p-2 cursor-pointer hover:bg-blue-600 transition-colors">
-                <FaCamera className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
               </div>
+
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                className="hidden"
+              />
+            </div>
+          </motion.div>
+
+          {/* Personal Information */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
+          >
+            <LabelInputContainer>
+              <Label htmlFor="firstname" className="text-foreground">First Name</Label>
+              <Input
+                id="firstname"
+                value={formData.firstname}
+                onChange={handleChange}
+                placeholder="John"
+                type="text"
+                required
+                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+              />
+            </LabelInputContainer>
+
+            <LabelInputContainer>
+              <Label htmlFor="lastname" className="text-foreground">Last Name</Label>
+              <Input
+                id="lastname"
+                value={formData.lastname}
+                onChange={handleChange}
+                placeholder="Doe"
+                type="text"
+                required
+                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+              />
+            </LabelInputContainer>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
+          >
+            <LabelInputContainer>
+              <Label htmlFor="email" className="text-foreground">Email</Label>
+              <Input
+                id="email"
+                value={formData.email}
+                onChange={handleChange}
+                type="email"
+                placeholder="you@example.com"
+                required
+                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+              />
+            </LabelInputContainer>
+
+            <LabelInputContainer className="relative">
+              <Label htmlFor="password" className="text-foreground">Password</Label>
+              <Input
+                id="password"
+                value={formData.password}
+                onChange={handleChange}
+                type={showPass ? "text" : "password"}
+                placeholder="••••••••"
+                required
+                className="bg-background border-input text-foreground placeholder:text-muted-foreground pr-10"
+              />
+              <button
+                type="button"
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setShowPass(!showPass)}
+                aria-label="Toggle password visibility"
+              >
+                {showPass ? <FaRegEye className="h-5 w-5" /> : <FaRegEyeSlash className="h-5 w-5" />}
+              </button>
+            </LabelInputContainer>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <LabelInputContainer>
+              <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
+              <Input
+                id="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                type="text"
+                placeholder="Enter your phone number"
+                required
+                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+              />
+            </LabelInputContainer>
+          </motion.div>
+
+          {/* Address Information */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="pt-6 border-t border-border"
+          >
+            <h3 className="text-lg font-semibold text-foreground mb-4">
+              Address Information
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <LabelInputContainer>
+                <Label htmlFor="address.city" className="text-foreground">City</Label>
+                <Input
+                  id="address.city"
+                  value={formData.address.city}
+                  onChange={handleChange}
+                  placeholder="Mumbai"
+                  type="text"
+                  required
+                  className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                />
+              </LabelInputContainer>
+
+              <LabelInputContainer>
+                <Label htmlFor="address.state" className="text-foreground">State</Label>
+                <Input
+                  id="address.state"
+                  value={formData.address.state}
+                  onChange={handleChange}
+                  placeholder="Maharashtra"
+                  type="text"
+                  required
+                  className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                />
+              </LabelInputContainer>
             </div>
 
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImageChange}
-              accept="image/*"
-              className="hidden"
-            />
-          </div>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4">
+              <LabelInputContainer>
+                <Label htmlFor="address.country" className="text-foreground">Country</Label>
+                <Input
+                  id="address.country"
+                  value={formData.address.country}
+                  onChange={handleChange}
+                  placeholder="India"
+                  type="text"
+                  required
+                  className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                />
+              </LabelInputContainer>
 
-        {/* Personal Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-6">
-          <LabelInputContainer>
-            <Label htmlFor="firstname">First Name</Label>
-            <Input
-              id="firstname"
-              value={formData.firstname}
-              onChange={handleChange}
-              placeholder="John"
-              type="text"
-              required
-            />
-          </LabelInputContainer>
+              <LabelInputContainer>
+                <Label htmlFor="address.pincode" className="text-foreground">Pincode</Label>
+                <Input
+                  id="address.pincode"
+                  value={formData.address.pincode}
+                  onChange={handleChange}
+                  placeholder="400001"
+                  type="text"
+                  maxLength={6}
+                  required
+                  className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                />
+              </LabelInputContainer>
+            </div>
+          </motion.div>
 
-          <LabelInputContainer>
-            <Label htmlFor="lastname">Last Name</Label>
-            <Input
-              id="lastname"
-              value={formData.lastname}
-              onChange={handleChange}
-              placeholder="Doe"
-              type="text"
-              required
-            />
-          </LabelInputContainer>
-        </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+          >
+            <button
+              disabled={loading}
+              className={cn(
+                "group/btn relative w-full h-11 rounded-xl font-semibold text-primary-foreground",
+                "bg-primary hover:bg-primary/90 transition-all duration-300",
+                "shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                "flex items-center justify-center"
+              )}
+              type="submit"
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  Creating Account...
+                </span>
+              ) : (
+                "Create Account →"
+              )}
+            </button>
+          </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-6 mt-4">
-          <LabelInputContainer>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              value={formData.email}
-              onChange={handleChange}
-              type="email"
-              placeholder="you@example.com"
-              required
-            />
-          </LabelInputContainer>
-
-          <LabelInputContainer className="relative">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              value={formData.password}
-              onChange={handleChange}
-              type={showPass ? "text" : "password"}
-              placeholder="••••••••"
-              required
-            />
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="text-center text-sm text-muted-foreground"
+          >
+            Already have an account?{" "}
             <button
               type="button"
-              className="absolute top-1/2 right-4 cursor-pointer transform -translate-y-1/2"
-              onClick={() => setShowPass(!showPass)}
+              onClick={handleLogin}
+              className="font-semibold text-primary hover:text-primary/80 underline transition-colors"
             >
-              {showPass ? <FaRegEye /> : <FaRegEyeSlash />}
+              Log in
             </button>
-          </LabelInputContainer>
-        </div>
-
-        <LabelInputContainer className="mt-4">
-          <Label htmlFor="phone">Phone Number</Label>
-          <Input
-            id="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            type="text"
-            placeholder="Enter your phone number"
-            required
-          />
-        </LabelInputContainer>
-
-        {/* Address Information */}
-        <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700">
-          <h3 className="text-base sm:text-lg md:text-xl font-semibold text-neutral-800 dark:text-neutral-200 mb-3 sm:mb-4">
-            Address Information
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 md:gap-6">
-            <LabelInputContainer>
-              <Label htmlFor="address.city">City</Label>
-              <Input
-                id="address.city"
-                value={formData.address.city}
-                onChange={handleChange}
-                placeholder="Mumbai"
-                type="text"
-                required
-              />
-            </LabelInputContainer>
-
-            <LabelInputContainer>
-              <Label htmlFor="address.state">State</Label>
-              <Input
-                id="address.state"
-                value={formData.address.state}
-                onChange={handleChange}
-                placeholder="Maharashtra"
-                type="text"
-                required
-              />
-            </LabelInputContainer>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 md:gap-6 mt-4">
-            <LabelInputContainer>
-              <Label htmlFor="address.country">Country</Label>
-              <Input
-                id="address.country"
-                value={formData.address.country}
-                onChange={handleChange}
-                placeholder="India"
-                type="text"
-                required
-              />
-            </LabelInputContainer>
-
-            <LabelInputContainer>
-              <Label htmlFor="address.pincode">Pincode</Label>
-              <Input
-                id="address.pincode"
-                value={formData.address.pincode}
-                onChange={handleChange}
-                placeholder="400001"
-                type="text"
-                maxLength={6}
-                required
-              />
-            </LabelInputContainer>
-          </div>
-        </div>
-
-        <button
-          disabled={loading}
-          className="group/btn mt-8 relative block h-10 w-full rounded-md bg-gradient-to-br from-black to-neutral-700 font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
-          type="submit"
-        >
-          {loading ? "Creating Account..." : "Create Account →"}
-        </button>
-
-        <p className="text-center mt-6 text-sm text-neutral-600 dark:text-neutral-400">
-          Already have an account?
-          <span
-            className="underline cursor-pointer text-blue-600 ml-1"
-            onClick={handleLogin}
-          >
-            Log in
-          </span>
-        </p>
-      </form>
+          </motion.p>
+        </form>
+      </motion.div>
     </div>
   );
 }
