@@ -24,34 +24,51 @@ const getSMTPConfig = () => {
   return { host, port, user, pass, fromEmail };
 };
 
-const smtpConfig = getSMTPConfig();
+// Create transporter lazily (only when needed)
+let transporter = null;
 
-// Create transporter with conditional auth
-const transporter = nodemailer.createTransport({
-  host: smtpConfig.host,
-  port: smtpConfig.port,
-  secure: smtpConfig.port === 465, // true for 465, false for other ports
-  auth:
-    smtpConfig.user && smtpConfig.pass
-      ? {
-          user: smtpConfig.user,
-          pass: smtpConfig.pass,
+function getTransporter() {
+  if (!transporter) {
+    const smtpConfig = getSMTPConfig();
+    transporter = nodemailer.createTransport({
+      host: smtpConfig.host,
+      port: smtpConfig.port,
+      secure: smtpConfig.port === 465, // true for 465, false for other ports
+      auth:
+        smtpConfig.user && smtpConfig.pass
+          ? {
+              user: smtpConfig.user,
+              pass: smtpConfig.pass,
+            }
+          : undefined,
+    });
+
+    // Verify transporter configuration (only in runtime, not during build)
+    // Skip verification during build time to avoid build failures
+    if (
+      typeof window === "undefined" &&
+      typeof process !== "undefined" &&
+      process.env.NODE_ENV !== "production" &&
+      !process.env.VERCEL &&
+      smtpConfig.user &&
+      smtpConfig.pass
+    ) {
+      transporter.verify((error) => {
+        if (error) {
+          console.error("Email transporter error:", error);
+          console.error("   Check your SMTP credentials in .env.local");
+        } else {
+          console.log("✅ Email server is ready to send messages");
+          console.log(`   Using: ${smtpConfig.host}:${smtpConfig.port}`);
         }
-      : undefined,
-});
-
-// Verify transporter configuration
-const smtpConfigCheck = getSMTPConfig();
-if (smtpConfigCheck.user && smtpConfigCheck.pass) {
-  transporter.verify((error) => {
-    if (error) {
-      console.error("Email transporter error:", error);
-      console.error("   Check your SMTP credentials in .env.local");
-    } else {
+      });
+    } else if (smtpConfig.user && smtpConfig.pass) {
+      // In production/Vercel, just log without verification
       console.log("✅ Email server is ready to send messages");
-      console.log(`   Using: ${smtpConfigCheck.host}:${smtpConfigCheck.port}`);
+      console.log(`   Using: ${smtpConfig.host}:${smtpConfig.port}`);
     }
-  });
+  }
+  return transporter;
 }
 
 // Check if SMTP credentials are configured (not placeholder values)
@@ -145,7 +162,7 @@ export async function sendOTPEmail(email, otp, type = "registration") {
     console.log(`   Using SMTP: ${smtpConfig.host}:${smtpConfig.port}`);
     console.log(`   From: ${smtpConfig.fromEmail || smtpConfig.user}`);
 
-    const info = await transporter.sendMail({
+    const info = await getTransporter().sendMail({
       from: `"To-Do List App" <${smtpConfig.fromEmail || smtpConfig.user}>`,
       to: email,
       subject,
@@ -181,4 +198,5 @@ export async function sendOTPEmail(email, otp, type = "registration") {
   }
 }
 
-export default transporter;
+// Export the function instead of calling it at module load time
+export default getTransporter;
