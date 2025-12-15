@@ -11,7 +11,10 @@ import api from "@/lib/axios";
 import toast from "react-hot-toast";
 import { clearAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Loader2, User, Settings } from "lucide-react";
+import { LogOut, User, Settings, Circle, Clock } from "lucide-react";
+import { Avatar, Badge, Statistic, Card as AntCard, Skeleton } from "antd";
+import { Card } from "@mui/material";
+import { CheckCircle, PlayCircle } from "@mui/icons-material";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -83,6 +86,17 @@ export default function DashboardPage() {
     }
   };
 
+  // Calculate statistics
+  const stats = {
+    total: tasks.length,
+    pending: tasks.filter((t) => t.status === "pending").length,
+    progress: tasks.filter((t) => t.status === "progress").length,
+    completed: tasks.filter((t) => t.status === "completed").length,
+  };
+
+  const completionRate =
+    stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-background transition-colors duration-300">
@@ -101,19 +115,21 @@ export default function DashboardPage() {
                 transition={{ delay: 0.1 }}
                 className="flex items-center gap-4"
               >
-                {user?.profileImage ? (
-                  <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-primary shadow-lg shadow-primary/20">
-                    <img
-                      src={user.profileImage}
-                      alt={`${user.firstname} ${user.lastname}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                    <User className="h-6 w-6 text-white" />
-                  </div>
-                )}
+                <Badge dot color="hsl(var(--color-primary))" offset={[-2, 2]}>
+                  <Avatar
+                    size={48}
+                    src={user?.profileImage}
+                    icon={!user?.profileImage && <User className="h-6 w-6" />}
+                    className="border-2 border-primary shadow-lg shadow-primary/20"
+                    style={{
+                      backgroundColor: "hsl(var(--color-primary))",
+                    }}
+                  >
+                    {!user?.profileImage &&
+                      user &&
+                      `${user.firstname?.[0]}${user.lastname?.[0]}`}
+                  </Avatar>
+                </Badge>
                 <div>
                   <h1 className="text-2xl font-semibold text-foreground tracking-tight">
                     My Tasks
@@ -155,10 +171,11 @@ export default function DashboardPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-20"
+              className="space-y-6"
             >
-              <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground text-sm">Loading tasks...</p>
+              <Skeleton active paragraph={{ rows: 2 }} />
+              <Skeleton active paragraph={{ rows: 3 }} />
+              <Skeleton active paragraph={{ rows: 2 }} />
             </motion.div>
           ) : (
             <motion.div
@@ -167,6 +184,99 @@ export default function DashboardPage() {
               transition={{ duration: 0.4 }}
               className="space-y-6"
             >
+              {/* Statistics Cards */}
+              {!status && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="grid grid-cols-2 md:grid-cols-4 gap-4"
+                >
+                  <AntCard
+                    className="border-border bg-card hover:shadow-lg transition-shadow"
+                    bordered
+                  >
+                    <Statistic
+                      title="Total Tasks"
+                      value={stats.total}
+                      valueStyle={{ color: "hsl(var(--color-primary))" }}
+                      prefix={<Circle className="h-4 w-4" />}
+                    />
+                  </AntCard>
+                  <AntCard
+                    className="border-border bg-card hover:shadow-lg transition-shadow"
+                    bordered
+                  >
+                    <Statistic
+                      title="Pending"
+                      value={stats.pending}
+                      valueStyle={{ color: "#f59e0b" }}
+                      prefix={<Clock className="h-4 w-4" />}
+                    />
+                  </AntCard>
+                  <AntCard
+                    className="border-border bg-card hover:shadow-lg transition-shadow"
+                    bordered
+                  >
+                    <Statistic
+                      title="In Progress"
+                      value={stats.progress}
+                      valueStyle={{ color: "#3b82f6" }}
+                      prefix={<PlayCircle className="h-4 w-4" />}
+                    />
+                  </AntCard>
+                  <AntCard
+                    className="border-border bg-card hover:shadow-lg transition-shadow"
+                    bordered
+                  >
+                    <Statistic
+                      title="Completed"
+                      value={stats.completed}
+                      valueStyle={{ color: "#10b981" }}
+                      prefix={<CheckCircle className="h-4 w-4" />}
+                    />
+                  </AntCard>
+                </motion.div>
+              )}
+
+              {/* Completion Progress */}
+              {!status && stats.total > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Card
+                    sx={{
+                      backgroundColor: "hsl(var(--color-card))",
+                      border: "1px solid hsl(var(--color-border))",
+                      borderRadius: 2,
+                      p: 2,
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-foreground">
+                        Completion Rate
+                      </span>
+                      <Badge
+                        count={`${completionRate}%`}
+                        style={{
+                          backgroundColor: "hsl(var(--color-primary))",
+                        }}
+                      />
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${completionRate}%` }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="h-full bg-primary rounded-full"
+                      />
+                    </div>
+                  </Card>
+                </motion.div>
+              )}
+
               <SearchFilter
                 search={search}
                 onSearchChange={setSearch}

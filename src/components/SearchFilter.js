@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Search, Filter } from "lucide-react";
+import { Input as AntInput, Select as AntSelect, Space } from "antd";
 
 export default function SearchFilter({
   search,
@@ -18,36 +19,36 @@ export default function SearchFilter({
       transition={{ duration: 0.3 }}
       className="flex flex-col sm:flex-row gap-3"
     >
-      <div className="flex-1 relative">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
-        <Input
-          type="text"
+      <div className="flex-1">
+        <AntInput
+          size="large"
           placeholder="Search tasks..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          suppressHydrationWarning
-          className="pl-12 h-12 text-base border-0 bg-muted/50 focus:bg-background focus:ring-2 focus:ring-primary rounded-xl transition-all"
+          prefix={<Search className="h-5 w-5 text-muted-foreground" />}
+          className="rounded-xl"
+          style={{
+            height: "48px",
+            fontSize: "16px",
+            borderRadius: "12px",
+          }}
         />
       </div>
-      <div className="sm:w-40">
-        <div className="relative">
-          <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none z-10" />
-          <Select
-            value={status}
-            onChange={(e) => onStatusChange(e.target.value)}
-            suppressHydrationWarning
-            className="pl-12 h-12 text-base border-0 bg-muted/50 dark:bg-background dark:text-foreground focus:bg-background dark:focus:bg-background focus:ring-2 focus:ring-primary rounded-xl transition-all appearance-none cursor-pointer"
-            style={{
-              backgroundColor: 'hsl(var(--color-background))',
-              color: 'hsl(var(--color-foreground))',
-            }}
-          >
-            <option value="" style={{ backgroundColor: 'hsl(var(--color-background))', color: 'hsl(var(--color-foreground))' }}>All Tasks</option>
-            <option value="pending" style={{ backgroundColor: 'hsl(var(--color-background))', color: 'hsl(var(--color-foreground))' }}>Pending</option>
-            <option value="progress" style={{ backgroundColor: 'hsl(var(--color-background))', color: 'hsl(var(--color-foreground))' }}>Progress</option>
-            <option value="completed" style={{ backgroundColor: 'hsl(var(--color-background))', color: 'hsl(var(--color-foreground))' }}>Completed</option>
-          </Select>
-        </div>
+      <div className="sm:w-48">
+        <AntSelect
+          value={status}
+          onChange={onStatusChange}
+          size="large"
+          placeholder="Filter by status"
+          prefix={<Filter className="h-5 w-5" />}
+          style={{ width: "100%", borderRadius: "12px" }}
+          options={[
+            { value: "", label: "All Tasks" },
+            { value: "pending", label: "Pending" },
+            { value: "progress", label: "Progress" },
+            { value: "completed", label: "Completed" },
+          ]}
+        />
       </div>
     </motion.div>
   );

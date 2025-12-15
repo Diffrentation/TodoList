@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AntDesignProvider, MaterialUIProvider } from "@/components/providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,8 +32,12 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster position="top-right" />
+          <AntDesignProvider>
+            <MaterialUIProvider>
+              {children}
+              <Toaster position="top-right" />
+            </MaterialUIProvider>
+          </AntDesignProvider>
         </ThemeProvider>
       </body>
     </html>

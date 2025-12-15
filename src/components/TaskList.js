@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Circle, MoreVertical, Plus, X, Edit, Trash2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge, Tooltip, Popconfirm, Tag, Skeleton } from "antd";
+import { IconButton } from "@mui/material";
+import { Delete, Edit as EditIcon } from "@mui/icons-material";
 
 export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus = "" }) {
   const [tasks, setTasks] = useState(initialTasks);
@@ -18,8 +21,6 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
   const [showForm, setShowForm] = useState(false);
 
   const handleDelete = async (taskId) => {
-    if (!confirm("Are you sure you want to delete this task?")) return;
-
     setLoading(true);
     try {
       console.log("[TaskList] Deleting task:", taskId);
@@ -213,6 +214,7 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
           <Button
             onClick={() => setShowForm(true)}
             className="rounded-xl px-6"
+            size="large"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Task
@@ -329,33 +331,43 @@ function TaskItem({
       >
         <CardContent className="p-5">
           <div className="flex items-start gap-4">
-            {/* Checkbox */}
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={() => onToggle(task)}
-              className="h-8 w-8 rounded-full flex-shrink-0 mt-0.5"
+            {/* Checkbox with Tooltip */}
+            <Tooltip
+              title={
+                task.status === "completed"
+                  ? "Mark as pending"
+                  : task.status === "progress"
+                  ? "Mark as completed"
+                  : "Mark as in progress"
+              }
             >
-              {task.status === "completed" ? (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                </motion.div>
-              ) : task.status === "progress" ? (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <Clock className="h-5 w-5 text-primary" />
-                </motion.div>
-              ) : (
-                <Circle className="h-5 w-5 text-muted-foreground" />
-              )}
-            </Button>
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={() => onToggle(task)}
+                className="h-8 w-8 rounded-full shrink-0 mt-0.5 hover:scale-110 transition-transform"
+              >
+                {task.status === "completed" ? (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                  </motion.div>
+                ) : task.status === "progress" ? (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Clock className="h-5 w-5 text-primary" />
+                  </motion.div>
+                ) : (
+                  <Circle className="h-5 w-5 text-muted-foreground" />
+                )}
+              </Button>
+            </Tooltip>
 
             {/* Task Content */}
             <div
@@ -389,53 +401,82 @@ function TaskItem({
                 </motion.p>
               )}
               <div className="flex items-center gap-3 mt-3">
-                <span className="text-xs text-muted-foreground">
-                  {new Date(task.createdAt).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </span>
-                <span
-                  className={cn(
-                    "px-2 py-1 text-xs font-medium rounded-full capitalize",
+                <Tooltip title={new Date(task.createdAt).toLocaleString()}>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(task.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
+                </Tooltip>
+                <Tag
+                  color={
                     task.status === "completed"
-                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      ? "success"
                       : task.status === "progress"
-                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                      : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                  )}
+                      ? "processing"
+                      : "warning"
+                  }
+                  className="capitalize"
                 >
                   {task.status}
-                </span>
+                </Tag>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 flex-shrink-0 menu-container">
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit();
+            <div className="flex items-center gap-2 shrink-0 menu-container">
+              <Tooltip title="Edit task">
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                  size="small"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  sx={{
+                    color: "hsl(var(--color-foreground))",
+                    "&:hover": {
+                      backgroundColor: "hsl(var(--color-muted))",
+                    },
+                  }}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Popconfirm
+                title="Delete task"
+                description="Are you sure you want to delete this task?"
+                onConfirm={(e) => {
+                  e?.stopPropagation();
+                  onDelete(task._id);
                 }}
-                className="h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  await onDelete(task._id);
+                onCancel={(e) => e?.stopPropagation()}
+                okText="Yes"
+                cancelText="No"
+                okButtonProps={{
+                  danger: true,
                 }}
-                className="h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity"
-                disabled={loading}
               >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+                <Tooltip title="Delete task">
+                  <IconButton
+                    onClick={(e) => e.stopPropagation()}
+                    size="small"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    sx={{
+                      color: "hsl(var(--color-destructive))",
+                      "&:hover": {
+                        backgroundColor: "hsl(var(--color-destructive))",
+                        color: "white",
+                      },
+                    }}
+                    disabled={loading}
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </Popconfirm>
             </div>
           </div>
         </CardContent>
