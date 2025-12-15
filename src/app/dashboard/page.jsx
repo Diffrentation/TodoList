@@ -11,7 +11,7 @@ import api from "@/lib/axios";
 import toast from "react-hot-toast";
 import { clearAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Loader2, User } from "lucide-react";
+import { LogOut, Loader2, User, Settings } from "lucide-react";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -128,6 +128,15 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3">
                 <ThemeToggle />
                 <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => router.push("/profile")}
+                  className="h-10 w-10 rounded-xl"
+                  title="Edit Profile"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
+                <Button
                   variant="secondary"
                   size="icon"
                   onClick={handleLogout}
@@ -164,12 +173,12 @@ export default function DashboardPage() {
                 status={status}
                 onStatusChange={setStatus}
               />
-              <TaskList 
-                tasks={tasks} 
+              <TaskList
+                tasks={tasks}
                 filterStatus={status}
                 onUpdate={(updatedTasks) => {
                   setTasks(updatedTasks);
-                }} 
+                }}
               />
             </motion.div>
           )}
@@ -178,4 +187,3 @@ export default function DashboardPage() {
     </ProtectedRoute>
   );
 }
-

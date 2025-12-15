@@ -116,7 +116,7 @@ export async function PUT(req) {
     } else {
       // Handle JSON
       const body = await req.json();
-      const { firstname, lastname, phone, address } = body;
+      const { firstname, lastname, phone, address, deleteProfileImage } = body;
 
       if (firstname) updateData.firstname = firstname;
       if (lastname) updateData.lastname = lastname;
@@ -126,6 +126,23 @@ export async function PUT(req) {
           ...user.address.toObject(),
           ...address,
         };
+      }
+      
+      // Handle profile image deletion
+      if (deleteProfileImage === true) {
+        // Delete old image file if it exists
+        if (user.profileImage) {
+          try {
+            const { unlink } = require("fs/promises");
+            const oldImagePath = join(process.cwd(), "public", user.profileImage);
+            if (existsSync(oldImagePath)) {
+              await unlink(oldImagePath);
+            }
+          } catch (error) {
+            console.error("Error deleting old profile image:", error);
+          }
+        }
+        updateData.profileImage = "";
       }
     }
 
