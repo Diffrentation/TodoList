@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env.local"
-  );
+// Get MongoDB URI at runtime (not at module load time)
+function getMongoDBURI() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error(
+      "Please define the MONGODB_URI environment variable inside .env.local"
+    );
+  }
+  return uri;
 }
 
 let cached = global.mongoose;
@@ -26,7 +29,7 @@ async function connectDB() {
     };
 
     cached.promise = mongoose
-      .connect(MONGODB_URI, opts)
+      .connect(getMongoDBURI(), opts)
       .then((mongoose) => {
         console.log("✅ MongoDB connected successfully");
         return mongoose;

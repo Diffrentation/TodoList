@@ -2,29 +2,39 @@ import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import connectDB from "@/lib/db";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+// Get JWT secrets at runtime (not at module load time)
+function getJWTSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET must be defined in environment variables");
+  }
+  return secret;
+}
 
-if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
-  throw new Error(
-    "JWT_SECRET and JWT_REFRESH_SECRET must be defined in environment variables"
-  );
+function getJWTRefreshSecret() {
+  const secret = process.env.JWT_REFRESH_SECRET;
+  if (!secret) {
+    throw new Error(
+      "JWT_REFRESH_SECRET must be defined in environment variables"
+    );
+  }
+  return secret;
 }
 
 // Generate access token (15 minutes)
 export function generateAccessToken(userId) {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: "15m" });
+  return jwt.sign({ userId }, getJWTSecret(), { expiresIn: "15m" });
 }
 
 // Generate refresh token (7 days)
 export function generateRefreshToken(userId) {
-  return jwt.sign({ userId }, JWT_REFRESH_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ userId }, getJWTRefreshSecret(), { expiresIn: "7d" });
 }
 
 // Verify access token
 export function verifyAccessToken(token) {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, getJWTSecret());
   } catch (error) {
     return null;
   }
@@ -33,7 +43,7 @@ export function verifyAccessToken(token) {
 // Verify refresh token
 export function verifyRefreshToken(token) {
   try {
-    return jwt.verify(token, JWT_REFRESH_SECRET);
+    return jwt.verify(token, getJWTRefreshSecret());
   } catch (error) {
     return null;
   }
