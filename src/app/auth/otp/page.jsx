@@ -68,15 +68,29 @@ function OTPPageContent() {
       return toast.error("User not found. Please signup again.");
     }
 
+    // Ensure OTP is a string and trim whitespace
+    const otpValue = String(data.pin).trim();
+
+    if (otpValue.length !== 6) {
+      return toast.error("OTP must be 6 digits");
+    }
+
     try {
       const endpoint =
         type === "forgot"
           ? "/api/auth/verify-forgot-password-otp"
           : "/api/auth/verify-register-otp";
 
+      console.log("[OTP PAGE] Submitting OTP:", {
+        userId,
+        otp: otpValue,
+        otpLength: otpValue.length,
+        type,
+      });
+
       const res = await axios.post(endpoint, {
         userId,
-        otp: data.pin,
+        otp: otpValue,
       });
 
       if (res.data.success) {
@@ -97,14 +111,14 @@ function OTPPageContent() {
             token: res.data.accessToken, // Save access token if available
             refreshToken: res.data.refreshToken, // Save refresh token if available
           };
-          
+
           // Only save if user is verified (which should be true at this point)
           if (userData.isVerified) {
             saveUserToLocalStorage(userData, true);
             // Delete OTP after successful verification
             deleteOTPFromLocalStorage();
             // Dispatch event to update navbar
-            window.dispatchEvent(new Event('userUpdated'));
+            window.dispatchEvent(new Event("userUpdated"));
             toast.success("Account verified! Welcome.");
           } else {
             toast.error("Verification failed. Please try again.");
@@ -162,6 +176,43 @@ function OTPPageContent() {
             <Button type="submit" className="w-full text-lg py-6 rounded-xl">
               Verify OTP
             </Button>
+
+            <div className="text-center mt-4">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!userId) {
+                    toast.error("User not found");
+                    return;
+                  }
+                  try {
+                    const resendType =
+                      type === "forgot" ? "forgot" : "registration";
+                    const res = await axios.post("/api/auth/resend-otp", {
+                      userId,
+                      type: resendType,
+                    });
+                    if (res.data.success) {
+                      toast.success(
+                        res.data.message || "OTP resent successfully!"
+                      );
+                      if (res.data.devMode && res.data.otp) {
+                        toast.success(`OTP: ${res.data.otp}`, {
+                          duration: 10000,
+                        });
+                      }
+                    }
+                  } catch (error) {
+                    toast.error(
+                      error?.response?.data?.message || "Failed to resend OTP"
+                    );
+                  }
+                }}
+                className="text-sm text-blue-600 hover:text-blue-800 underline"
+              >
+                Resend OTP
+              </button>
+            </div>
           </form>
         </Form>
       </div>
@@ -172,15 +223,13 @@ function OTPPageContent() {
 function OTPFallback() {
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <p className="text-lg font-semibold text-gray-600">
-        Preparing OTP form…
-      </p>
+      <p className="text-lg font-semibold text-gray-600">Preparing OTP form…</p>
     </div>
   );
 }
 
 // Force dynamic rendering to prevent static generation issues
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default function OTPPage() {
   return (
@@ -189,4 +238,3 @@ export default function OTPPage() {
     </Suspense>
   );
 }
-

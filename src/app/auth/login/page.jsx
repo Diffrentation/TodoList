@@ -131,7 +131,7 @@ function Login() {
         <div className="my-8 h-[1px] w-full bg-gradient-to-r from-transparent via-neutral-300 to-transparent dark:via-neutral-700" />
 
         <p className="text-sm text-neutral-600 dark:text-neutral-400 text-center mt-6">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <span className="underline cursor-pointer text-blue-600" onClick={handleSignup}>
             Sign up
           </span>

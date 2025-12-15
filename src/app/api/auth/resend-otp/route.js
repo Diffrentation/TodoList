@@ -32,15 +32,33 @@ export async function POST(req) {
     const otp = OTP.generateOTP();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
+    console.log(
+      "[RESEND OTP] Generated new OTP for:",
+      user.email,
+      "OTP:",
+      otp,
+      "Type:",
+      type
+    );
+
     // Delete old OTPs
-    await OTP.deleteMany({ email: user.email, type });
+    await OTP.deleteMany({
+      email: user.email.toLowerCase().trim(),
+      type,
+    });
 
     // Create new OTP
-    await OTP.create({
-      email: user.email,
-      hashedOTP: otp,
+    const otpRecord = await OTP.create({
+      email: user.email.toLowerCase().trim(),
+      hashedOTP: otp, // Will be hashed by pre-save hook
       expiresAt,
       type,
+    });
+
+    console.log("[RESEND OTP] OTP record created:", {
+      id: otpRecord._id,
+      email: otpRecord.email,
+      expiresAt: otpRecord.expiresAt,
     });
 
     // Send OTP email
@@ -65,4 +83,3 @@ export async function POST(req) {
     return errorHandler(error);
   }
 }
-

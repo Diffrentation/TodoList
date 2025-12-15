@@ -29,19 +29,28 @@ export async function POST(req) {
 
     // Find OTP
     const otpRecord = await OTP.findOne({
-      email: user.email,
+      email: user.email.toLowerCase().trim(),
       type: "forgot",
     }).sort({ createdAt: -1 });
 
     if (!otpRecord) {
+      console.error("[OTP VERIFY FORGOT] OTP not found for email:", user.email);
       return NextResponse.json(
         { success: false, message: "OTP not found. Please request a new one." },
         { status: 404 }
       );
     }
 
+    console.log("[OTP VERIFY FORGOT] Found OTP record:", {
+      email: otpRecord.email,
+      type: otpRecord.type,
+      expiresAt: otpRecord.expiresAt,
+    });
+
     // Check if OTP expired
-    if (new Date() > otpRecord.expiresAt) {
+    const now = new Date();
+    if (now > otpRecord.expiresAt) {
+      console.error("[OTP VERIFY FORGOT] OTP expired");
       await OTP.deleteOne({ _id: otpRecord._id });
       return NextResponse.json(
         { success: false, message: "OTP expired. Please request a new one." },
@@ -50,12 +59,19 @@ export async function POST(req) {
     }
 
     // Verify OTP
+    console.log("[OTP VERIFY FORGOT] Verifying OTP");
     const isOTPValid = await otpRecord.verifyOTP(otp);
+    console.log("[OTP VERIFY FORGOT] Verification result:", isOTPValid);
+
     if (!isOTPValid) {
       otpRecord.attempts += 1;
       await otpRecord.save();
+      console.error(
+        "[OTP VERIFY FORGOT] Invalid OTP. Attempts:",
+        otpRecord.attempts
+      );
       return NextResponse.json(
-        { success: false, message: "Invalid OTP" },
+        { success: false, message: "Invalid OTP. Please check and try again." },
         { status: 400 }
       );
     }
@@ -75,4 +91,3 @@ export async function POST(req) {
     return errorHandler(error);
   }
 }
-

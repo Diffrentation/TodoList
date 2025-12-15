@@ -98,11 +98,25 @@ export async function POST(req) {
     const otp = OTP.generateOTP();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-    await OTP.create({
-      email: user.email,
-      hashedOTP: otp,
+    console.log("[REGISTER] Generated OTP for:", user.email, "OTP:", otp);
+
+    // Delete any existing OTPs for this email and type
+    await OTP.deleteMany({ 
+      email: user.email.toLowerCase().trim(), 
+      type: "registration" 
+    });
+
+    const otpRecord = await OTP.create({
+      email: user.email.toLowerCase().trim(),
+      hashedOTP: otp, // Will be hashed by pre-save hook
       expiresAt,
       type: "registration",
+    });
+
+    console.log("[REGISTER] OTP record created:", {
+      id: otpRecord._id,
+      email: otpRecord.email,
+      expiresAt: otpRecord.expiresAt,
     });
 
     // Send OTP email
