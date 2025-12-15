@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
-import { validateEmail } from "@/lib/validation";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-} from "@/lib/middleware/auth";
+import { generateAccessToken, generateRefreshToken } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
 
 export async function POST(req) {
@@ -15,17 +12,9 @@ export async function POST(req) {
     const body = await req.json();
     const { email, password } = body;
 
-    // Validation
-    if (!validateEmail(email)) {
+    if (!email || !password) {
       return NextResponse.json(
-        { success: false, message: "Invalid email format" },
-        { status: 400 }
-      );
-    }
-
-    if (!password) {
-      return NextResponse.json(
-        { success: false, message: "Password is required" },
+        { success: false, message: "Email and password are required" },
         { status: 400 }
       );
     }
@@ -39,11 +28,14 @@ export async function POST(req) {
       );
     }
 
-    // Check if verified
+    // Check if user is verified
     if (!user.isVerified) {
       return NextResponse.json(
-        { success: false, message: "Please verify your email first" },
-        { status: 401 }
+        {
+          success: false,
+          message: "Please verify your email first. Check your inbox for OTP.",
+        },
+        { status: 403 }
       );
     }
 
@@ -57,47 +49,56 @@ export async function POST(req) {
     }
 
     // Generate tokens
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
+    const accessToken = generateAccessToken(user._id.toString());
+    const refreshToken = generateRefreshToken(user._id.toString());
 
-    // Save refresh token
+    // Save refresh token to user
     user.refreshToken = refreshToken;
     await user.save();
 
-    // Create response
-    const response = NextResponse.json(
+    // Set HTTP-only cookies
+    const cookieStore = await cookies();
+    cookieStore.set("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 15 * 60, // 15 minutes
+      path: "/",
+    });
+
+    cookieStore.set("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: "/",
+    });
+
+    // Return user data (without password)
+    const userData = {
+      id: user._id.toString(),
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      profileImage: user.profileImage,
+      address: user.address,
+      isVerified: user.isVerified,
+    };
+
+    return NextResponse.json(
       {
         success: true,
         message: "Login successful",
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
+        user: userData,
+        accessToken,
+        refreshToken,
       },
       { status: 200 }
     );
-
-    // Set HTTP-only cookies
-    const isProduction =
-      (process.env.NODE_ENV || "development") === "production";
-    response.cookies.set("accessToken", accessToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: "lax",
-      maxAge: 15 * 60, // 15 minutes
-    });
-
-    response.cookies.set("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-    });
-
-    return response;
   } catch (error) {
     return errorHandler(error);
   }
 }
+

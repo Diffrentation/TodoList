@@ -3,14 +3,17 @@ import { cookies } from "next/headers";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import { authenticateToken } from "@/lib/middleware/auth";
-import { validateName } from "@/lib/validation";
 import { errorHandler } from "@/lib/middleware/errorHandler";
+import { writeFile, mkdir } from "fs/promises";
+import { join } from "path";
+import { existsSync } from "fs";
 
+// GET profile
 export async function GET(req) {
   try {
     await connectDB();
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const { user, error } = await authenticateToken(req, cookieStore);
     if (error || !user) {
       return NextResponse.json(
@@ -19,16 +22,22 @@ export async function GET(req) {
       );
     }
 
+    const userData = {
+      id: user._id.toString(),
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      profileImage: user.profileImage,
+      address: user.address,
+      isVerified: user.isVerified,
+    };
+
     return NextResponse.json(
       {
         success: true,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          isVerified: user.isVerified,
-        },
+        user: userData,
       },
       { status: 200 }
     );
@@ -37,11 +46,12 @@ export async function GET(req) {
   }
 }
 
+// UPDATE profile
 export async function PUT(req) {
   try {
     await connectDB();
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const { user, error } = await authenticateToken(req, cookieStore);
     if (error || !user) {
       return NextResponse.json(
@@ -50,32 +60,96 @@ export async function PUT(req) {
       );
     }
 
-    const body = await req.json();
-    const { name } = body;
+    const contentType = req.headers.get("content-type");
+    let updateData = {};
 
-    if (name) {
-      const nameValidation = validateName(name);
-      if (!nameValidation.valid) {
-        return NextResponse.json(
-          { success: false, message: nameValidation.message },
-          { status: 400 }
-        );
+    if (contentType?.includes("multipart/form-data")) {
+      // Handle FormData (for profile image)
+      const formData = await req.formData();
+      
+      const firstname = formData.get("firstname");
+      const lastname = formData.get("lastname");
+      const phone = formData.get("phone");
+      const profileImageFile = formData.get("profileImage");
+
+      if (firstname) updateData.firstname = firstname;
+      if (lastname) updateData.lastname = lastname;
+      if (phone) updateData.phone = phone;
+
+      // Handle address
+      const city = formData.get("address.city");
+      const state = formData.get("address.state");
+      const country = formData.get("address.country");
+      const pincode = formData.get("address.pincode");
+
+      if (city || state || country || pincode) {
+        updateData.address = {
+          ...user.address.toObject(),
+          ...(city && { city }),
+          ...(state && { state }),
+          ...(country && { country }),
+          ...(pincode && { pincode }),
+        };
       }
-      const userModel = await User.findById(user._id);
-      userModel.name = name;
-      await userModel.save();
+
+      // Handle profile image upload
+      if (profileImageFile && profileImageFile.size > 0) {
+        try {
+          const bytes = await profileImageFile.arrayBuffer();
+          const buffer = Buffer.from(bytes);
+
+          const uploadsDir = join(process.cwd(), "public", "uploads", "profiles");
+          if (!existsSync(uploadsDir)) {
+            await mkdir(uploadsDir, { recursive: true });
+          }
+
+          const timestamp = Date.now();
+          const filename = `${timestamp}-${profileImageFile.name}`;
+          const filepath = join(uploadsDir, filename);
+
+          await writeFile(filepath, buffer);
+          updateData.profileImage = `/uploads/profiles/${filename}`;
+        } catch (error) {
+          console.error("Error saving profile image:", error);
+        }
+      }
+    } else {
+      // Handle JSON
+      const body = await req.json();
+      const { firstname, lastname, phone, address } = body;
+
+      if (firstname) updateData.firstname = firstname;
+      if (lastname) updateData.lastname = lastname;
+      if (phone) updateData.phone = phone;
+      if (address) {
+        updateData.address = {
+          ...user.address.toObject(),
+          ...address,
+        };
+      }
     }
+
+    // Update user
+    Object.assign(user, updateData);
+    await user.save();
+
+    const userData = {
+      id: user._id.toString(),
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      profileImage: user.profileImage,
+      address: user.address,
+      isVerified: user.isVerified,
+    };
 
     return NextResponse.json(
       {
         success: true,
         message: "Profile updated successfully",
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
+        user: userData,
       },
       { status: 200 }
     );
@@ -83,3 +157,4 @@ export async function PUT(req) {
     return errorHandler(error);
   }
 }
+

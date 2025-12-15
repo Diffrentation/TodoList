@@ -25,10 +25,26 @@ export async function GET(req, { params }) {
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Task ID is required" },
+        { status: 400 }
+      );
+    }
+
+    console.log("[TASKS GET id] Looking for task:", {
+      id,
+      userId: user._id.toString(),
+    });
 
     const task = await Task.findOne({ _id: id, user: user._id });
     if (!task) {
+      console.log(
+        "[TASKS GET id] Task not found. Checking if task exists:",
+        await Task.findOne({ _id: id })
+      );
       return NextResponse.json(
         { success: false, message: "Task not found" },
         { status: 404 }
@@ -66,13 +82,30 @@ export async function PUT(req, { params }) {
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Task ID is required" },
+        { status: 400 }
+      );
+    }
+
     const body = await req.json();
     const { title, description, status } = body;
+
+    console.log("[TASKS PUT] Updating task:", {
+      id,
+      userId: user._id.toString(),
+    });
 
     // Find task
     const task = await Task.findOne({ _id: id, user: user._id });
     if (!task) {
+      console.log(
+        "[TASKS PUT] Task not found. Checking if task exists:",
+        await Task.findOne({ _id: id })
+      );
       return NextResponse.json(
         { success: false, message: "Task not found" },
         { status: 404 }
@@ -146,10 +179,26 @@ export async function DELETE(req, { params }) {
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Task ID is required" },
+        { status: 400 }
+      );
+    }
+
+    console.log("[TASKS DELETE] Deleting task:", {
+      id,
+      userId: user._id.toString(),
+    });
 
     const task = await Task.findOneAndDelete({ _id: id, user: user._id });
     if (!task) {
+      console.log(
+        "[TASKS DELETE] Task not found. Checking if task exists:",
+        await Task.findOne({ _id: id })
+      );
       return NextResponse.json(
         { success: false, message: "Task not found" },
         { status: 404 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -15,6 +15,14 @@ export default function TaskForm({ onSubmit, initialData = null, onCancel }) {
   const [status, setStatus] = useState(initialData?.status || "pending");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title || "");
+      setDescription(initialData.description || "");
+      setStatus(initialData.status || "pending");
+    }
+  }, [initialData]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
@@ -23,6 +31,11 @@ export default function TaskForm({ onSubmit, initialData = null, onCancel }) {
     try {
       await onSubmit({ title, description, status });
       if (!initialData) {
+        setTitle("");
+        setDescription("");
+        setStatus("pending");
+      } else {
+        // Reset form after successful edit
         setTitle("");
         setDescription("");
         setStatus("pending");
@@ -42,95 +55,81 @@ export default function TaskForm({ onSubmit, initialData = null, onCancel }) {
       onSubmit={handleSubmit}
       className="space-y-4"
     >
-      <motion.div
-        initial={{ y: -10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.1 }}
-      >
-        <Label htmlFor="title" className="mb-2">
-          Title *
-        </Label>
+      <div>
         <Input
           id="title"
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter task title"
+          placeholder="What needs to be done?"
           required
           disabled={loading}
           suppressHydrationWarning
-          className="transition-all focus:scale-[1.01]"
+          className="h-12 text-base border-0 bg-muted/50 focus:bg-background focus:ring-2 focus:ring-primary rounded-xl transition-all"
+          autoFocus
         />
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ y: -10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <Label htmlFor="description" className="mb-2">
-          Description
-        </Label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={3}
-          suppressHydrationWarning
-          className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all focus:scale-[1.01] resize-none"
-          placeholder="Enter task description (optional)"
-          disabled={loading}
-        />
-      </motion.div>
+      {title && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            suppressHydrationWarning
+            className="w-full rounded-xl border-0 bg-muted/50 focus:bg-background focus:ring-2 focus:ring-primary px-4 py-3 text-sm placeholder:text-muted-foreground transition-all resize-none"
+            placeholder="Add description (optional)"
+            disabled={loading}
+          />
+        </motion.div>
+      )}
 
-      <motion.div
-        initial={{ y: -10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <Label htmlFor="status" className="mb-2">
-          Status
-        </Label>
+      <div className="flex items-center justify-between pt-2">
         <Select
           id="status"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           suppressHydrationWarning
           disabled={loading}
-          className="transition-all focus:scale-[1.01]"
+          className="w-32 h-9 text-sm border-0 bg-muted/50 focus:bg-background focus:ring-2 focus:ring-primary rounded-lg"
         >
           <option value="pending">Pending</option>
           <option value="completed">Completed</option>
         </Select>
-      </motion.div>
 
-      <motion.div
-        initial={{ y: -10, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="flex gap-2"
-      >
-        <Button
-          type="submit"
-          disabled={loading || !title.trim()}
-          suppressHydrationWarning
-          className="flex-1 transition-all hover:scale-105 active:scale-95"
-        >
-          {loading ? "Saving..." : initialData ? "Update Task" : "Create Task"}
-        </Button>
-        {initialData && onCancel && (
+        <div className="flex gap-2">
+          {onCancel && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={onCancel}
+              disabled={loading}
+              suppressHydrationWarning
+              className="rounded-xl"
+            >
+              Cancel
+            </Button>
+          )}
           <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={loading}
+            type="submit"
+            disabled={loading || !title.trim()}
             suppressHydrationWarning
-            className="transition-all hover:scale-105 active:scale-95"
+            className="rounded-xl px-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
           >
-            Cancel
+            {loading
+              ? "Saving..."
+              : initialData
+                ? "Save Changes"
+                : "Add Task"}
           </Button>
-        )}
-      </motion.div>
+        </div>
+      </div>
     </motion.form>
   );
 }

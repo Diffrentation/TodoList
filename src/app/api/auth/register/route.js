@@ -3,40 +3,44 @@ import connectDB from "@/lib/db";
 import User from "@/models/User";
 import OTP from "@/models/OTP";
 import { sendOTPEmail } from "@/lib/email";
-import {
-  validateEmail,
-  validatePassword,
-  validateName,
-} from "@/lib/validation";
 import { errorHandler } from "@/lib/middleware/errorHandler";
+import { writeFile, mkdir } from "fs/promises";
+import { join } from "path";
+import { existsSync } from "fs";
 
 export async function POST(req) {
   try {
     await connectDB();
 
-    const body = await req.json();
-    const { name, email, password } = body;
+    const formData = await req.formData();
+    
+    const firstname = formData.get("firstname");
+    const lastname = formData.get("lastname");
+    const email = formData.get("email");
+    const password = formData.get("password");
+    const phone = formData.get("phone");
+    const role = formData.get("role") || "user";
+    
+    const address = {
+      city: formData.get("address.city"),
+      state: formData.get("address.state"),
+      country: formData.get("address.country") || "India",
+      pincode: formData.get("address.pincode"),
+    };
+
+    const profileImageFile = formData.get("profileImage");
 
     // Validation
-    const nameValidation = validateName(name);
-    if (!nameValidation.valid) {
+    if (!firstname || !lastname || !email || !password || !phone) {
       return NextResponse.json(
-        { success: false, message: nameValidation.message },
+        { success: false, message: "All fields are required" },
         { status: 400 }
       );
     }
 
-    if (!validateEmail(email)) {
+    if (!address.city || !address.state || !address.pincode) {
       return NextResponse.json(
-        { success: false, message: "Invalid email format" },
-        { status: 400 }
-      );
-    }
-
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.valid) {
-      return NextResponse.json(
-        { success: false, message: passwordValidation.message },
+        { success: false, message: "All address fields are required" },
         { status: 400 }
       );
     }
@@ -44,68 +48,75 @@ export async function POST(req) {
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      if (existingUser.isVerified) {
-        return NextResponse.json(
-          { success: false, message: "User already exists" },
-          { status: 400 }
-        );
-      } else {
-        // User exists but not verified, delete old OTPs and create new one
-        await OTP.deleteMany({ email });
+      return NextResponse.json(
+        { success: false, message: "Email already registered" },
+        { status: 400 }
+      );
+    }
+
+    // Handle profile image upload
+    let profileImagePath = "";
+    if (profileImageFile && profileImageFile.size > 0) {
+      try {
+        const bytes = await profileImageFile.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        // Create uploads directory if it doesn't exist
+        const uploadsDir = join(process.cwd(), "public", "uploads", "profiles");
+        if (!existsSync(uploadsDir)) {
+          await mkdir(uploadsDir, { recursive: true });
+        }
+
+        // Generate unique filename
+        const timestamp = Date.now();
+        const filename = `${timestamp}-${profileImageFile.name}`;
+        const filepath = join(uploadsDir, filename);
+
+        // Save file
+        await writeFile(filepath, buffer);
+        profileImagePath = `/uploads/profiles/${filename}`;
+      } catch (error) {
+        console.error("Error saving profile image:", error);
+        // Continue without image if upload fails
       }
     }
 
-    // Create or update user
-    let user;
-    if (existingUser) {
-      existingUser.name = name;
-      existingUser.password = password; // Will be hashed by pre-save hook
-      await existingUser.save();
-      user = existingUser;
-    } else {
-      user = await User.create({ name, email, password });
-    }
+    // Create user
+    const user = await User.create({
+      firstname,
+      lastname,
+      email,
+      password,
+      phone,
+      role,
+      address,
+      profileImage: profileImagePath,
+      isVerified: false,
+    });
 
-    // Generate OTP
+    // Generate and send OTP
     const otp = OTP.generateOTP();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-    // Save OTP
     await OTP.create({
-      email,
-      hashedOTP: otp, // Will be hashed by pre-save hook
+      email: user.email,
+      hashedOTP: otp,
       expiresAt,
       type: "registration",
     });
 
     // Send OTP email
-    const emailResult = await sendOTPEmail(email, otp, "registration");
-
-    // If email failed, still return success but include OTP in response for dev mode
-    if (!emailResult.success) {
-      console.error("Failed to send OTP email:", emailResult.error);
-      // In development, include OTP in response if email fails
-      return NextResponse.json(
-        {
-          success: true,
-          message:
-            "Registration successful. OTP email failed - check console for OTP.",
-          userId: user._id,
-          otp: emailResult.devMode ? otp : undefined,
-          emailError: emailResult.error,
-        },
-        { status: 201 }
-      );
-    }
+    const emailResult = await sendOTPEmail(user.email, otp, "registration");
 
     return NextResponse.json(
       {
         success: true,
         message: emailResult.devMode
-          ? "Registration successful. OTP logged to console (email not configured)."
-          : "Registration successful. Please verify your email with OTP.",
-        userId: user._id,
-        otp: emailResult.devMode ? otp : undefined, // Include OTP in dev mode
+          ? `OTP sent! Check console for OTP: ${otp}`
+          : "OTP sent to your email",
+        userId: user._id.toString(),
+        devMode: emailResult.devMode,
+        otp: emailResult.devMode ? otp : undefined,
       },
       { status: 201 }
     );
@@ -113,3 +124,4 @@ export async function POST(req) {
     return errorHandler(error);
   }
 }
+

@@ -3,12 +3,19 @@ import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    firstname: {
       type: String,
-      required: [true, 'Name is required'],
+      required: [true, 'First name is required'],
       trim: true,
-      minlength: [2, 'Name must be at least 2 characters'],
-      maxlength: [50, 'Name cannot exceed 50 characters'],
+      minlength: [2, 'First name must be at least 2 characters'],
+      maxlength: [50, 'First name cannot exceed 50 characters'],
+    },
+    lastname: {
+      type: String,
+      required: [true, 'Last name is required'],
+      trim: true,
+      minlength: [2, 'Last name must be at least 2 characters'],
+      maxlength: [50, 'Last name cannot exceed 50 characters'],
     },
     email: {
       type: String,
@@ -24,13 +31,45 @@ const userSchema = new mongoose.Schema(
       minlength: [6, 'Password must be at least 6 characters'],
       select: false, // Don't return password by default
     },
+    phone: {
+      type: String,
+      required: [true, 'Phone number is required'],
+      trim: true,
+      match: [/^[0-9]{10}$/, 'Please provide a valid 10-digit phone number'],
+    },
+    profileImage: {
+      type: String,
+      default: '',
+    },
+    address: {
+      city: {
+        type: String,
+        required: [true, 'City is required'],
+        trim: true,
+      },
+      state: {
+        type: String,
+        required: [true, 'State is required'],
+        trim: true,
+      },
+      country: {
+        type: String,
+        default: 'India',
+        trim: true,
+      },
+      pincode: {
+        type: String,
+        required: [true, 'Pincode is required'],
+        match: [/^[0-9]{6}$/, 'Please provide a valid 6-digit pincode'],
+      },
+    },
     isVerified: {
       type: Boolean,
       default: false,
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
+      enum: ['user', 'admin', 'buyer'],
       default: 'user',
     },
     refreshToken: {
