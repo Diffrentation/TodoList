@@ -43,19 +43,19 @@ export default function Home() {
 
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-2">Secure Authentication</h3>
+            <h3 className="text-xl font-semibold mb-2 text-black">Secure Authentication</h3>
             <p className="text-gray-600">
               OTP-based email verification and JWT token authentication for secure access
             </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-2">Task Management</h3>
+            <h3 className="text-xl font-semibold mb-2 text-black">Task Management</h3>
             <p className="text-gray-600">
               Create, update, and delete tasks with status tracking and descriptions
             </p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-2">Search & Filter</h3>
+            <h3 className="text-xl font-semibold mb-2 text-black">Search & Filter</h3>
             <p className="text-gray-600">
               Quickly find tasks by title or filter by completion status
             </p>
