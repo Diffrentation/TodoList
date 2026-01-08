@@ -130,15 +130,15 @@ function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground pr-10 focus:bg-background transition-colors duration-200 ease-out"
+                className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground pr-11 focus:bg-background transition-colors duration-200 ease-out"
               />
               <button
                 type="button"
                 onClick={() => setShowPass(!showPass)}
-                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-blue-600 hover:scale-110 transition-all duration-200 ease-out cursor-pointer"
+                className="absolute inset-y-0 right-0 flex items-center justify-center pr-3 text-muted-foreground hover:text-blue-600 hover:scale-110 transition-all duration-200 ease-out cursor-pointer"
                 aria-label="Toggle password visibility"
               >
-                {showPass ? <FaRegEye className="h-5 w-5" /> : <FaRegEyeSlash className="h-5 w-5" />}
+                {showPass ? <FaRegEye className="h-5 w-5 shrink-0 relative top-1.5 " /> : <FaRegEyeSlash className="h-5 w-5 shrink-0 relative top-1.5" />}
               </button>
             </LabelInputContainer>
           </motion.div>

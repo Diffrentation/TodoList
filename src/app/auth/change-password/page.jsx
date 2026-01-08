@@ -54,7 +54,7 @@ function ChangePasswordContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8 py-12 relative">
       <Toaster position="top-right" />
-      
+
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
         <ThemeToggle />
@@ -71,111 +71,119 @@ function ChangePasswordContent() {
             "p-6 sm:p-8 md:p-10"
           )}
         >
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-        >
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-            Change Your Password
-          </h2>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Update your account password for better security.
-          </p>
-        </motion.div>
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* NEW PASSWORD */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
           >
-            <LabelInputContainer>
-              <Label htmlFor="newPassword" className="text-foreground">
-                New Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="newPassword"
-                  name="newPassword"
-                  type={showNew ? "text" : "password"}
-                  placeholder="At least 6 characters"
-                  required
-                  className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground pr-10 focus:bg-background transition-colors duration-200 ease-out"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNew(!showNew)}
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-blue-600 hover:scale-110 transition-all duration-200 ease-out cursor-pointer"
-                  aria-label="Toggle password visibility"
-                >
-                  {showNew ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </LabelInputContainer>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+              Change Your Password
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Update your account password for better security.
+            </p>
           </motion.div>
 
-          {/* CONFIRM PASSWORD */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <LabelInputContainer>
-              <Label htmlFor="confirmPassword" className="text-foreground">
-                Confirm New Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirm ? "text" : "password"}
-                  placeholder="Re-type new password"
-                  required
-                  className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground pr-10 focus:bg-background transition-colors duration-200 ease-out"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-blue-600 hover:scale-110 transition-all duration-200 ease-out cursor-pointer"
-                  aria-label="Toggle password visibility"
-                >
-                  {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </LabelInputContainer>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <button
-              disabled={loading}
-              className={cn(
-                "group/btn relative w-full h-11 rounded-xl font-semibold text-white",
-                "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700",
-                "transition-all duration-200 ease-out cursor-pointer",
-                "shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40",
-                "disabled:opacity-50 disabled:cursor-not-allowed",
-                "flex items-center justify-center"
-              )}
-              type="submit"
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {/* NEW PASSWORD */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
             >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  Processing...
-                </span>
-              ) : (
-                "Change Password →"
-              )}
-              <BottomGradient />
-            </button>
-          </motion.div>
-        </form>
+              <LabelInputContainer>
+                <Label htmlFor="newPassword" className="text-foreground">
+                  New Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="newPassword"
+                    name="newPassword"
+                    type={showNew ? "text" : "password"}
+                    placeholder="At least 6 characters"
+                    required
+                    className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground pr-11 focus:bg-background transition-colors duration-200 ease-out"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNew(!showNew)}
+                    className="absolute inset-y-0 right-0 flex items-center justify-center pr-3 text-muted-foreground hover:text-blue-600 hover:scale-110 transition-all duration-200 ease-out cursor-pointer"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showNew ? (
+                      <EyeOff size={20} className="shrink-0" />
+                    ) : (
+                      <Eye size={20} className="shrink-0" />
+                    )}
+                  </button>
+                </div>
+              </LabelInputContainer>
+            </motion.div>
+
+            {/* CONFIRM PASSWORD */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <LabelInputContainer>
+                <Label htmlFor="confirmPassword" className="text-foreground">
+                  Confirm New Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirm ? "text" : "password"}
+                    placeholder="Re-type new password"
+                    required
+                    className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground pr-11 focus:bg-background transition-colors duration-200 ease-out"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute inset-y-0 right-0 flex items-center justify-center pr-3 text-muted-foreground hover:text-blue-600 hover:scale-110 transition-all duration-200 ease-out cursor-pointer"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showConfirm ? (
+                      <EyeOff size={20} className="shrink-0" />
+                    ) : (
+                      <Eye size={20} className="shrink-0" />
+                    )}
+                  </button>
+                </div>
+              </LabelInputContainer>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <button
+                disabled={loading}
+                className={cn(
+                  "group/btn relative w-full h-11 rounded-xl font-semibold text-white",
+                  "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700",
+                  "transition-all duration-200 ease-out cursor-pointer",
+                  "shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40",
+                  "disabled:opacity-50 disabled:cursor-not-allowed",
+                  "flex items-center justify-center"
+                )}
+                type="submit"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                    Processing...
+                  </span>
+                ) : (
+                  "Change Password →"
+                )}
+                <BottomGradient />
+              </button>
+            </motion.div>
+          </form>
         </motion.div>
       </div>
     </div>
@@ -187,14 +195,16 @@ function ChangePasswordFallback() {
     <div className="flex min-h-screen items-center justify-center bg-background">
       <div className="text-center">
         <div className="h-8 w-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-lg font-semibold text-foreground">Preparing change password form…</p>
+        <p className="text-lg font-semibold text-foreground">
+          Preparing change password form…
+        </p>
       </div>
     </div>
   );
 }
 
 // Force dynamic rendering to prevent static generation issues
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default function ChangePassword() {
   return (
@@ -216,4 +226,3 @@ const LabelInputContainer = ({ children, className }) => (
     {children}
   </div>
 );
-
