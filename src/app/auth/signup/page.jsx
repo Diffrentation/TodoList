@@ -222,8 +222,8 @@ export default function Signup() {
                 className={cn(
                   "w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-dashed",
                   "border-border flex items-center justify-center cursor-pointer",
-                  "hover:border-primary transition-colors bg-muted/50",
-                  "hover:bg-muted"
+                  "hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/30",
+                  "transition-all duration-200 ease-out bg-muted/50"
                 )}
                 onClick={handleImageClick}
               >
@@ -323,7 +323,7 @@ export default function Signup() {
               />
               <button
                 type="button"
-                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-blue-600 hover:scale-110 transition-all duration-200 ease-out cursor-pointer"
                 onClick={() => setShowPass(!showPass)}
                 aria-label="Toggle password visibility"
               >
@@ -430,7 +430,7 @@ export default function Signup() {
               className={cn(
                 "group/btn relative w-full h-11 rounded-xl font-semibold text-white",
                 "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700",
-                "transition-all duration-200 ease-out",
+                "transition-all duration-200 ease-out cursor-pointer",
                 "shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 "flex items-center justify-center"
@@ -458,7 +458,7 @@ export default function Signup() {
             <button
               type="button"
               onClick={handleLogin}
-              className="font-semibold text-primary hover:text-primary/80 underline transition-colors"
+              className="font-semibold text-primary hover:text-blue-600 hover:scale-105 transition-all duration-200 ease-out cursor-pointer underline"
             >
               Log in
             </button>

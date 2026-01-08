@@ -62,6 +62,20 @@ html {
   transition-timing-function: ease-out;
 }
 
+/* Ensure all buttons have pointer cursor */
+button,
+[role="button"],
+.Button,
+a[href] {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"]:disabled,
+.Button:disabled {
+  cursor: not-allowed;
+}
+
 /* Select dropdown styling for dark mode */
 select {
   background-color: hsl(var(--color-background));

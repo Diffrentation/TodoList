@@ -451,9 +451,10 @@ function TaskItem({
                     onEdit();
                   }}
                   size="small"
-                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out"
+                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out cursor-pointer"
                   sx={{
                     color: "hsl(var(--color-foreground))",
+                    cursor: "pointer",
                     "&:hover": {
                       backgroundColor: "#eab308",
                       color: "white",
@@ -481,9 +482,10 @@ function TaskItem({
                   <IconButton
                     onClick={(e) => e.stopPropagation()}
                     size="small"
-                    className="opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out"
+                    className="opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out cursor-pointer"
                     sx={{
                       color: "hsl(var(--color-destructive))",
+                      cursor: "pointer",
                       "&:hover": {
                         backgroundColor: "#ef4444",
                         color: "white",

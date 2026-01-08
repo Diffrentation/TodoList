@@ -184,6 +184,7 @@ function OTPPageContent() {
             <div className="text-center mt-4">
               <button
                 type="button"
+                className="cursor-pointer text-sm text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 ease-out"
                 onClick={async () => {
                   if (!userId) {
                     toast.error("User not found");
@@ -212,7 +213,7 @@ function OTPPageContent() {
                     );
                   }
                 }}
-                className="text-sm text-blue-600 hover:text-blue-800 underline"
+                className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 ease-out cursor-pointer"
               >
                 Resend OTP
               </button>

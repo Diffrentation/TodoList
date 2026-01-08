@@ -107,7 +107,7 @@ function ChangePasswordContent() {
                 <button
                   type="button"
                   onClick={() => setShowNew(!showNew)}
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-blue-600 hover:scale-110 transition-all duration-200 ease-out cursor-pointer"
                   aria-label="Toggle password visibility"
                 >
                   {showNew ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -138,7 +138,7 @@ function ChangePasswordContent() {
                 <button
                   type="button"
                   onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-blue-600 hover:scale-110 transition-all duration-200 ease-out cursor-pointer"
                   aria-label="Toggle password visibility"
                 >
                   {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -157,7 +157,7 @@ function ChangePasswordContent() {
               className={cn(
                 "group/btn relative w-full h-11 rounded-xl font-semibold text-white",
                 "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700",
-                "transition-all duration-200 ease-out",
+                "transition-all duration-200 ease-out cursor-pointer",
                 "shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 "flex items-center justify-center"

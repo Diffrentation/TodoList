@@ -322,7 +322,7 @@ export default function ProfilePage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => router.back()}
-                  className="h-10 w-10 rounded-xl"
+                  className="h-10 w-10 rounded-xl hover:bg-blue-500 hover:text-white transition-colors duration-200 ease-out cursor-pointer"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
@@ -374,7 +374,7 @@ export default function ProfilePage() {
                             <button
                               type="button"
                               onClick={handleImageClick}
-                              className="p-2 bg-primary/80 hover:bg-primary rounded-full text-white transition-colors"
+                              className="p-2 bg-primary/80 hover:bg-blue-500 hover:scale-110 rounded-full text-white transition-all duration-200 ease-out cursor-pointer"
                               title="Change Image"
                             >
                               <Camera className="h-4 w-4" />
@@ -383,7 +383,7 @@ export default function ProfilePage() {
                               type="button"
                               onClick={handleDeleteImage}
                               disabled={uploadingImage}
-                              className="p-2 bg-destructive/80 hover:bg-destructive rounded-full text-white transition-colors disabled:opacity-50"
+                              className="p-2 bg-destructive/80 hover:bg-red-500 hover:scale-110 rounded-full text-white transition-all duration-200 ease-out cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                               title="Delete Image"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -397,7 +397,7 @@ export default function ProfilePage() {
                             <button
                               type="button"
                               onClick={handleImageClick}
-                              className="p-2 bg-primary/80 hover:bg-primary rounded-full text-white transition-colors"
+                              className="p-2 bg-primary/80 hover:bg-blue-500 hover:scale-110 rounded-full text-white transition-all duration-200 ease-out cursor-pointer"
                               title="Upload Image"
                             >
                               <Camera className="h-4 w-4" />
@@ -426,7 +426,7 @@ export default function ProfilePage() {
                           variant="outline"
                           size="sm"
                           onClick={handleImageClick}
-                          className="h-8 text-xs"
+                          className="h-8 text-xs hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-colors duration-200 ease-out cursor-pointer"
                         >
                           <Camera className="h-3 w-3 mr-1" />
                           {imagePreview ? "Change" : "Upload"} Image
@@ -438,7 +438,7 @@ export default function ProfilePage() {
                             size="sm"
                             onClick={handleDeleteImage}
                             disabled={uploadingImage}
-                            className="h-8 text-xs text-destructive hover:text-destructive"
+                            className="h-8 text-xs text-destructive hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors duration-200 ease-out cursor-pointer disabled:cursor-not-allowed"
                           >
                             {uploadingImage ? (
                               <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -602,14 +602,14 @@ export default function ProfilePage() {
                         type="button"
                         variant="outline"
                         onClick={() => router.back()}
-                        className="h-11 px-6"
+                        className="h-11 px-6 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors duration-200 ease-out cursor-pointer"
                       >
                         Cancel
                       </Button>
                       <Button
                         type="submit"
                         disabled={saving}
-                        className="h-11 px-6"
+                        className="h-11 px-6 hover:bg-green-500 hover:text-white transition-colors duration-200 ease-out cursor-pointer"
                       >
                         {saving ? (
                           <>

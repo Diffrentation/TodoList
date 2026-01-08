@@ -4,20 +4,20 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20 active:scale-95",
+          "bg-primary text-primary-foreground hover:bg-blue-500 hover:text-white shadow-md shadow-primary/20 active:scale-95",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-md active:scale-95",
+          "bg-destructive text-destructive-foreground hover:bg-red-600 hover:text-white shadow-md active:scale-95",
         outline:
-          "border border-input bg-background hover:bg-muted hover:text-foreground active:scale-95",
+          "border border-input bg-background hover:bg-blue-500 hover:text-white hover:border-blue-500 active:scale-95",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-95",
-        ghost: "bg-muted text-foreground hover:bg-muted/80 active:scale-95",
-        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80",
+          "bg-secondary text-secondary-foreground hover:bg-blue-500 hover:text-white active:scale-95",
+        ghost: "bg-muted text-foreground hover:bg-blue-500 hover:text-white active:scale-95",
+        link: "text-primary underline-offset-4 hover:underline hover:text-blue-600 cursor-pointer",
       },
       size: {
         default: "h-10 px-4 py-2",

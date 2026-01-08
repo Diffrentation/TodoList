@@ -132,7 +132,7 @@ export default function OtpSendTo() {
               className={cn(
                 "group/btn relative w-full h-11 rounded-xl font-semibold text-white",
                 "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700",
-                "transition-all duration-200 ease-out",
+                "transition-all duration-200 ease-out cursor-pointer",
                 "shadow-lg shadow-yellow-500/30 hover:shadow-xl hover:shadow-yellow-500/40",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 "flex items-center justify-center"

@@ -135,7 +135,7 @@ function Login() {
               <button
                 type="button"
                 onClick={() => setShowPass(!showPass)}
-                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-muted-foreground hover:text-blue-600 hover:scale-110 transition-all duration-200 ease-out cursor-pointer"
                 aria-label="Toggle password visibility"
               >
                 {showPass ? <FaRegEye className="h-5 w-5" /> : <FaRegEyeSlash className="h-5 w-5" />}
@@ -152,7 +152,7 @@ function Login() {
             <button
               type="button"
               onClick={handleforgotPass}
-              className="text-sm text-primary hover:text-primary/80 transition-colors font-medium"
+              className="text-sm text-primary hover:text-blue-600 hover:underline transition-all duration-200 ease-out cursor-pointer font-medium"
             >
               Forgot Password?
             </button>
@@ -167,7 +167,7 @@ function Login() {
               className={cn(
                 "group/btn relative w-full h-11 rounded-xl font-semibold text-white",
                 "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700",
-                "transition-all duration-200 ease-out",
+                "transition-all duration-200 ease-out cursor-pointer",
                 "shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 "flex items-center justify-center"
@@ -206,7 +206,7 @@ function Login() {
             <button
               type="button"
               onClick={handleSignup}
-              className="font-semibold text-primary hover:text-primary/80 underline transition-colors"
+              className="font-semibold text-primary hover:text-blue-600 hover:scale-105 transition-all duration-200 ease-out cursor-pointer underline"
             >
               Sign up
             </button>
