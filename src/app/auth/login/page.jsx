@@ -66,25 +66,27 @@ function Login() {
   const handleforgotPass = () => router.push("/auth/forgot-password");
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12 relative">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8 py-12 relative">
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
         <ThemeToggle />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className={cn(
-          "w-full max-w-md rounded-2xl border border-border bg-card shadow-xl shadow-primary/5",
-          "p-6 sm:p-8 md:p-10"
-        )}
-      >
+      <div className="w-full max-w-md">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className={cn(
+            "w-full rounded-2xl border border-border bg-gradient-to-br from-card via-card/95 to-muted/20",
+            "shadow-xl shadow-primary/10 backdrop-blur-sm",
+            "p-6 sm:p-8 md:p-10"
+          )}
+        >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.1, duration: 0.3, ease: "easeOut" }}
         >
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
             Welcome Back
@@ -98,7 +100,7 @@ function Login() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.2, duration: 0.3, ease: "easeOut" }}
           >
             <LabelInputContainer>
               <Label htmlFor="email" className="text-foreground">Email Address</Label>
@@ -109,7 +111,7 @@ function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:bg-background transition-colors duration-200 ease-out"
               />
             </LabelInputContainer>
           </motion.div>
@@ -117,7 +119,7 @@ function Login() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.3, duration: 0.3, ease: "easeOut" }}
           >
             <LabelInputContainer className="relative">
               <Label htmlFor="password" className="text-foreground">Password</Label>
@@ -128,7 +130,7 @@ function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-background border-input text-foreground placeholder:text-muted-foreground pr-10"
+                className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground pr-10 focus:bg-background transition-colors duration-200 ease-out"
               />
               <button
                 type="button"
@@ -144,7 +146,7 @@ function Login() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.4, duration: 0.3, ease: "easeOut" }}
             className="flex justify-end"
           >
             <button
@@ -159,13 +161,14 @@ function Login() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.5, duration: 0.3, ease: "easeOut" }}
           >
             <button
               className={cn(
-                "group/btn relative w-full h-11 rounded-xl font-semibold text-primary-foreground",
-                "bg-primary hover:bg-primary/90 transition-all duration-300",
-                "shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30",
+                "group/btn relative w-full h-11 rounded-xl font-semibold text-white",
+                "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700",
+                "transition-all duration-200 ease-out",
+                "shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 "flex items-center justify-center"
               )}
@@ -189,14 +192,14 @@ function Login() {
               <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or</span>
+              <span className="bg-gradient-to-br from-card via-card/95 to-muted/20 px-2 text-muted-foreground">Or</span>
             </div>
           </div>
 
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.6, duration: 0.3, ease: "easeOut" }}
             className="text-sm text-center text-muted-foreground"
           >
             Don&apos;t have an account?{" "}
@@ -209,7 +212,8 @@ function Login() {
             </button>
           </motion.p>
         </form>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }

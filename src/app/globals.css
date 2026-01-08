@@ -49,7 +49,17 @@ body {
   background-color: hsl(var(--color-background));
   color: hsl(var(--color-foreground));
   font-feature-settings: "rlig" 1, "calt" 1;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease-out, color 0.3s ease-out;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Smooth transitions for all elements */
+* {
+  transition-timing-function: ease-out;
 }
 
 /* Select dropdown styling for dark mode */
@@ -81,4 +91,80 @@ select option {
   50% {
     opacity: 0;
   }
+}
+
+/* Responsive grid for tasks that adapts to zoom levels */
+.task-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .task-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .task-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .task-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .task-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+/* Smooth animations for opacity transitions */
+@keyframes smoothFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes smoothFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Search and Filter hover effects */
+.search-input-wrapper .ant-input {
+  transition: all 0.2s ease-out;
+}
+
+.search-input-wrapper:hover .ant-input,
+.search-input-wrapper .ant-input:focus,
+.search-input-wrapper .ant-input-focused {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+.filter-select-wrapper .ant-select-selector {
+  transition: all 0.2s ease-out !important;
+}
+
+.filter-select-wrapper:hover .ant-select-selector,
+.filter-select-wrapper .ant-select-focused .ant-select-selector {
+  border-color: #eab308 !important;
+  box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.2) !important;
 }

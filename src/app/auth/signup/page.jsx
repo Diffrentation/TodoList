@@ -179,21 +179,23 @@ export default function Signup() {
   const handleLogin = () => router.push("/auth/login");
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12 relative">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8 py-12 relative">
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
         <ThemeToggle />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className={cn(
-          "w-full max-w-3xl rounded-2xl border border-border bg-card shadow-xl shadow-primary/5",
-          "p-6 sm:p-8 md:p-10"
-        )}
-      >
+      <div className="w-full max-w-4xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className={cn(
+            "w-full rounded-2xl border border-border bg-gradient-to-br from-card via-card/95 to-muted/20",
+            "shadow-xl shadow-primary/10 backdrop-blur-sm",
+            "p-6 sm:p-8 md:p-10"
+          )}
+        >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -240,8 +242,8 @@ export default function Signup() {
                   </div>
                 )}
 
-                <div className="absolute bottom-0 right-0 bg-primary rounded-full p-2 cursor-pointer hover:bg-primary/90 transition-colors shadow-lg">
-                  <FaCamera className="w-3 h-3 text-primary-foreground" />
+                <div className="absolute bottom-0 right-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-full p-2 cursor-pointer transition-all duration-200 ease-out shadow-lg shadow-blue-500/30">
+                  <FaCamera className="w-3 h-3 text-white" />
                 </div>
               </div>
 
@@ -259,8 +261,8 @@ export default function Signup() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
+            transition={{ delay: 0.3, duration: 0.3, ease: "easeOut" }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6"
           >
             <LabelInputContainer>
               <Label htmlFor="firstname" className="text-foreground">First Name</Label>
@@ -271,7 +273,7 @@ export default function Signup() {
                 placeholder="John"
                 type="text"
                 required
-                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:bg-background transition-colors duration-200 ease-out"
               />
             </LabelInputContainer>
 
@@ -284,7 +286,7 @@ export default function Signup() {
                 placeholder="Doe"
                 type="text"
                 required
-                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:bg-background transition-colors duration-200 ease-out"
               />
             </LabelInputContainer>
           </motion.div>
@@ -292,8 +294,8 @@ export default function Signup() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
+            transition={{ delay: 0.4, duration: 0.3, ease: "easeOut" }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6"
           >
             <LabelInputContainer>
               <Label htmlFor="email" className="text-foreground">Email</Label>
@@ -304,7 +306,7 @@ export default function Signup() {
                 type="email"
                 placeholder="you@example.com"
                 required
-                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:bg-background transition-colors duration-200 ease-out"
               />
             </LabelInputContainer>
 
@@ -317,7 +319,7 @@ export default function Signup() {
                 type={showPass ? "text" : "password"}
                 placeholder="••••••••"
                 required
-                className="bg-background border-input text-foreground placeholder:text-muted-foreground pr-10"
+                className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground pr-10 focus:bg-background transition-colors duration-200 ease-out"
               />
               <button
                 type="button"
@@ -344,7 +346,7 @@ export default function Signup() {
                 type="text"
                 placeholder="Enter your phone number"
                 required
-                className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:bg-background transition-colors duration-200 ease-out"
               />
             </LabelInputContainer>
           </motion.div>
@@ -360,7 +362,7 @@ export default function Signup() {
               Address Information
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
               <LabelInputContainer>
                 <Label htmlFor="address.city" className="text-foreground">City</Label>
                 <Input
@@ -370,7 +372,7 @@ export default function Signup() {
                   placeholder="Mumbai"
                   type="text"
                   required
-                  className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                  className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:bg-background transition-colors duration-200 ease-out"
                 />
               </LabelInputContainer>
 
@@ -383,7 +385,7 @@ export default function Signup() {
                   placeholder="Maharashtra"
                   type="text"
                   required
-                  className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                  className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:bg-background transition-colors duration-200 ease-out"
                 />
               </LabelInputContainer>
             </div>
@@ -398,7 +400,7 @@ export default function Signup() {
                   placeholder="India"
                   type="text"
                   required
-                  className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                  className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:bg-background transition-colors duration-200 ease-out"
                 />
               </LabelInputContainer>
 
@@ -412,7 +414,7 @@ export default function Signup() {
                   type="text"
                   maxLength={6}
                   required
-                  className="bg-background border-input text-foreground placeholder:text-muted-foreground"
+                  className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:bg-background transition-colors duration-200 ease-out"
                 />
               </LabelInputContainer>
             </div>
@@ -426,9 +428,10 @@ export default function Signup() {
             <button
               disabled={loading}
               className={cn(
-                "group/btn relative w-full h-11 rounded-xl font-semibold text-primary-foreground",
-                "bg-primary hover:bg-primary/90 transition-all duration-300",
-                "shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30",
+                "group/btn relative w-full h-11 rounded-xl font-semibold text-white",
+                "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700",
+                "transition-all duration-200 ease-out",
+                "shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 "flex items-center justify-center"
               )}
@@ -461,7 +464,8 @@ export default function Signup() {
             </button>
           </motion.p>
         </form>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }

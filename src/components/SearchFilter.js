@@ -14,12 +14,12 @@ export default function SearchFilter({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className="flex flex-col sm:flex-row gap-3"
     >
-      <div className="flex-1">
+      <div className="flex-1 search-input-wrapper">
         <AntInput
           size="large"
           placeholder="Search tasks..."
@@ -34,14 +34,19 @@ export default function SearchFilter({
           }}
         />
       </div>
-      <div className="sm:w-48">
+      <div className="sm:w-48 filter-select-wrapper">
         <AntSelect
           value={status}
           onChange={onStatusChange}
           size="large"
           placeholder="Filter by status"
           prefix={<Filter className="h-5 w-5" />}
-          style={{ width: "100%", borderRadius: "12px" }}
+          style={{ 
+            width: "100%", 
+            height: "48px",
+            fontSize: "16px",
+            borderRadius: "12px" 
+          }}
           options={[
             { value: "", label: "All Tasks" },
             { value: "pending", label: "Pending" },

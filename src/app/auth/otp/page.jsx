@@ -143,9 +143,10 @@ function OTPPageContent() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex justify-center items-center min-h-screen px-4 sm:px-6 lg:px-8 py-12">
       <Toaster position="top-right" />
-      <div className="border p-10 rounded-2xl w-[450px] shadow-md">
+      <div className="w-full max-w-md">
+        <div className="border border-border bg-gradient-to-br from-card via-card/95 to-muted/20 p-6 sm:p-8 md:p-10 rounded-2xl shadow-xl shadow-primary/10 backdrop-blur-sm">
         <h2 className="text-2xl font-bold mb-6 text-center">Enter OTP</h2>
 
         <Form {...form}>
@@ -173,7 +174,10 @@ function OTPPageContent() {
               )}
             />
 
-            <Button type="submit" className="w-full text-lg py-6 rounded-xl">
+            <Button 
+              type="submit" 
+              className="w-full text-lg py-6 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 ease-out"
+            >
               Verify OTP
             </Button>
 
@@ -215,6 +219,7 @@ function OTPPageContent() {
             </div>
           </form>
         </Form>
+        </div>
       </div>
     </div>
   );

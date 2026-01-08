@@ -29,12 +29,12 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="h-9 w-9 relative transition-all duration-200 hover:scale-110 active:scale-95"
+      className="h-9 w-9 relative transition-all duration-200 ease-out hover:scale-105 hover:bg-blue-500 hover:text-white active:scale-95"
     >
       <motion.div
         initial={false}
         animate={{ rotate: isDark ? 180 : 0, scale: isDark ? 0 : 1 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.25, ease: "easeInOut" }}
         className="absolute"
       >
         <Sun className="h-5 w-5" />
@@ -42,7 +42,7 @@ export function ThemeToggle() {
       <motion.div
         initial={false}
         animate={{ rotate: isDark ? 0 : -180, scale: isDark ? 1 : 0 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.25, ease: "easeInOut" }}
         className="absolute"
       >
         <Moon className="h-5 w-5" />

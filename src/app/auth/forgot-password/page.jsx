@@ -57,7 +57,7 @@ export default function OtpSendTo() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12 relative">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8 py-12 relative">
       <Toaster position="top-right" />
       
       {/* Theme Toggle */}
@@ -65,15 +65,17 @@ export default function OtpSendTo() {
         <ThemeToggle />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className={cn(
-          "w-full max-w-md rounded-2xl border border-border bg-card shadow-xl shadow-primary/5",
-          "p-6 sm:p-8 md:p-10"
-        )}
-      >
+      <div className="w-full max-w-md">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className={cn(
+            "w-full rounded-2xl border border-border bg-gradient-to-br from-card via-card/95 to-muted/20",
+            "shadow-xl shadow-primary/10 backdrop-blur-sm",
+            "p-6 sm:p-8 md:p-10"
+          )}
+        >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -105,11 +107,11 @@ export default function OtpSendTo() {
               placeholder="you@example.com"
               required
               className={cn(
-                "bg-background border-input text-foreground placeholder:text-muted-foreground",
-                "transition-all duration-300",
+                "bg-muted/50 border-input text-foreground placeholder:text-muted-foreground",
+                "transition-all duration-200 ease-out focus:bg-background",
                 validateEmail(email)
-                  ? "focus:border-primary focus:ring-primary/20"
-                  : "border-destructive focus:border-destructive focus:ring-destructive/20"
+                  ? "focus:border-blue-500 focus:ring-blue-500/20"
+                  : "border-red-500 focus:border-red-500 focus:ring-red-500/20"
               )}
             />
             {email && !validateEmail(email) && (
@@ -128,9 +130,10 @@ export default function OtpSendTo() {
               type="submit"
               disabled={loading || !validateEmail(email)}
               className={cn(
-                "group/btn relative w-full h-11 rounded-xl font-semibold text-primary-foreground",
-                "bg-primary hover:bg-primary/90 transition-all duration-300",
-                "shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30",
+                "group/btn relative w-full h-11 rounded-xl font-semibold text-white",
+                "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700",
+                "transition-all duration-200 ease-out",
+                "shadow-lg shadow-yellow-500/30 hover:shadow-xl hover:shadow-yellow-500/40",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 "flex items-center justify-center"
               )}
@@ -147,7 +150,8 @@ export default function OtpSendTo() {
             </button>
           </motion.div>
         </form>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }

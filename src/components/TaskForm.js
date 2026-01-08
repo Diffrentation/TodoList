@@ -52,7 +52,7 @@ export default function TaskForm({ onSubmit, initialData = null, onCancel }) {
     <motion.form
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       onSubmit={handleSubmit}
       className="space-y-4"
     >
@@ -78,7 +78,7 @@ export default function TaskForm({ onSubmit, initialData = null, onCancel }) {
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.25, ease: "easeInOut" }}
         >
           <AntInput.TextArea
             value={description}
@@ -116,7 +116,7 @@ export default function TaskForm({ onSubmit, initialData = null, onCancel }) {
               onClick={onCancel}
               disabled={loading}
               suppressHydrationWarning
-              className="rounded-xl"
+              className="rounded-xl hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors duration-200 ease-out"
             >
               Cancel
             </Button>
@@ -125,7 +125,7 @@ export default function TaskForm({ onSubmit, initialData = null, onCancel }) {
             type="submit"
             disabled={loading || !title.trim()}
             suppressHydrationWarning
-            className="rounded-xl px-6 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+            className="rounded-xl px-6 bg-primary hover:bg-green-500 hover:text-white shadow-lg shadow-primary/20 transition-colors duration-200 ease-out"
             size="default"
           >
             {loading ? "Saving..." : initialData ? "Save Changes" : "Add Task"}

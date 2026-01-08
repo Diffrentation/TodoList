@@ -102,17 +102,17 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-background transition-colors duration-300">
         {/* Clean Minimalist Header */}
         <motion.header
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.3 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className="border-b border-border/50 bg-background/80 backdrop-blur-xl sticky top-0 z-50"
         >
-          <div className="max-w-6xl mx-auto px-6 py-5">
+          <div className="w-full px-4 sm:px-6 lg:px-8 py-5">
             <div className="flex justify-between items-center">
               <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1, duration: 0.3, ease: "easeOut" }}
                 className="flex items-center gap-4"
               >
                 <Badge dot color="hsl(var(--color-primary))" offset={[-2, 2]}>
@@ -120,7 +120,7 @@ export default function DashboardPage() {
                     size={48}
                     src={user?.profileImage}
                     icon={!user?.profileImage && <User className="h-6 w-6" />}
-                    className="border-2 border-primary shadow-lg shadow-primary/20"
+                    className="border-2 border-primary shadow-lg shadow-primary/20 cursor-pointer transition-all duration-200 ease-out hover:border-blue-500 hover:shadow-blue-500/30 hover:scale-105"
                     style={{
                       backgroundColor: "hsl(var(--color-primary))",
                     }}
@@ -147,7 +147,7 @@ export default function DashboardPage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => router.push("/profile")}
-                  className="h-10 w-10 rounded-xl"
+                  className="h-10 w-10 rounded-xl hover:bg-yellow-500 hover:text-white transition-colors duration-200 ease-out"
                   title="Edit Profile"
                 >
                   <Settings className="h-5 w-5" />
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                   variant="secondary"
                   size="icon"
                   onClick={handleLogout}
-                  className="h-10 w-10 rounded-xl"
+                  className="h-10 w-10 rounded-xl hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors duration-200 ease-out"
                 >
                   <LogOut className="h-5 w-5" />
                 </Button>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
         </motion.header>
 
         {/* Main Content - Any.do Style */}
-        <main className="max-w-4xl mx-auto px-6 py-8">
+        <main className="w-full px-4 sm:px-6 lg:px-8 py-8">
           {loading ? (
             <motion.div
               initial={{ opacity: 0 }}
@@ -179,21 +179,21 @@ export default function DashboardPage() {
             </motion.div>
           ) : (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               className="space-y-6"
             >
               {/* Statistics Cards */}
               {!status && (
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="grid grid-cols-2 md:grid-cols-4 gap-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.15, duration: 0.3, ease: "easeOut" }}
+                  className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4"
                 >
                   <AntCard
-                    className="border-border bg-card hover:shadow-lg transition-shadow"
+                    className="border-border bg-gradient-to-br from-blue-50 via-blue-50/50 to-blue-100/30 dark:from-blue-950/50 dark:via-blue-950/30 dark:to-blue-900/20 hover:shadow-lg hover:border-blue-500 transition-all duration-200 ease-out cursor-pointer backdrop-blur-sm"
                     bordered
                   >
                     <Statistic
@@ -204,7 +204,7 @@ export default function DashboardPage() {
                     />
                   </AntCard>
                   <AntCard
-                    className="border-border bg-card hover:shadow-lg transition-shadow"
+                    className="border-border bg-gradient-to-br from-yellow-50 via-yellow-50/50 to-yellow-100/30 dark:from-yellow-950/50 dark:via-yellow-950/30 dark:to-yellow-900/20 hover:shadow-lg hover:border-yellow-500 transition-all duration-200 ease-out cursor-pointer backdrop-blur-sm"
                     bordered
                   >
                     <Statistic
@@ -215,7 +215,7 @@ export default function DashboardPage() {
                     />
                   </AntCard>
                   <AntCard
-                    className="border-border bg-card hover:shadow-lg transition-shadow"
+                    className="border-border bg-gradient-to-br from-blue-50 via-blue-50/50 to-blue-100/30 dark:from-blue-950/50 dark:via-blue-950/30 dark:to-blue-900/20 hover:shadow-lg hover:border-blue-500 transition-all duration-200 ease-out cursor-pointer backdrop-blur-sm"
                     bordered
                   >
                     <Statistic
@@ -226,7 +226,7 @@ export default function DashboardPage() {
                     />
                   </AntCard>
                   <AntCard
-                    className="border-border bg-card hover:shadow-lg transition-shadow"
+                    className="border-border bg-gradient-to-br from-green-50 via-green-50/50 to-green-100/30 dark:from-green-950/50 dark:via-green-950/30 dark:to-green-900/20 hover:shadow-lg hover:border-green-500 transition-all duration-200 ease-out cursor-pointer backdrop-blur-sm"
                     bordered
                   >
                     <Statistic
@@ -244,34 +244,147 @@ export default function DashboardPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3 }}
+                  transition={{ delay: 0.2, duration: 0.3, ease: "easeOut" }}
                 >
                   <Card
                     sx={{
-                      backgroundColor: "hsl(var(--color-card))",
+                      background: "linear-gradient(to bottom right, hsl(var(--color-card)), hsl(var(--color-card) / 0.95), hsl(var(--color-muted) / 0.2))",
+                      backdropFilter: "blur(4px)",
                       border: "1px solid hsl(var(--color-border))",
                       borderRadius: 2,
-                      p: 2,
+                      p: 3,
                     }}
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-foreground">
-                        Completion Rate
-                      </span>
-                      <Badge
-                        count={`${completionRate}%`}
-                        style={{
-                          backgroundColor: "hsl(var(--color-primary))",
-                        }}
-                      />
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${completionRate}%` }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="h-full bg-primary rounded-full"
-                      />
+                    <div className="flex flex-col sm:flex-row items-center gap-6">
+                      {/* Circular Progress */}
+                      <div className="relative flex-shrink-0">
+                        <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
+                          {/* Background circle */}
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="40"
+                            fill="none"
+                            stroke="hsl(var(--color-muted))"
+                            strokeWidth="8"
+                          />
+                          {/* Progress circle */}
+                          <motion.circle
+                            cx="50"
+                            cy="50"
+                            r="40"
+                            fill="none"
+                            stroke="url(#gradient)"
+                            strokeWidth="8"
+                            strokeLinecap="round"
+                            strokeDasharray={`${2 * Math.PI * 40}`}
+                            initial={{ strokeDashoffset: 2 * Math.PI * 40 }}
+                            animate={{ strokeDashoffset: 2 * Math.PI * 40 * (1 - completionRate / 100) }}
+                            transition={{ duration: 1.5, ease: "easeOut" }}
+                          />
+                          {/* Gradient definition */}
+                          <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#10b981" />
+                              <stop offset="50%" stopColor="#3b82f6" />
+                              <stop offset="100%" stopColor="#8b5cf6" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                        {/* Center percentage */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center">
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+                              className="text-2xl font-bold bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent"
+                            >
+                              {completionRate}%
+                            </motion.div>
+                            <div className="text-xs text-muted-foreground mt-0.5">Complete</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Breakdown Stats */}
+                      <div className="flex-1 w-full sm:w-auto">
+                        <h3 className="text-lg font-semibold text-foreground mb-4">
+                          Task Breakdown
+                        </h3>
+                        <div className="space-y-3">
+                          {/* Completed */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                              <span className="text-sm text-foreground">Completed</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${stats.total > 0 ? (stats.completed / stats.total) * 100 : 0}%` }}
+                                  transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+                                  className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full"
+                                />
+                              </div>
+                              <span className="text-sm font-semibold text-foreground w-8 text-right">
+                                {stats.completed}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* In Progress */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                              <span className="text-sm text-foreground">In Progress</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${stats.total > 0 ? (stats.progress / stats.total) * 100 : 0}%` }}
+                                  transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
+                                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
+                                />
+                              </div>
+                              <span className="text-sm font-semibold text-foreground w-8 text-right">
+                                {stats.progress}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Pending */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                              <span className="text-sm text-foreground">Pending</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${stats.total > 0 ? (stats.pending / stats.total) * 100 : 0}%` }}
+                                  transition={{ duration: 1, delay: 0.7, ease: "easeOut" }}
+                                  className="h-full bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full"
+                                />
+                              </div>
+                              <span className="text-sm font-semibold text-foreground w-8 text-right">
+                                {stats.pending}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Total */}
+                          <div className="pt-2 border-t border-border">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium text-foreground">Total Tasks</span>
+                              <span className="text-sm font-bold text-foreground">{stats.total}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </Card>
                 </motion.div>

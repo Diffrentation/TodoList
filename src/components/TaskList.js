@@ -131,14 +131,16 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
       {/* Quick Add Task - Any.do Style */}
       {!showForm && !editingTask && (
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
           className="mb-6"
         >
           <Button
             onClick={() => setShowForm(true)}
             variant="outline"
-            className="w-full justify-start h-auto py-4 px-4 border-2 border-dashed"
+            className="w-full justify-start h-auto py-4 px-4 border-2 border-dashed hover:bg-green-500 hover:text-white hover:border-green-500 transition-colors duration-200 ease-out"
           >
             <Plus className="h-5 w-5 mr-3" />
             <span>Add a task</span>
@@ -151,13 +153,13 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
         {(showForm || editingTask) && (
           <motion.div
             key="form"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
             className="mb-6"
           >
-            <div className="bg-card rounded-xl border border-border p-5 shadow-sm">
+            <div className="bg-gradient-to-br from-card via-card/95 to-muted/20 rounded-xl border border-border p-5 shadow-sm backdrop-blur-sm">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-foreground">
                   {editingTask ? "Edit Task" : "New Task"}
@@ -169,7 +171,7 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
                     setShowForm(false);
                     setEditingTask(null);
                   }}
-                  className="h-8 w-8"
+                  className="h-8 w-8 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors duration-200 ease-out"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -194,8 +196,10 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
       {/* Empty State */}
       {filteredTasks.length === 0 && !showForm && !editingTask && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
           className="text-center py-16"
         >
           <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
@@ -213,7 +217,7 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
           </p>
           <Button
             onClick={() => setShowForm(true)}
-            className="rounded-xl px-6"
+            className="rounded-xl px-6 hover:bg-green-500 hover:text-white transition-colors duration-200 ease-out"
             size="large"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -228,23 +232,25 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Pending ({pendingTasks.length})
           </h2>
-          <AnimatePresence>
-            {pendingTasks.map((task, index) => (
-              <TaskItem
-                key={task._id}
-                task={task}
-                index={index}
-                onToggle={toggleStatus}
-                onEdit={() => setEditingTask(task)}
-                onDelete={handleDelete}
-                expanded={expandedTask === task._id}
-                onExpand={() =>
-                  setExpandedTask(expandedTask === task._id ? null : task._id)
-                }
-                loading={loading}
-              />
-            ))}
-          </AnimatePresence>
+          <div className="task-grid">
+            <AnimatePresence>
+              {pendingTasks.map((task, index) => (
+                <TaskItem
+                  key={task._id}
+                  task={task}
+                  index={index}
+                  onToggle={toggleStatus}
+                  onEdit={() => setEditingTask(task)}
+                  onDelete={handleDelete}
+                  expanded={expandedTask === task._id}
+                  onExpand={() =>
+                    setExpandedTask(expandedTask === task._id ? null : task._id)
+                  }
+                  loading={loading}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
       )}
 
@@ -254,23 +260,25 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Progress ({progressTasks.length})
           </h2>
-          <AnimatePresence>
-            {progressTasks.map((task, index) => (
-              <TaskItem
-                key={task._id}
-                task={task}
-                index={index}
-                onToggle={toggleStatus}
-                onEdit={() => setEditingTask(task)}
-                onDelete={handleDelete}
-                expanded={expandedTask === task._id}
-                onExpand={() =>
-                  setExpandedTask(expandedTask === task._id ? null : task._id)
-                }
-                loading={loading}
-              />
-            ))}
-          </AnimatePresence>
+          <div className="task-grid">
+            <AnimatePresence>
+              {progressTasks.map((task, index) => (
+                <TaskItem
+                  key={task._id}
+                  task={task}
+                  index={index}
+                  onToggle={toggleStatus}
+                  onEdit={() => setEditingTask(task)}
+                  onDelete={handleDelete}
+                  expanded={expandedTask === task._id}
+                  onExpand={() =>
+                    setExpandedTask(expandedTask === task._id ? null : task._id)
+                  }
+                  loading={loading}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
       )}
 
@@ -280,23 +288,25 @@ export default function TaskList({ tasks: initialTasks, onUpdate, filterStatus =
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Completed ({completedTasks.length})
           </h2>
-          <AnimatePresence>
-            {completedTasks.map((task, index) => (
-              <TaskItem
-                key={task._id}
-                task={task}
-                index={index}
-                onToggle={toggleStatus}
-                onEdit={() => setEditingTask(task)}
-                onDelete={handleDelete}
-                expanded={expandedTask === task._id}
-                onExpand={() =>
-                  setExpandedTask(expandedTask === task._id ? null : task._id)
-                }
-                loading={loading}
-              />
-            ))}
-          </AnimatePresence>
+          <div className="task-grid">
+            <AnimatePresence>
+              {completedTasks.map((task, index) => (
+                <TaskItem
+                  key={task._id}
+                  task={task}
+                  index={index}
+                  onToggle={toggleStatus}
+                  onEdit={() => setEditingTask(task)}
+                  onDelete={handleDelete}
+                  expanded={expandedTask === task._id}
+                  onExpand={() =>
+                    setExpandedTask(expandedTask === task._id ? null : task._id)
+                  }
+                  loading={loading}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
       )}
     </div>
@@ -316,21 +326,23 @@ function TaskItem({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20, scale: 0.95 }}
-      transition={{ duration: 0.2, delay: index * 0.03 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2, delay: index * 0.02, ease: "easeOut" }}
       layout
-      className="group"
+      className="group h-full"
     >
       <Card
         className={cn(
-          "transition-all duration-200 hover:shadow-lg hover:border-primary/30",
-          task.status === "completed" && "opacity-70"
+          "transition-all duration-200 ease-out hover:shadow-lg h-full flex flex-col",
+          task.status === "pending" && "hover:border-yellow-500/50",
+          task.status === "progress" && "hover:border-blue-500/50",
+          task.status === "completed" && "opacity-70 hover:border-green-500/50"
         )}
       >
-        <CardContent className="p-5">
-          <div className="flex items-start gap-4">
+        <CardContent className="p-4 sm:p-5 flex-1 flex flex-col">
+          <div className="flex items-start gap-3 sm:gap-4 flex-1">
             {/* Checkbox with Tooltip */}
             <Tooltip
               title={
@@ -345,21 +357,26 @@ function TaskItem({
                 variant="secondary"
                 size="icon"
                 onClick={() => onToggle(task)}
-                className="h-8 w-8 rounded-full shrink-0 mt-0.5 hover:scale-110 transition-transform"
+                className={cn(
+                  "h-8 w-8 rounded-full shrink-0 mt-0.5 transition-all duration-200 ease-out",
+                  task.status === "pending" && "hover:bg-yellow-500 hover:text-white hover:border-yellow-500",
+                  task.status === "progress" && "hover:bg-blue-500 hover:text-white hover:border-blue-500",
+                  task.status === "completed" && "hover:bg-green-500 hover:text-white hover:border-green-500"
+                )}
               >
                 {task.status === "completed" ? (
                   <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
                   >
                     <CheckCircle2 className="h-5 w-5 text-primary" />
                   </motion.div>
                 ) : task.status === "progress" ? (
                   <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
                   >
                     <Clock className="h-5 w-5 text-primary" />
                   </motion.div>
@@ -371,7 +388,7 @@ function TaskItem({
 
             {/* Task Content */}
             <div
-              className="flex-1 cursor-pointer min-w-0"
+              className="flex-1 cursor-pointer min-w-0 flex flex-col"
               onClick={(e) => {
                 if (!e.target.closest('.menu-container') && !e.target.closest('button')) {
                   onExpand();
@@ -380,7 +397,7 @@ function TaskItem({
             >
               <h3
                 className={cn(
-                  "text-lg font-semibold text-foreground mb-2 transition-all",
+                  "text-base sm:text-lg font-semibold text-foreground mb-2 transition-all duration-200 ease-out line-clamp-2",
                   task.status === "completed" &&
                     "line-through text-muted-foreground"
                 )}
@@ -394,15 +411,15 @@ function TaskItem({
                     height: expanded ? "auto" : 0,
                     opacity: expanded ? 1 : 0,
                   }}
-                  transition={{ duration: 0.2 }}
-                  className="text-sm text-muted-foreground overflow-hidden mb-2"
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                  className="text-xs sm:text-sm text-muted-foreground overflow-hidden mb-2 line-clamp-2"
                 >
                   {task.description}
                 </motion.p>
               )}
-              <div className="flex items-center gap-3 mt-3">
+              <div className="flex items-center gap-2 sm:gap-3 mt-auto pt-3 flex-wrap">
                 <Tooltip title={new Date(task.createdAt).toLocaleString()}>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {new Date(task.createdAt).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
@@ -418,7 +435,7 @@ function TaskItem({
                       ? "processing"
                       : "warning"
                   }
-                  className="capitalize"
+                  className="capitalize text-xs"
                 >
                   {task.status}
                 </Tag>
@@ -426,7 +443,7 @@ function TaskItem({
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 shrink-0 menu-container">
+            <div className="flex items-start gap-1 sm:gap-2 shrink-0 menu-container">
               <Tooltip title="Edit task">
                 <IconButton
                   onClick={(e) => {
@@ -434,11 +451,12 @@ function TaskItem({
                     onEdit();
                   }}
                   size="small"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out"
                   sx={{
                     color: "hsl(var(--color-foreground))",
                     "&:hover": {
-                      backgroundColor: "hsl(var(--color-muted))",
+                      backgroundColor: "#eab308",
+                      color: "white",
                     },
                   }}
                 >
@@ -463,11 +481,11 @@ function TaskItem({
                   <IconButton
                     onClick={(e) => e.stopPropagation()}
                     size="small"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out"
                     sx={{
                       color: "hsl(var(--color-destructive))",
                       "&:hover": {
-                        backgroundColor: "hsl(var(--color-destructive))",
+                        backgroundColor: "#ef4444",
                         color: "white",
                       },
                     }}
