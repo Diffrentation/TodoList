@@ -13,6 +13,8 @@ const projectSchema = new mongoose.Schema(
     lead: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", default: null, index: true },
+    archivedAt: { type: Date, default: null, index: true },
+    archivedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
   },
   { timestamps: true }

@@ -133,7 +133,6 @@ export default function Signup() {
       submitFormData.append("email", formData.email);
       submitFormData.append("password", formData.password);
       submitFormData.append("phone", formData.phone);
-      submitFormData.append("role", "buyer");
       if (inviteToken) submitFormData.append("inviteToken", inviteToken);
 
       // Append address fields

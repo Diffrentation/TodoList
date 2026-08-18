@@ -101,12 +101,10 @@ function OTPPageContent() {
             lastname: res.data.user.lastname,
             email: res.data.user.email,
             phone: res.data.user.phone,
-            role: res.data.user.role || "buyer",
+            role: res.data.user.role || "user",
             profileImage: res.data.user.profileImage,
             address: res.data.user.address,
             isVerified: res.data.user.isVerified, // Should be true after verification
-            token: res.data.accessToken, // Save access token if available
-            refreshToken: res.data.refreshToken, // Save refresh token if available
           };
 
           // Only save if user is verified (which should be true at this point)

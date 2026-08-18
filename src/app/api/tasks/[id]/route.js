@@ -7,6 +7,7 @@ import Team from "@/models/Team";
 import { authenticateToken } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
 import { accessibleProjectIds, taskOwnershipScope } from "@/lib/task-access";
+import { addActivity, canEditTeamContent, canManageTaskLock, notifyMany } from "@/lib/collaboration";
 import { isObjectId, normalizeDate, normalizeLabels, normalizePriority, normalizeStatus } from "@/lib/task-data";
 
 const publicUser = "firstname lastname email profileImage";
@@ -57,6 +58,9 @@ function taskFields(body) {
   if (body.private !== undefined) {
     updates.private = Boolean(body.private);
   }
+  if (body.locked !== undefined) {
+    updates.locked = Boolean(body.locked);
+  }
   if (body.labels !== undefined) {
     const labels = normalizeLabels(body.labels);
     if (!labels) return { error: "Labels must be an array of up to 12 short labels" };
@@ -66,6 +70,7 @@ function taskFields(body) {
     if (!Number.isFinite(body.position) || body.position < 0 || body.position > 1_000_000) return { error: "Invalid task position" };
     updates.position = body.position;
   }
+  if (body.archived !== undefined) updates.archivedAt = body.archived ? new Date() : null;
   return { updates };
 }
 
@@ -108,6 +113,7 @@ export async function GET(req, { params }) {
       .populate("reporter", publicUser)
       .populate("watchers", publicUser)
       .populate("comments.author", publicUser)
+      .populate("lockedBy", publicUser)
       .lean();
     if (!task) return response("Task not found", 404);
     return NextResponse.json({ success: true, task });
@@ -129,20 +135,38 @@ export async function PUT(req, { params }) {
     const task = await Task.findOne({ _id: id, ...taskOwnershipScope(user._id, teamIds, projectIds) });
     if (!task) return response("Task not found", 404);
 
-    let assigneePool = [String(user._id)];
+    let taskTeam = null;
     if (task.team) {
-      const teamDoc = await Team.findById(task.team);
-      if (teamDoc) assigneePool = teamDoc.members.map((memberId) => String(memberId));
+      taskTeam = await Team.findById(task.team);
+      if (!canEditTeamContent(taskTeam, user._id)) return response("Your viewer role allows you to view this task but not change it", 403);
     }
+    const isTaskManager = canManageTaskLock(task, taskTeam, user._id);
+    if (task.locked && !isTaskManager) return response("This task is locked. Only the reporter or a team owner/admin can make changes.", 403);
+
+    let assigneePool = [String(user._id)];
+    if (taskTeam) assigneePool = taskTeam.members.map((memberId) => String(memberId));
 
     const body = await req.json();
+    if (body.locked !== undefined && Boolean(body.locked) !== task.locked && !isTaskManager) {
+      return response("Only the reporter or a team owner/admin can lock or unlock this task.", 403);
+    }
     const fields = taskFields(body);
     if (fields.error) return response(fields.error, 400);
     const linked = await references(body, user._id, id, teamIds, projectIds, assigneePool);
     if (linked.error) return response(linked.error, 400);
     Object.assign(task, fields.updates, linked.updates);
+    if (body.archived !== undefined) task.archivedBy = body.archived ? user._id : null;
+    if (fields.updates.locked !== undefined) {
+      task.lockedBy = fields.updates.locked ? user._id : null;
+      task.lockedAt = fields.updates.locked ? new Date() : null;
+    }
     await task.save();
-    await task.populate(["project", { path: "assignees", select: publicUser }, { path: "reporter", select: publicUser }]);
+    const action = body.archived === true ? "archived" : body.archived === false ? "restored" : fields.updates.locked === true ? "locked" : fields.updates.locked === false ? "unlocked" : body.status === "completed" ? "completed" : "updated";
+    await addActivity({ actor: user._id, entityType: "task", entityId: task._id, team: task.team, action, details: { changed: Object.keys({ ...fields.updates, ...linked.updates }) } });
+    if (linked.updates.assignees) {
+      await notifyMany({ recipients: linked.updates.assignees, actor: user._id, type: "assignment", title: "Task assignment updated", message: `${user.firstname} updated assignees for “${task.title}”.`, href: `/dashboard?task=${task._id}`, metadata: { taskId: String(task._id) } });
+    }
+    await task.populate(["project", { path: "assignees", select: publicUser }, { path: "reporter", select: publicUser }, { path: "lockedBy", select: publicUser }]);
     return NextResponse.json({ success: true, message: "Task updated", task });
   } catch (error) {
     return errorHandler(error);
@@ -158,8 +182,13 @@ export async function DELETE(req, { params }) {
     if (!isObjectId(id)) return response("Invalid task ID", 400);
     const teamIds = await accessibleTeamIds(user._id);
     const projectIds = await accessibleProjectIds(user._id);
-    const task = await Task.findOneAndDelete({ _id: id, ...taskOwnershipScope(user._id, teamIds, projectIds) });
+    const task = await Task.findOne({ _id: id, ...taskOwnershipScope(user._id, teamIds, projectIds) });
     if (!task) return response("Task not found", 404);
+    if (task.locked) {
+      const taskTeam = task.team ? await Team.findById(task.team) : null;
+      if (!canManageTaskLock(task, taskTeam, user._id)) return response("This task is locked. Only the reporter or a team owner/admin can delete it.", 403);
+    }
+    await Task.deleteOne({ _id: task._id });
     return NextResponse.json({ success: true, message: "Task deleted" });
   } catch (error) {
     return errorHandler(error);

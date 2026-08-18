@@ -2,9 +2,13 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
-import { authenticateToken } from "@/lib/middleware/auth";
+import { authenticateToken, hashRefreshToken } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
+import { addActivity, requestFingerprint } from "@/lib/collaboration";
 
+// Forgotten-password resets go through /api/auth/forgot-password and
+// /api/auth/reset-password, which verify a signed, short-lived reset token.
+// This route only ever changes the authenticated caller's own password.
 export async function POST(req) {
   try {
     await connectDB();
@@ -19,54 +23,8 @@ export async function POST(req) {
     }
 
     const body = await req.json();
-    const { currentPassword, newPassword, confirmPassword, type, userId } = body;
+    const { currentPassword, newPassword, confirmPassword } = body;
 
-    // Handle forgot password flow (no auth required)
-    if (type === "forgot") {
-      if (!userId || !newPassword || !confirmPassword) {
-        return NextResponse.json(
-          { success: false, message: "All fields are required" },
-          { status: 400 }
-        );
-      }
-
-      if (newPassword !== confirmPassword) {
-        return NextResponse.json(
-          { success: false, message: "Passwords do not match" },
-          { status: 400 }
-        );
-      }
-
-      if (newPassword.length < 6) {
-        return NextResponse.json(
-          { success: false, message: "Password must be at least 6 characters" },
-          { status: 400 }
-        );
-      }
-
-      // Find user by userId (for forgot password flow)
-      const forgotUser = await User.findById(userId).select("+password");
-      if (!forgotUser) {
-        return NextResponse.json(
-          { success: false, message: "User not found" },
-          { status: 404 }
-        );
-      }
-
-      // Update password
-      forgotUser.password = newPassword;
-      await forgotUser.save();
-
-      return NextResponse.json(
-        {
-          success: true,
-          message: "Password changed successfully",
-        },
-        { status: 200 }
-      );
-    }
-
-    // Handle regular password change (requires authentication)
     if (!currentPassword || !newPassword || !confirmPassword) {
       return NextResponse.json(
         { success: false, message: "All fields are required" },
@@ -104,6 +62,17 @@ export async function POST(req) {
     // Update password
     userWithPassword.password = newPassword;
     await userWithPassword.save();
+
+    // A changed password should sign out every other session, keeping only
+    // the one used to make this request.
+    const currentRefreshToken = cookieStore.get("refreshToken")?.value;
+    const currentHash = currentRefreshToken ? hashRefreshToken(currentRefreshToken) : null;
+    await User.updateOne(
+      { _id: user._id },
+      { $pull: { sessions: { tokenHash: { $ne: currentHash } } } }
+    );
+
+    await addActivity({ actor: user._id, entityType: "account", entityId: user._id, action: "password_changed", details: requestFingerprint(req) });
 
     return NextResponse.json(
       {

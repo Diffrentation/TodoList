@@ -8,6 +8,17 @@ const commentSchema = new mongoose.Schema(
   { timestamps: true, _id: true }
 );
 
+const attachmentSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 180 },
+    url: { type: String, required: true, maxlength: 500 },
+    mimeType: { type: String, required: true, maxlength: 120 },
+    size: { type: Number, required: true, min: 0, max: 10 * 1024 * 1024 },
+    uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  },
+  { timestamps: true, _id: true }
+);
+
 const taskSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true, minlength: 1, maxlength: 200 },
@@ -33,6 +44,13 @@ const taskSchema = new mongoose.Schema(
     // Only meaningful when team is set: restricts visibility to assignees/reporter
     // instead of the whole team. Ignored for personal (non-team) tasks.
     private: { type: Boolean, default: false },
+    // Distinct from `private` (which controls who can SEE the task): locking
+    // freezes editing. While locked, only the reporter or a team owner/admin
+    // can change fields, comment, manage attachments, or delete it — everyone
+    // else keeps whatever view access `private` already grants them.
+    locked: { type: Boolean, default: false },
+    lockedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    lockedAt: { type: Date, default: null },
     watchers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     parentTask: { type: mongoose.Schema.Types.ObjectId, ref: "Task", default: null, index: true },
     assignees: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
@@ -45,6 +63,9 @@ const taskSchema = new mongoose.Schema(
     },
     position: { type: Number, default: 0 },
     comments: { type: [commentSchema], default: [] },
+    attachments: { type: [attachmentSchema], default: [] },
+    archivedAt: { type: Date, default: null, index: true },
+    archivedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
   },
   { timestamps: true }
@@ -56,4 +77,3 @@ taskSchema.index({ user: 1, project: 1, status: 1 });
 const Task = mongoose.models.Task || mongoose.model("Task", taskSchema);
 
 export default Task;
-

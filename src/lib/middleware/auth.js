@@ -1,6 +1,51 @@
 import jwt from "jsonwebtoken";
+import crypto from "node:crypto";
 import User from "@/models/User";
 import connectDB from "@/lib/db";
+
+// Refresh tokens are only ever compared server-side (via this hash), never
+// stored in plaintext, mirroring how team invitation tokens are hashed.
+export function hashRefreshToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+const MAX_SESSIONS_PER_USER = 20;
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Records a signed-in device as a new session, evicting the oldest ones
+// beyond MAX_SESSIONS_PER_USER instead of letting the array grow forever.
+export async function recordSession(userId, refreshToken, { userAgent = "", ipHash = null } = {}) {
+  const now = new Date();
+  await User.updateOne(
+    { _id: userId },
+    {
+      $push: {
+        sessions: {
+          $each: [{ tokenHash: hashRefreshToken(refreshToken), userAgent, ipHash, createdAt: now, lastUsedAt: now, expiresAt: new Date(now.getTime() + SESSION_TTL_MS) }],
+          $slice: -MAX_SESSIONS_PER_USER,
+        },
+      },
+    }
+  );
+}
+
+// Swaps a session's token for a fresh one in place (so a stolen, already-used
+// refresh token can't be replayed), while keeping the same session record —
+// its original createdAt is preserved so "signed in since" stays accurate.
+export async function rotateSession(userId, oldRefreshToken, newRefreshToken) {
+  const now = new Date();
+  const result = await User.updateOne(
+    { _id: userId, "sessions.tokenHash": hashRefreshToken(oldRefreshToken), "sessions.expiresAt": { $gt: now } },
+    {
+      $set: {
+        "sessions.$.tokenHash": hashRefreshToken(newRefreshToken),
+        "sessions.$.lastUsedAt": now,
+        "sessions.$.expiresAt": new Date(now.getTime() + SESSION_TTL_MS),
+      },
+    }
+  );
+  return result.matchedCount > 0;
+}
 
 // Get JWT secrets at runtime (not at module load time)
 function getJWTSecret() {

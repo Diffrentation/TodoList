@@ -8,6 +8,7 @@ import { authenticateToken } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
 import { accessibleProjectIds, taskOwnershipScope } from "@/lib/task-access";
 import { syncAcceptedInvitationWork } from "@/lib/team-work";
+import { addActivity, canEditTeamContent, createDueReminders, notifyMany } from "@/lib/collaboration";
 import {
   isObjectId,
   normalizeDate,
@@ -121,6 +122,8 @@ export async function GET(req) {
     const projectIds = await accessibleProjectIds(user._id);
     const { searchParams } = new URL(req.url);
     const conditions = [taskOwnershipScope(user._id, teamIds, projectIds)];
+    if (searchParams.get("archived") === "true") conditions.push({ archivedAt: { $ne: null } });
+    else conditions.push({ archivedAt: null });
     const status = searchParams.get("status");
     const priority = searchParams.get("priority");
     const project = searchParams.get("project");
@@ -159,6 +162,8 @@ export async function GET(req) {
       .sort({ position: 1, createdAt: -1 })
       .lean();
 
+    await createDueReminders(tasks.filter((task) => (task.assignees || []).some((assignee) => String(assignee?._id || assignee) === String(user._id))), user._id);
+
     return NextResponse.json({ success: true, tasks, count: tasks.length });
   } catch (error) {
     return errorHandler(error);
@@ -182,6 +187,9 @@ export async function POST(req) {
         return NextResponse.json({ success: false, message: "Team not found" }, { status: 400 });
       }
       const teamDoc = await Team.findById(body.team);
+      if (!canEditTeamContent(teamDoc, user._id)) {
+        return NextResponse.json({ success: false, message: "Your viewer role allows you to view team tasks but not create them" }, { status: 403 });
+      }
       team = teamDoc._id;
       assigneePool = teamDoc.members.map((id) => String(id));
     }
@@ -207,6 +215,16 @@ export async function POST(req) {
       assignees: defaultAssignees,
     });
     await task.populate(["project", { path: "assignees", select: taskSelect }, { path: "reporter", select: taskSelect }]);
+    await addActivity({ actor: user._id, entityType: "task", entityId: task._id, team: task.team, action: "created", details: { title: task.title } });
+    await notifyMany({
+      recipients: task.assignees,
+      actor: user._id,
+      type: "assignment",
+      title: "You were assigned a task",
+      message: `${user.firstname} assigned you to “${task.title}”.`,
+      href: `/dashboard?task=${task._id}`,
+      metadata: { taskId: String(task._id) },
+    });
     return NextResponse.json({ success: true, message: "Task created", task }, { status: 201 });
   } catch (error) {
     return errorHandler(error);

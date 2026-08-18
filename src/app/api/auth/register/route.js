@@ -21,7 +21,6 @@ export async function POST(req) {
     const email = formData.get("email");
     const password = formData.get("password");
     const phone = formData.get("phone");
-    const role = formData.get("role") || "user";
     const inviteToken = typeof formData.get("inviteToken") === "string" ? formData.get("inviteToken") : "";
     
     const address = {
@@ -59,6 +58,24 @@ export async function POST(req) {
       );
     }
 
+    // Validate the team invitation (if any) before creating the account so an
+    // invalid/expired token is rejected without leaving an orphaned user row.
+    let invitation = null;
+    if (inviteToken) {
+      invitation = await TeamInvitation.findOne({
+        tokenHash: hashTeamInvitationToken(inviteToken),
+        email: normalizedEmail,
+        status: "pending",
+        expiresAt: { $gt: new Date() },
+      });
+      if (!invitation) {
+        return NextResponse.json(
+          { success: false, message: "This invitation is invalid or has expired. Ask the team owner to send a new one." },
+          { status: 400 }
+        );
+      }
+    }
+
     // Handle profile image upload
     let profileImagePath = "";
     if (profileImageFile && profileImageFile.size > 0) {
@@ -93,7 +110,7 @@ export async function POST(req) {
       email,
       password,
       phone,
-      role,
+      role: "user",
       address,
       profileImage: profileImagePath,
       isVerified: false,
@@ -141,22 +158,6 @@ export async function POST(req) {
         },
         { status: 502 }
       );
-    }
-
-    let invitation = null;
-    if (inviteToken) {
-      invitation = await TeamInvitation.findOne({
-        tokenHash: hashTeamInvitationToken(inviteToken),
-        email: normalizedEmail,
-        status: "pending",
-        expiresAt: { $gt: new Date() },
-      });
-      if (!invitation) {
-        return NextResponse.json(
-          { success: false, message: "This invitation is invalid or has expired. Ask the team owner to send a new one." },
-          { status: 400 }
-        );
-      }
     }
 
     return NextResponse.json(

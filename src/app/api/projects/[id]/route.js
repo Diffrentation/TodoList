@@ -7,6 +7,7 @@ import Team from "@/models/Team";
 import { authenticateToken } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
 import { isObjectId, normalizeDate, normalizePriority } from "@/lib/task-data";
+import { addActivity, canEditTeamContent } from "@/lib/collaboration";
 
 const taskSelect = "firstname lastname email profileImage";
 
@@ -44,6 +45,7 @@ function validateProject(body) {
     }
     updates.members = [...new Set(body.members.map(String))];
   }
+  if (body.archived !== undefined) updates.archivedAt = body.archived ? new Date() : null;
   return { updates };
 }
 
@@ -56,11 +58,16 @@ export async function PUT(req, { params }) {
     if (error || !user) return NextResponse.json({ success: false, message: error || "Unauthorized" }, { status: 401 });
     const { id } = await params;
     if (!isObjectId(id)) return NextResponse.json({ success: false, message: "Invalid project ID" }, { status: 400 });
-    const updates = validateProject(await req.json());
+    const body = await req.json();
+    const updates = validateProject(body);
     if (updates.error) return NextResponse.json({ success: false, message: updates.error }, { status: 400 });
     const teamIds = await accessibleTeamIds(user._id);
     const project = await Project.findOne({ _id: id, ...ownershipScope(user._id, teamIds) });
     if (!project) return NextResponse.json({ success: false, message: "Project not found" }, { status: 404 });
+    if (project.team) {
+      const projectTeam = await Team.findById(project.team);
+      if (!canEditTeamContent(projectTeam, user._id)) return NextResponse.json({ success: false, message: "Your viewer role allows you to view this project but not change it" }, { status: 403 });
+    }
 
     const existingMemberIds = project.members.map(String);
     if (updates.updates.members) {
@@ -81,7 +88,9 @@ export async function PUT(req, { params }) {
     }
 
     Object.assign(project, updates.updates);
+    if (updates.updates.archivedAt !== undefined) project.archivedBy = updates.updates.archivedAt ? user._id : null;
     await project.save();
+    await addActivity({ actor: user._id, entityType: "project", entityId: project._id, team: project.team, action: body.archived === true ? "archived" : body.archived === false ? "restored" : "updated", details: { changed: Object.keys(updates.updates) } });
     let synchronizedTasks = [];
     if (updates.updates.members) {
       const addedMemberIds = updates.updates.members.filter((memberId) => !existingMemberIds.includes(String(memberId)));

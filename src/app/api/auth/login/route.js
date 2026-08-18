@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
-import { generateAccessToken, generateRefreshToken } from "@/lib/middleware/auth";
+import { generateAccessToken, generateRefreshToken, recordSession } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
 import { rateLimiter } from "@/lib/middleware/rateLimiter";
+import { addActivity, requestFingerprint } from "@/lib/collaboration";
 
 const limitLogin = rateLimiter(8, 15 * 60 * 1000);
 
@@ -62,9 +63,10 @@ export async function POST(req) {
     const accessToken = generateAccessToken(user._id.toString());
     const refreshToken = generateRefreshToken(user._id.toString());
 
-    // Save refresh token to user
-    user.refreshToken = refreshToken;
-    await user.save();
+    // Record this device as a new session (one of possibly several signed-in devices)
+    const fingerprint = requestFingerprint(req);
+    await recordSession(user._id, refreshToken, fingerprint);
+    await addActivity({ actor: user._id, entityType: "account", entityId: user._id, action: "signed_in", details: fingerprint });
 
     // Set HTTP-only cookies
     const cookieStore = await cookies();

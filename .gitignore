@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# private task attachments (uploaded files, never committed)
+/private-uploads
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

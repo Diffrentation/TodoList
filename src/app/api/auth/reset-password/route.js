@@ -21,11 +21,11 @@ export async function POST(req) {
 
     const payload = verifyPasswordResetToken(resetToken);
     if (!payload) return NextResponse.json({ success: false, message: "This password-reset link has expired. Please request a new code." }, { status: 401 });
-    const user = await User.findById(payload.userId).select("+password +refreshToken");
+    const user = await User.findById(payload.userId).select("+password");
     if (!user) return NextResponse.json({ success: false, message: "This password-reset link is no longer valid." }, { status: 401 });
 
     user.password = newPassword;
-    user.refreshToken = null; // revoke any existing session after a password reset
+    user.sessions = []; // revoke every signed-in device after a password reset
     await user.save();
     return NextResponse.json({ success: true, message: "Password reset successfully. Please sign in." });
   } catch (error) {

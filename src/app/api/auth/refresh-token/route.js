@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import connectDB from "@/lib/db";
-import User from "@/models/User";
 import {
   generateAccessToken,
   generateRefreshToken,
+  rotateSession,
   verifyRefreshToken,
 } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
@@ -61,30 +61,21 @@ export async function POST(req) {
       );
     }
 
-    // Find user and verify refresh token matches
-    const user = await User.findById(decoded.userId).select("+refreshToken");
-    if (!user) {
-      return NextResponse.json(
-        { success: false, message: "User not found" },
-        { status: 404 }
-      );
-    }
+    // Generate new tokens
+    const newAccessToken = generateAccessToken(decoded.userId);
+    const newRefreshToken = generateRefreshToken(decoded.userId);
 
-    // Verify refresh token matches stored token
-    if (user.refreshToken !== refreshToken) {
+    // The session must still exist (i.e. not signed out from elsewhere) and
+    // not have outlived its own expiry, independent of the JWT's own expiry.
+    // Rotating in place (rather than removing + re-adding) keeps the
+    // session's original createdAt intact for "signed in since" accuracy.
+    const rotated = await rotateSession(decoded.userId, refreshToken, newRefreshToken);
+    if (!rotated) {
       return NextResponse.json(
-        { success: false, message: "Invalid refresh token" },
+        { success: false, message: "Invalid or expired refresh token" },
         { status: 401 }
       );
     }
-
-    // Generate new tokens
-    const newAccessToken = generateAccessToken(user._id.toString());
-    const newRefreshToken = generateRefreshToken(user._id.toString());
-
-    // Update refresh token in database
-    user.refreshToken = newRefreshToken;
-    await user.save();
 
     // Set new HTTP-only cookies
     cookieStore.set("accessToken", newAccessToken, {

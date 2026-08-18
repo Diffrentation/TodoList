@@ -1,5 +1,6 @@
 import "./globals.css";
 import AppToaster from "@/components/AppToaster";
+import PageReloadButton from "@/components/PageReloadButton";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AntDesignProvider, MaterialUIProvider } from "@/components/providers";
 
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
           <AntDesignProvider>
             <MaterialUIProvider>
               {children}
+              <PageReloadButton />
               <AppToaster />
             </MaterialUIProvider>
           </AntDesignProvider>

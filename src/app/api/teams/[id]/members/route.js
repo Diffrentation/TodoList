@@ -10,6 +10,7 @@ import { isObjectId } from "@/lib/task-data";
 import { createTeamInvitationToken, hashTeamInvitationToken } from "@/lib/team-invitations";
 import { sendTeamInvitationEmail } from "@/lib/email";
 import { syncTeamMemberWork } from "@/lib/team-work";
+import { addActivity, notify } from "@/lib/collaboration";
 
 const publicUser = "firstname lastname email profileImage";
 
@@ -31,6 +32,7 @@ export async function POST(req, { params }) {
 
     const body = await req.json();
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const role = ["admin", "editor", "viewer"].includes(body.role) ? body.role : "editor";
     if (!email) return response("Email is required", 400);
 
     const team = await Team.findOne({ _id: id, owner: user._id });
@@ -44,6 +46,7 @@ export async function POST(req, { params }) {
         team: team._id,
         email,
         invitedBy: user._id,
+        role,
         tokenHash: hashTeamInvitationToken(token),
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       });
@@ -79,12 +82,35 @@ export async function POST(req, { params }) {
     }
 
     team.members.push(invitee._id);
+    team.memberRoles.set(String(invitee._id), role);
     await team.save();
     await syncTeamMemberWork(team._id, invitee._id);
+    await addActivity({ actor: user._id, entityType: "team", entityId: team._id, team: team._id, action: "member_added", details: { memberId: String(invitee._id), role } });
+    await notify({ recipient: invitee._id, actor: user._id, type: "invite", title: `You joined ${team.name}`, message: `${user.firstname} added you to the team as an ${role}.`, href: "/dashboard", metadata: { teamId: String(team._id) } });
     await team.populate(["owner", { path: "members", select: publicUser }]);
 
     return NextResponse.json({ success: true, message: "Member added to the team and its existing projects", team });
   } catch (error) {
     return errorHandler(error);
   }
+}
+
+export async function PATCH(req, { params }) {
+  try {
+    await connectDB();
+    const { user, error } = await currentUser(req);
+    if (error || !user) return response(error || "Unauthorized", 401);
+    const { id } = await params;
+    const body = await req.json();
+    const memberId = typeof body.memberId === "string" ? body.memberId : "";
+    const role = body.role;
+    if (!isObjectId(id) || !isObjectId(memberId) || !["admin", "editor", "viewer"].includes(role)) return response("Choose a member and a valid role", 400);
+    const team = await Team.findOne({ _id: id, owner: user._id });
+    if (!team) return response("Only the team owner can change member roles", 403);
+    if (String(team.owner) === memberId || !team.members.some((member) => String(member) === memberId)) return response("That team member cannot be updated", 400);
+    team.memberRoles.set(memberId, role);
+    await team.save();
+    await addActivity({ actor: user._id, entityType: "team", entityId: team._id, team: team._id, action: "member_role_changed", details: { memberId, role } });
+    return NextResponse.json({ success: true, message: "Member role updated", memberId, role });
+  } catch (error) { return errorHandler(error); }
 }

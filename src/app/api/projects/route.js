@@ -2,10 +2,12 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import connectDB from "@/lib/db";
 import Project from "@/models/Project";
+import Task from "@/models/Task";
 import Team from "@/models/Team";
 import { authenticateToken } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
 import { isObjectId, normalizeDate, normalizePriority } from "@/lib/task-data";
+import { canEditTeamContent } from "@/lib/collaboration";
 
 async function currentUser(req) {
   return authenticateToken(req, await cookies());
@@ -48,9 +50,18 @@ export async function GET(req) {
     const { user, error } = await currentUser(req);
     if (error || !user) return NextResponse.json({ success: false, message: error || "Unauthorized" }, { status: 401 });
     const teamIds = await accessibleTeamIds(user._id);
-    const search = new URL(req.url).searchParams.get("search")?.trim();
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search")?.trim();
+    const priority = searchParams.get("priority");
     const conditions = [ownershipScope(user._id, teamIds)];
     if (search) conditions.push({ title: { $regex: search.slice(0, 100), $options: "i" } });
+    if (priority) {
+      const normalized = normalizePriority(priority);
+      if (!normalized) return NextResponse.json({ success: false, message: "Invalid priority" }, { status: 400 });
+      conditions.push({ priority: normalized });
+    }
+    if (searchParams.get("archived") === "true") conditions.push({ archivedAt: { $ne: null } });
+    else conditions.push({ archivedAt: null });
     const query = conditions.length > 1 ? { $and: conditions } : conditions[0];
     const projects = await Project.find(query)
       .populate("lead", "firstname lastname email profileImage")
@@ -58,7 +69,13 @@ export async function GET(req) {
       .populate("team", "name")
       .sort({ createdAt: -1 })
       .lean();
-    return NextResponse.json({ success: true, projects });
+    const projectIds = projects.map((project) => project._id);
+    const summaries = projectIds.length ? await Task.aggregate([
+      { $match: { project: { $in: projectIds }, parentTask: null, archivedAt: null } },
+      { $group: { _id: "$project", total: { $sum: 1 }, completed: { $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] } } } },
+    ]) : [];
+    const summaryByProject = new Map(summaries.map((summary) => [String(summary._id), { total: summary.total, completed: summary.completed }]));
+    return NextResponse.json({ success: true, projects: projects.map((project) => ({ ...project, taskSummary: summaryByProject.get(String(project._id)) || { total: 0, completed: 0 } })) });
   } catch (error) {
     return errorHandler(error);
   }
@@ -80,6 +97,7 @@ export async function POST(req) {
         return NextResponse.json({ success: false, message: "Team not found" }, { status: 400 });
       }
       const teamDoc = await Team.findById(body.team);
+      if (!canEditTeamContent(teamDoc, user._id)) return NextResponse.json({ success: false, message: "Your viewer role does not allow creating projects" }, { status: 403 });
       team = teamDoc._id;
       members = teamDoc.members;
     }

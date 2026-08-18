@@ -42,8 +42,6 @@ function Login() {
             profileImage: res.data.user.profileImage,
             address: res.data.user.address,
             isVerified: res.data.user.isVerified,
-            token: res.data.accessToken,
-            refreshToken: res.data.refreshToken,
           };
           
           // Use utility function - only saves if verified

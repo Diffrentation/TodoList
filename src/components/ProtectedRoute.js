@@ -62,6 +62,31 @@ export default function ProtectedRoute({ children }) {
     checkAuth();
   }, [checkAuth]);
 
+  // Access tokens live 15 minutes. While the user is actually on the site,
+  // renew the session proactively instead of waiting for a request to fail
+  // and rely on the axios interceptor's reactive retry-after-401 path.
+  useEffect(() => {
+    if (!authenticated) return;
+    const REFRESH_INTERVAL_MS = 12 * 60 * 1000;
+    let cancelled = false;
+    const refresh = async () => {
+      try {
+        await api.post("/auth/refresh-token");
+      } catch {
+        // A truly expired/revoked session is still handled by the axios
+        // interceptor and this component's own 401 redirect on next request.
+      }
+    };
+    const timer = window.setInterval(() => { if (!cancelled) refresh(); }, REFRESH_INTERVAL_MS);
+    const onVisible = () => { if (document.visibilityState === "visible") refresh(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [authenticated]);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">

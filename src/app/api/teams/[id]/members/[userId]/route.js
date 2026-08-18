@@ -5,6 +5,7 @@ import Team from "@/models/Team";
 import { authenticateToken } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
 import { isObjectId } from "@/lib/task-data";
+import { addActivity } from "@/lib/collaboration";
 
 const publicUser = "firstname lastname email profileImage";
 
@@ -37,7 +38,9 @@ export async function DELETE(req, { params }) {
     if (!isOwner && !isSelfRemoval) return response("Only the team owner can remove other members", 403);
 
     team.members = team.members.filter((memberId) => String(memberId) !== String(userId));
+    team.memberRoles.delete(String(userId));
     await team.save();
+    await addActivity({ actor: user._id, entityType: "team", entityId: team._id, team: team._id, action: "member_removed", details: { memberId: String(userId) } });
     await team.populate(["owner", { path: "members", select: publicUser }]);
 
     return NextResponse.json({ success: true, message: "Member removed", team });

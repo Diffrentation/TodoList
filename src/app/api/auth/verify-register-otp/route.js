@@ -9,8 +9,10 @@ import { syncTeamMemberWork } from "@/lib/team-work";
 import {
   generateAccessToken,
   generateRefreshToken,
+  recordSession,
 } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
+import { requestFingerprint } from "@/lib/collaboration";
 
 export async function POST(req) {
   try {
@@ -109,7 +111,7 @@ export async function POST(req) {
     for (const invitation of invitations) {
       await Team.updateOne(
         { _id: invitation.team },
-        { $addToSet: { members: user._id } }
+        { $addToSet: { members: user._id }, $set: { [`memberRoles.${user._id}`]: invitation.role || "editor" } }
       );
       await syncTeamMemberWork(invitation.team, user._id);
       invitation.status = "accepted";
@@ -125,9 +127,8 @@ export async function POST(req) {
     const accessToken = generateAccessToken(user._id.toString());
     const refreshToken = generateRefreshToken(user._id.toString());
 
-    // Save refresh token
-    user.refreshToken = refreshToken;
-    await user.save();
+    // Record this device as a new session
+    await recordSession(user._id, refreshToken, requestFingerprint(req));
 
     // Set HTTP-only cookies
     const cookieStore = await cookies();

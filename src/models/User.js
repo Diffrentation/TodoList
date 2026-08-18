@@ -1,6 +1,18 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+const sessionSchema = new mongoose.Schema(
+  {
+    tokenHash: { type: String, required: true },
+    userAgent: { type: String, default: '', maxlength: 500 },
+    ipHash: { type: String, default: null },
+    createdAt: { type: Date, default: Date.now },
+    lastUsedAt: { type: Date, default: Date.now },
+    expiresAt: { type: Date, required: true },
+  },
+  { _id: true }
+);
+
 const userSchema = new mongoose.Schema(
   {
     firstname: {
@@ -85,9 +97,13 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin', 'buyer'],
       default: 'user',
     },
-    refreshToken: {
-      type: String,
+    // Each entry is one signed-in device/browser. Storing multiple sessions
+    // (instead of a single shared refreshToken) lets us revoke one device
+    // without logging out every other one.
+    sessions: {
+      type: [sessionSchema],
       select: false,
+      default: [],
     },
     otpAttempts: {
       type: Number,

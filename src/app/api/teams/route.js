@@ -4,6 +4,7 @@ import connectDB from "@/lib/db";
 import Team from "@/models/Team";
 import { authenticateToken } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
+import { addActivity } from "@/lib/collaboration";
 
 const publicUser = "firstname lastname email profileImage";
 
@@ -45,6 +46,7 @@ export async function POST(req) {
     }
 
     const team = await Team.create({ name, owner: user._id, members: [user._id] });
+    await addActivity({ actor: user._id, entityType: "team", entityId: team._id, team: team._id, action: "created", details: { name } });
     await team.populate(["owner", { path: "members", select: publicUser }]);
     return NextResponse.json({ success: true, message: "Team created", team }, { status: 201 });
   } catch (error) {

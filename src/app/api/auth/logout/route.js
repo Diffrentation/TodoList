@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
-import { authenticateToken } from "@/lib/middleware/auth";
+import { authenticateToken, hashRefreshToken } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
 
 export async function POST(req) {
@@ -11,12 +11,15 @@ export async function POST(req) {
 
     const cookieStore = await cookies();
     const { user, error } = await authenticateToken(req, cookieStore);
-    
-    // Even if token is invalid, clear cookies
+
+    // Even if the access token is invalid/expired, still drop this device's
+    // session so a stale refresh token can't be used again. Only removes the
+    // current session, not any other signed-in device.
     if (user) {
-      // Clear refresh token from database
-      user.refreshToken = null;
-      await user.save();
+      const refreshToken = cookieStore.get("refreshToken")?.value;
+      if (refreshToken) {
+        await User.updateOne({ _id: user._id }, { $pull: { sessions: { tokenHash: hashRefreshToken(refreshToken) } } });
+      }
     }
 
     // Clear HTTP-only cookies
