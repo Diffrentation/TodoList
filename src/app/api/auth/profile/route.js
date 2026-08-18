@@ -30,6 +30,8 @@ export async function GET(req) {
       phone: user.phone,
       role: user.role,
       profileImage: user.profileImage,
+      title: user.title || "",
+      username: user.username || "",
       address: user.address,
       isVerified: user.isVerified,
     };
@@ -70,11 +72,15 @@ export async function PUT(req) {
       const firstname = formData.get("firstname");
       const lastname = formData.get("lastname");
       const phone = formData.get("phone");
+      const title = formData.get("title");
+      const username = formData.get("username");
       const profileImageFile = formData.get("profileImage");
 
       if (firstname) updateData.firstname = firstname;
       if (lastname) updateData.lastname = lastname;
       if (phone) updateData.phone = phone;
+      if (title !== null) updateData.title = String(title).trim();
+      if (username !== null) updateData.username = String(username).trim().toLowerCase();
 
       // Handle address
       const city = formData.get("address.city");
@@ -116,11 +122,13 @@ export async function PUT(req) {
     } else {
       // Handle JSON
       const body = await req.json();
-      const { firstname, lastname, phone, address, deleteProfileImage } = body;
+      const { firstname, lastname, phone, title, username, address, deleteProfileImage } = body;
 
       if (firstname) updateData.firstname = firstname;
       if (lastname) updateData.lastname = lastname;
       if (phone) updateData.phone = phone;
+      if (title !== undefined) updateData.title = String(title).trim();
+      if (username !== undefined) updateData.username = String(username).trim().toLowerCase();
       if (address) {
         updateData.address = {
           ...user.address.toObject(),
@@ -158,6 +166,8 @@ export async function PUT(req) {
       phone: user.phone,
       role: user.role,
       profileImage: user.profileImage,
+      title: user.title || "",
+      username: user.username || "",
       address: user.address,
       isVerified: user.isVerified,
     };

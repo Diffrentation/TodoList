@@ -4,9 +4,16 @@ import connectDB from "@/lib/db";
 import User from "@/models/User";
 import { generateAccessToken, generateRefreshToken } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
+import { rateLimiter } from "@/lib/middleware/rateLimiter";
+
+const limitLogin = rateLimiter(8, 15 * 60 * 1000);
 
 export async function POST(req) {
   try {
+    const limit = limitLogin(req);
+    if (!limit.allowed) {
+      return NextResponse.json({ success: false, message: limit.message }, { status: 429 });
+    }
     await connectDB();
 
     const body = await req.json();
@@ -28,23 +35,26 @@ export async function POST(req) {
       );
     }
 
-    // Check if user is verified
-    if (!user.isVerified) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Please verify your email first. Check your inbox for OTP.",
-        },
-        { status: 403 }
-      );
-    }
-
     // Verify password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       return NextResponse.json(
         { success: false, message: "Invalid email or password" },
         { status: 401 }
+      );
+    }
+
+    // Require verification only after credentials have been validated. This avoids
+    // exposing verification state to someone who does not know the password.
+    if (!user.isVerified) {
+      return NextResponse.json(
+        {
+          success: false,
+          verificationRequired: true,
+          userId: user._id.toString(),
+          message: "Your email needs verification. Check your inbox for the OTP.",
+        },
+        { status: 403 }
       );
     }
 
@@ -92,8 +102,6 @@ export async function POST(req) {
         success: true,
         message: "Login successful",
         user: userData,
-        accessToken,
-        refreshToken,
       },
       { status: 200 }
     );

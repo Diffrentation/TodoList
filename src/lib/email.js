@@ -128,11 +128,11 @@ export async function sendOTPEmail(email, otp, type = "registration") {
 
     let subject;
     if (type === "registration") {
-      subject = "Verify Your Email - To-Do List App";
+      subject = "Verify Your Email - Taskspace";
     } else if (type === "forgot") {
-      subject = "Reset Your Password - To-Do List App";
+      subject = "Reset Your Password - Taskspace";
     } else {
-      subject = "Login OTP - To-Do List App";
+      subject = "Login OTP - Taskspace";
     }
 
     const messageText =
@@ -163,7 +163,7 @@ export async function sendOTPEmail(email, otp, type = "registration") {
     console.log(`   From: ${smtpConfig.fromEmail || smtpConfig.user}`);
 
     const info = await getTransporter().sendMail({
-      from: `"To-Do List App" <${smtpConfig.fromEmail || smtpConfig.user}>`,
+      from: `"Taskspace" <${smtpConfig.fromEmail || smtpConfig.user}>`,
       to: email,
       subject,
       html,
@@ -195,6 +195,42 @@ export async function sendOTPEmail(email, otp, type = "registration") {
       errorCode: error.code,
       errorResponse: error.response,
     };
+  }
+}
+
+export async function sendTeamInvitationEmail({ email, teamName, inviterName, inviteUrl }) {
+  try {
+    if (!isSMTPConfigured()) {
+      console.log(`[DEV MODE] Team invitation link for ${email}: ${inviteUrl}`);
+      return { success: true, devMode: true };
+    }
+
+    const smtpConfig = getSMTPConfig();
+    const safeTeamName = String(teamName).replace(/[<>&"']/g, "");
+    const safeInviterName = String(inviterName).replace(/[<>&"']/g, "");
+    const html = `
+      <div style="background:#f8fafc;padding:32px 16px;font-family:Arial,sans-serif;color:#0f172a;">
+        <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:32px;">
+          <p style="margin:0 0 18px;font-size:14px;font-weight:700;color:#4f46e5;">TASKSPACE</p>
+          <h1 style="margin:0 0 14px;font-size:24px;line-height:1.3;">You have been invited to ${safeTeamName}</h1>
+          <p style="margin:0 0 12px;font-size:16px;line-height:1.6;color:#475569;">${safeInviterName} invited you to collaborate in their Taskspace team.</p>
+          <p style="margin:0 0 26px;font-size:16px;line-height:1.6;color:#475569;">Create and verify your account to accept the invitation and access the shared projects and tasks.</p>
+          <a href="${inviteUrl}" style="display:inline-block;background:#4f46e5;border-radius:8px;padding:12px 18px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;">Join workspace</a>
+          <p style="margin:28px 0 0;font-size:13px;line-height:1.5;color:#64748b;">This invitation expires in 7 days. If you were not expecting it, you can safely ignore this email.</p>
+        </div>
+      </div>`;
+
+    const info = await getTransporter().sendMail({
+      from: `"Taskspace" <${smtpConfig.fromEmail || smtpConfig.user}>`,
+      to: email,
+      subject: `You're invited to join ${safeTeamName} on Taskspace`,
+      html,
+    });
+
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("Unable to send team invitation:", error.message);
+    return { success: false, error: "Invitation email could not be sent" };
   }
 }
 

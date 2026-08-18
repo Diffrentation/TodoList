@@ -107,8 +107,6 @@ export async function POST(req) {
       {
         success: true,
         message: "Token refreshed successfully",
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
       },
       { status: 200 }
     );

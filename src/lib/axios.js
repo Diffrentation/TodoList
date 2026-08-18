@@ -38,9 +38,13 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const requestUrl = originalRequest?.url || "";
+    const isAuthRequest = requestUrl.includes("/auth/");
 
-    // If 401 and not already retried, try to refresh token
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // A login, registration, OTP, or refresh request has no existing session to
+    // refresh. Preserve its original, user-readable response instead of turning
+    // it into a misleading "Refresh token not found" error.
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRequest) {
       // If refresh is already in progress, queue this request
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -84,12 +88,7 @@ api.interceptors.response.use(
         // and if it's not a protected route check
         if (typeof window !== "undefined") {
           const currentPath = window.location.pathname;
-          const isAuthPage =
-            currentPath === "/auth/login" ||
-            currentPath === "/auth/signup" ||
-            currentPath === "/auth/otp" ||
-            currentPath === "/auth/forgot-password" ||
-            currentPath === "/auth/change-password";
+          const isAuthPage = currentPath.startsWith("/auth/");
           const isProtectedRouteCheck =
             originalRequest.url?.includes("/auth/profile");
 

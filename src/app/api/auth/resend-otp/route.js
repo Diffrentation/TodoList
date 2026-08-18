@@ -8,77 +8,36 @@ import { errorHandler } from "@/lib/middleware/errorHandler";
 export async function POST(req) {
   try {
     await connectDB();
+    const { userId, email, type = "registration" } = await req.json();
+    if (!["registration", "forgot"].includes(type)) return NextResponse.json({ success: false, message: "Invalid verification request." }, { status: 400 });
 
-    const body = await req.json();
-    const { userId, type = "registration" } = body;
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, message: "User ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // Find user
-    const user = await User.findById(userId);
+    const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+    const user = type === "forgot" ? await User.findOne({ email: normalizedEmail }) : await User.findById(userId);
     if (!user) {
-      return NextResponse.json(
-        { success: false, message: "User not found" },
-        { status: 404 }
-      );
+      // Match the initial password-reset response to avoid revealing accounts.
+      return NextResponse.json({ success: true, message: type === "forgot" ? "If the email exists, a new code has been sent." : "Unable to resend the code." });
     }
 
-    // Generate new OTP
+    await OTP.deleteMany({ email: user.email.toLowerCase(), type });
     const otp = OTP.generateOTP();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
-
-    console.log(
-      "[RESEND OTP] Generated new OTP for:",
-      user.email,
-      "OTP:",
-      otp,
-      "Type:",
-      type
-    );
-
-    // Delete old OTPs
-    await OTP.deleteMany({
-      email: user.email.toLowerCase().trim(),
-      type,
-    });
-
-    // Create new OTP
-    const otpRecord = await OTP.create({
-      email: user.email.toLowerCase().trim(),
-      hashedOTP: otp, // Will be hashed by pre-save hook
-      expiresAt,
-      type,
-    });
-
-    console.log("[RESEND OTP] OTP record created:", {
-      id: otpRecord._id,
-      email: otpRecord.email,
-      expiresAt: otpRecord.expiresAt,
-    });
-
-    // Send OTP email
+    await OTP.create({ email: user.email.toLowerCase(), hashedOTP: otp, expiresAt: new Date(Date.now() + 5 * 60 * 1000), type });
     const emailResult = await sendOTPEmail(
       user.email,
       otp,
       type === "forgot" ? "forgot" : "registration"
     );
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: emailResult.devMode
-          ? `OTP resent! Check console for OTP: ${otp}`
-          : "OTP resent to your email",
-        devMode: emailResult.devMode,
-        otp: emailResult.devMode ? otp : undefined,
-      },
-      { status: 200 }
-    );
+    if (!emailResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "We could not send the verification code. Please try again shortly.",
+        },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json({ success: true, message: type === "forgot" ? "If the email exists, a new code has been sent." : "A new code has been sent." });
   } catch (error) {
     return errorHandler(error);
   }

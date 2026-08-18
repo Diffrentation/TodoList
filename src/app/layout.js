@@ -1,31 +1,23 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "react-hot-toast";
+import AppToaster from "@/components/AppToaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AntDesignProvider, MaterialUIProvider } from "@/components/providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata = {
-  title: "To-Do List App",
-  description:
-    "Production-ready To-Do List Application with OTP Authentication",
+  title: {
+    default: "Taskspace | Private task management",
+    template: "%s | Taskspace",
+  },
+  description: "A responsive, private workspace for managing tasks, projects, priorities, and deadlines.",
+  applicationName: "Taskspace",
+  robots: { index: false, follow: false },
+  formatDetection: { email: false, address: false, telephone: false },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -35,7 +27,7 @@ export default function RootLayout({ children }) {
           <AntDesignProvider>
             <MaterialUIProvider>
               {children}
-              <Toaster position="top-right" />
+              <AppToaster />
             </MaterialUIProvider>
           </AntDesignProvider>
         </ThemeProvider>

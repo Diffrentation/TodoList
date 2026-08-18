@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import api from "@/lib/axios";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,18 +37,19 @@ export default function OtpSendTo() {
         email,
       });
 
-      const userId = data?.userId;
-      const isSuccess = status === 200 && Boolean(userId);
+      const isSuccess = status === 200 && data?.success === true;
 
       if (!isSuccess) {
         toast.error(data?.message || "Unable to process request");
         return;
       }
 
-      toast.success(data?.message || "OTP sent successfully!");
+      toast.success(data?.message || "If the email exists, an OTP has been sent.");
 
-      // Navigate to OTP page with id & type
-      router.push(`/auth/otp?type=forgot&userId=${userId}`);
+      // Continue identically for every address so the UI cannot reveal whether
+      // an account exists. The verification endpoint accepts the email, not a
+      // user ID exposed in the URL.
+      router.push(`/auth/otp?type=forgot&email=${encodeURIComponent(email.trim().toLowerCase())}`);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to send OTP");
     } finally {
@@ -58,7 +59,6 @@ export default function OtpSendTo() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8 py-12 relative">
-      <Toaster position="top-right" />
       
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6">

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,7 @@ export default function Signup() {
 
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [inviteToken, setInviteToken] = useState("");
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -82,6 +83,11 @@ export default function Signup() {
 
   const router = useRouter();
 
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get("invite");
+    if (token) setInviteToken(token);
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -110,6 +116,13 @@ export default function Signup() {
       return;
     }
 
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phone.trim())) {
+      toast.error("Please enter a valid 10-digit phone number without a leading zero.");
+      setLoading(false);
+      return;
+    }
+
     try {
       // Create FormData object
       const submitFormData = new FormData();
@@ -121,6 +134,7 @@ export default function Signup() {
       submitFormData.append("password", formData.password);
       submitFormData.append("phone", formData.phone);
       submitFormData.append("role", "buyer");
+      if (inviteToken) submitFormData.append("inviteToken", inviteToken);
 
       // Append address fields
       submitFormData.append("address.city", formData.address.city);
@@ -205,7 +219,9 @@ export default function Signup() {
               Create Your Account
             </h2>
             <p className="text-sm sm:text-base text-muted-foreground">
-              Fill in your details to get started
+              {inviteToken
+                ? "You have been invited to join a workspace. Sign up with the email that received the invitation."
+                : "Fill in your details to get started"}
             </p>
           </motion.div>
 
@@ -359,6 +375,8 @@ export default function Signup() {
                   onChange={handleChange}
                   type="text"
                   placeholder="Enter your phone number"
+                  inputMode="numeric"
+                  maxLength={10}
                   required
                   className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:bg-background transition-colors duration-200 ease-out"
                 />

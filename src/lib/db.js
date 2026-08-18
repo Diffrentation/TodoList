@@ -1,4 +1,22 @@
 import mongoose from "mongoose";
+import dns from "node:dns";
+
+let mongoDnsConfigured = false;
+
+function configureMongoDns() {
+  if (mongoDnsConfigured) return;
+
+  const servers = process.env.MONGODB_DNS_SERVERS
+    ?.split(",")
+    .map((server) => server.trim())
+    .filter(Boolean);
+
+  if (servers?.length) {
+    dns.setServers(servers);
+  }
+
+  mongoDnsConfigured = true;
+}
 
 // Get MongoDB URI at runtime (not at module load time)
 function getMongoDBURI() {
@@ -22,10 +40,16 @@ async function connectDB() {
     return cached.conn;
   }
 
+  // Some local ISPs or VPN DNS resolvers block Atlas SRV lookups. A local,
+  // configurable resolver avoids changing credentials or hard-coding a cluster.
+  configureMongoDns();
+
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
       serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+      // Keep Taskspace data isolated even when the MongoDB cluster is shared.
+      ...(process.env.TASKSPACE_DB_NAME ? { dbName: process.env.TASKSPACE_DB_NAME } : {}),
     };
 
     cached.promise = mongoose

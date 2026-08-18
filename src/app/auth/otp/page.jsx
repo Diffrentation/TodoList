@@ -4,7 +4,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { Suspense, useEffect } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 
@@ -42,6 +42,7 @@ function OTPPageContent() {
   // ✅ Get userId and type directly from URL
   const userId = searchParams?.get("userId");
   const type = searchParams?.get("type"); // "register" | "forgot"
+  const email = searchParams?.get("email");
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -64,8 +65,11 @@ function OTPPageContent() {
   }, [userId, type]);
 
   const onSubmit = async (data) => {
-    if (!userId) {
-      return toast.error("User not found. Please signup again.");
+    if (type === "forgot" && !email) {
+      return toast.error("Start again from the password reset page.");
+    }
+    if (type !== "forgot" && !userId) {
+      return toast.error("Your verification link is incomplete. Please sign up again.");
     }
 
     // Ensure OTP is a string and trim whitespace
@@ -81,17 +85,10 @@ function OTPPageContent() {
           ? "/api/auth/verify-forgot-password-otp"
           : "/api/auth/verify-register-otp";
 
-      console.log("[OTP PAGE] Submitting OTP:", {
-        userId,
-        otp: otpValue,
-        otpLength: otpValue.length,
-        type,
-      });
-
-      const res = await axios.post(endpoint, {
-        userId,
-        otp: otpValue,
-      });
+      const res = await axios.post(
+        endpoint,
+        type === "forgot" ? { email, otp: otpValue } : { userId, otp: otpValue }
+      );
 
       if (res.data.success) {
         toast.success(res.data.message || "OTP verified successfully!");
@@ -134,7 +131,7 @@ function OTPPageContent() {
         } else {
           // Delete OTP after successful forgot password verification
           deleteOTPFromLocalStorage();
-          router.push(`/auth/change-password?type=forgot&userId=${userId}`);
+          router.push(`/auth/change-password?resetToken=${encodeURIComponent(res.data.resetToken)}`);
         }
       }
     } catch (error) {
@@ -144,7 +141,6 @@ function OTPPageContent() {
 
   return (
     <div className="flex justify-center items-center min-h-screen px-4 sm:px-6 lg:px-8 py-12">
-      <Toaster position="top-right" />
       <div className="w-full max-w-md">
         <div className="border border-border bg-gradient-to-br from-card via-card/95 to-muted/20 p-6 sm:p-8 md:p-10 rounded-2xl shadow-xl shadow-primary/10 backdrop-blur-sm">
         <h2 className="text-2xl font-bold mb-6 text-center">Enter OTP</h2>
@@ -184,28 +180,26 @@ function OTPPageContent() {
             <div className="text-center mt-4">
               <button
                 type="button"
-                className="cursor-pointer text-sm text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 ease-out"
                 onClick={async () => {
-                  if (!userId) {
-                    toast.error("User not found");
+                  if (type === "forgot" && !email) {
+                    toast.error("Start again from the password reset page.");
+                    return;
+                  }
+                  if (type !== "forgot" && !userId) {
+                    toast.error("Your verification link is incomplete.");
                     return;
                   }
                   try {
                     const resendType =
                       type === "forgot" ? "forgot" : "registration";
-                    const res = await axios.post("/api/auth/resend-otp", {
-                      userId,
-                      type: resendType,
-                    });
+                    const res = await axios.post(
+                      "/api/auth/resend-otp",
+                      type === "forgot" ? { email, type: resendType } : { userId, type: resendType }
+                    );
                     if (res.data.success) {
                       toast.success(
                         res.data.message || "OTP resent successfully!"
                       );
-                      if (res.data.devMode && res.data.otp) {
-                        toast.success(`OTP: ${res.data.otp}`, {
-                          duration: 10000,
-                        });
-                      }
                     }
                   } catch (error) {
                     toast.error(

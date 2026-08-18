@@ -1,41 +1,59 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+
+const commentSchema = new mongoose.Schema(
+  {
+    body: { type: String, required: true, trim: true, maxlength: 4000 },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  },
+  { timestamps: true, _id: true }
+);
 
 const taskSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: [true, 'Title is required'],
-      trim: true,
-      minlength: [1, 'Title cannot be empty'],
-      maxlength: [200, 'Title cannot exceed 200 characters'],
-    },
-    description: {
-      type: String,
-      trim: true,
-      maxlength: [1000, 'Description cannot exceed 1000 characters'],
-      default: '',
-    },
+    title: { type: String, required: true, trim: true, minlength: 1, maxlength: 200 },
+    description: { type: String, trim: true, maxlength: 4000, default: "" },
+    // pending/progress are retained so existing records remain readable.
     status: {
       type: String,
-      enum: ['pending', 'progress', 'completed'],
-      default: 'pending',
+      enum: ["todo", "doing", "completed", "on_hold", "pending", "progress"],
+      default: "todo",
+      index: true,
     },
-    user: {
+    priority: {
+      type: String,
+      enum: ["none", "low", "medium", "high", "urgent"],
+      default: "none",
+      index: true,
+    },
+    startDate: { type: Date, default: null },
+    dueDate: { type: Date, default: null, index: true },
+    labels: [{ type: String, trim: true, maxlength: 40 }],
+    project: { type: mongoose.Schema.Types.ObjectId, ref: "Project", default: null, index: true },
+    team: { type: mongoose.Schema.Types.ObjectId, ref: "Team", default: null, index: true },
+    // Only meaningful when team is set: restricts visibility to assignees/reporter
+    // instead of the whole team. Ignored for personal (non-team) tasks.
+    private: { type: Boolean, default: false },
+    watchers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    parentTask: { type: mongoose.Schema.Types.ObjectId, ref: "Task", default: null, index: true },
+    assignees: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    reporter: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
-      index: true, // Index for faster queries
+      default: function defaultReporter() { return this.user; },
+      index: true,
     },
+    position: { type: Number, default: 0 },
+    comments: { type: [commentSchema], default: [] },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// Compound index for user and status for efficient filtering
-taskSchema.index({ user: 1, status: 1 });
+taskSchema.index({ user: 1, status: 1, position: 1 });
+taskSchema.index({ user: 1, project: 1, status: 1 });
 
-const Task = mongoose.models.Task || mongoose.model('Task', taskSchema);
+const Task = mongoose.models.Task || mongoose.model("Task", taskSchema);
 
 export default Task;
 

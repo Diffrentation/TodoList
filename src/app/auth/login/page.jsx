@@ -56,7 +56,22 @@ function Login() {
         router.push("/dashboard");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed");
+      const response = error.response;
+      const payload = response?.data;
+
+      if (
+        response?.status === 403 &&
+        payload?.verificationRequired &&
+        payload?.userId
+      ) {
+        toast.success("Your account needs verification. Enter the OTP we sent you.");
+        router.push(
+          `/auth/otp?type=register&userId=${encodeURIComponent(payload.userId)}`
+        );
+        return;
+      }
+
+      toast.error(payload?.message || "Login failed");
     } finally {
       setLoading(false);
     }

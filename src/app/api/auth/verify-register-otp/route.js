@@ -3,6 +3,9 @@ import { cookies } from "next/headers";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import OTP from "@/models/OTP";
+import Team from "@/models/Team";
+import TeamInvitation from "@/models/TeamInvitation";
+import { syncTeamMemberWork } from "@/lib/team-work";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -96,6 +99,25 @@ export async function POST(req) {
     user.isVerified = true;
     await user.save();
 
+    // Invitations are accepted only after the recipient proves control of the
+    // invited email address by completing OTP verification.
+    const invitations = await TeamInvitation.find({
+      acceptedBy: user._id,
+      status: "registered",
+      expiresAt: { $gt: new Date() },
+    });
+    for (const invitation of invitations) {
+      await Team.updateOne(
+        { _id: invitation.team },
+        { $addToSet: { members: user._id } }
+      );
+      await syncTeamMemberWork(invitation.team, user._id);
+      invitation.status = "accepted";
+      invitation.acceptedAt = new Date();
+      invitation.workSyncedAt = new Date();
+      await invitation.save();
+    }
+
     // Delete OTP after successful verification
     await OTP.deleteOne({ _id: otpRecord._id });
 
@@ -143,8 +165,6 @@ export async function POST(req) {
         success: true,
         message: "Email verified successfully",
         user: userData,
-        accessToken,
-        refreshToken,
       },
       { status: 200 }
     );

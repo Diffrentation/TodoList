@@ -41,6 +41,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    title: {
+      type: String,
+      trim: true,
+      maxlength: [80, 'Title cannot exceed 80 characters'],
+      default: '',
+    },
+    username: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      maxlength: [40, 'Username cannot exceed 40 characters'],
+      default: '',
+    },
     address: {
       city: {
         type: String,

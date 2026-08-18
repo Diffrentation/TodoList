@@ -31,6 +31,21 @@ export function generateRefreshToken(userId) {
   return jwt.sign({ userId }, getJWTRefreshSecret(), { expiresIn: "7d" });
 }
 
+// This token is intentionally separate from an authenticated session. It can
+// only be used to set a new password and expires quickly.
+export function generatePasswordResetToken(userId) {
+  return jwt.sign({ userId, purpose: "password-reset" }, getJWTSecret(), { expiresIn: "10m" });
+}
+
+export function verifyPasswordResetToken(token) {
+  try {
+    const payload = jwt.verify(token, getJWTSecret());
+    return payload.purpose === "password-reset" ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
 // Verify access token
 export function verifyAccessToken(token) {
   try {

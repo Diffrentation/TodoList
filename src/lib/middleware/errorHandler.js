@@ -11,7 +11,7 @@ export function errorHandler(err) {
     return NextResponse.json(
       {
         success: false,
-        message: "Validation error",
+        message: "Some information is invalid. Please check it and try again.",
         errors,
         details: err.errors,
       },
@@ -25,7 +25,7 @@ export function errorHandler(err) {
     return NextResponse.json(
       {
         success: false,
-        message: `${field} already exists`,
+        message: field === "email" ? "An account already uses this email address." : "This value is already in use.",
       },
       { status: 400 }
     );
@@ -36,7 +36,7 @@ export function errorHandler(err) {
     return NextResponse.json(
       {
         success: false,
-        message: "Invalid token",
+        message: "Your session is no longer valid. Please sign in again.",
       },
       { status: 401 }
     );
@@ -46,7 +46,7 @@ export function errorHandler(err) {
     return NextResponse.json(
       {
         success: false,
-        message: "Token expired",
+        message: "Your session has expired. Please sign in again.",
       },
       { status: 401 }
     );
@@ -56,7 +56,7 @@ export function errorHandler(err) {
   return NextResponse.json(
     {
       success: false,
-      message: err.message || "Internal server error",
+      message: "We couldn’t complete that request. Please try again.",
     },
     { status: err.statusCode || 500 }
   );

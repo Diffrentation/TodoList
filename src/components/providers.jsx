@@ -3,15 +3,9 @@
 import { ConfigProvider, theme } from "antd";
 import { ThemeProvider as MUIThemeProvider, createTheme } from "@mui/material/styles";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
 export function AntDesignProvider({ children }) {
-  const { theme: nextTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { resolvedTheme } = useTheme();
 
   const isDark = resolvedTheme === "dark";
 
@@ -21,7 +15,7 @@ export function AntDesignProvider({ children }) {
         token: {
           colorPrimary: "hsl(var(--color-primary))",
           borderRadius: 12,
-          fontFamily: "var(--font-geist-sans)",
+          fontFamily: "var(--font-sans)",
         },
         algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
       }}
@@ -32,12 +26,7 @@ export function AntDesignProvider({ children }) {
 }
 
 export function MaterialUIProvider({ children }) {
-  const { theme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { resolvedTheme } = useTheme();
 
   const isDark = resolvedTheme === "dark";
 
@@ -59,13 +48,9 @@ export function MaterialUIProvider({ children }) {
       borderRadius: 12,
     },
     typography: {
-      fontFamily: "var(--font-geist-sans)",
+      fontFamily: "var(--font-sans)",
     },
   });
-
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   return <MUIThemeProvider theme={muiTheme}>{children}</MUIThemeProvider>;
 }

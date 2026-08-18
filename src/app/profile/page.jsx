@@ -1,636 +1,141 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import toast from "react-hot-toast";
+import { ArrowLeft, Camera, ChevronDown, Loader2, Pencil, Save, Trash2, UserRound } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import api from "@/lib/axios";
-import toast from "react-hot-toast";
-import {
-  ArrowLeft,
-  User,
-  Save,
-  Loader2,
-  Camera,
-  Trash2,
-  X,
-} from "lucide-react";
-import {
-  getUserFromLocalStorage,
-  saveUserToLocalStorage,
-} from "@/utils/localStorage";
+import { getUserFromLocalStorage, saveUserToLocalStorage } from "@/utils/localStorage";
+
+function initials(user) {
+  return `${user?.firstname?.[0] || ""}${user?.lastname?.[0] || ""}`.toUpperCase() || "U";
+}
+
+function ProfileImage({ user, preview, onClick, size = "large" }) {
+  const dimensions = size === "small" ? "h-10 w-10" : "h-16 w-16 sm:h-20 sm:w-20";
+  return <button type="button" onClick={onClick} title="Change profile picture" className={`group relative inline-flex ${dimensions} shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-indigo-500 to-sky-500 shadow-lg ring-4 ring-white dark:ring-slate-950`}>
+    {preview ? <img src={preview} alt="Profile" className="h-full w-full object-cover" /> : <span className="flex h-full w-full items-center justify-center text-lg font-semibold text-white"><UserRound size={size === "small" ? 18 : 30} /></span>}
+    <span className="absolute inset-0 grid place-items-center bg-slate-950/55 text-white opacity-0 transition group-hover:opacity-100"><Camera size={18}/></span>
+  </button>;
+}
+
+function SettingRow({ label, hint, children, last = false }) {
+  return <div className={`grid gap-3 px-4 py-4 sm:grid-cols-[minmax(150px,1fr)_minmax(260px,1.1fr)] sm:items-center sm:px-6 ${last ? "" : "border-b border-slate-100 dark:border-slate-800"}`}>
+    <div><p className="text-sm font-medium text-slate-800 dark:text-slate-100">{label}</p>{hint && <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{hint}</p>}</div>
+    <div className="min-w-0">{children}</div>
+  </div>;
+}
+
+const fieldClass = "h-10 w-full rounded-lg border-0 bg-slate-100 px-3 text-sm text-slate-900 outline-none ring-1 ring-transparent transition placeholder:text-slate-400 focus:bg-white focus:ring-indigo-500 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-900";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [user, setUser] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const fileInputRef = useRef(null);
-
-  const [formData, setFormData] = useState({
-    firstname: "",
-    lastname: "",
-    phone: "",
-    address: {
-      city: "",
-      state: "",
-      country: "India",
-      pincode: "",
-    },
-  });
+  const [showDetails, setShowDetails] = useState(false);
+  const [formData, setFormData] = useState({ firstname: "", lastname: "", title: "", username: "", phone: "", address: { city: "", state: "", country: "India", pincode: "" } });
 
   const fetchProfile = useCallback(async () => {
     try {
-      setLoading(true);
       const response = await api.get("/auth/profile");
-      if (response.data.success) {
-        const userData = response.data.user;
-        setUser(userData);
-        setFormData({
-          firstname: userData.firstname || "",
-          lastname: userData.lastname || "",
-          phone: userData.phone || "",
-          address: {
-            city: userData.address?.city || "",
-            state: userData.address?.state || "",
-            country: userData.address?.country || "India",
-            pincode: userData.address?.pincode || "",
-          },
-        });
-        // Set image preview if profile image exists
-        if (userData.profileImage) {
-          setImagePreview(userData.profileImage);
-        } else {
-          setImagePreview("");
-        }
-        setSelectedFile(null);
-      }
+      const profile = response.data.user;
+      setUser(profile);
+      setImagePreview(profile.profileImage || "");
+      setFormData({ firstname: profile.firstname || "", lastname: profile.lastname || "", title: profile.title || "", username: profile.username || "", phone: profile.phone || "", address: { city: profile.address?.city || "", state: profile.address?.state || "", country: profile.address?.country || "India", pincode: profile.address?.pincode || "" } });
     } catch (error) {
-      console.error("Failed to fetch profile:", error);
-      toast.error(error.response?.data?.message || "Failed to load profile");
-      if (error.response?.status === 401) {
-        router.push("/auth/login");
-      }
-    } finally {
-      setLoading(false);
-    }
+      toast.error(error.response?.data?.message || "We could not load your profile");
+      if (error.response?.status === 401) router.replace("/auth/login");
+    } finally { setLoading(false); }
   }, [router]);
 
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+  useEffect(() => { fetchProfile(); }, [fetchProfile]);
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
-
-    if (id.startsWith("address.")) {
-      const addressField = id.split(".")[1];
-      setFormData({
-        ...formData,
-        address: {
-          ...formData.address,
-          [addressField]: value,
-        },
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [id]: value,
-      });
-    }
+  const changeField = (event) => {
+    const { name, value } = event.target;
+    if (name.startsWith("address.")) {
+      const key = name.split(".")[1];
+      setFormData((current) => ({ ...current, address: { ...current.address, [key]: value } }));
+    } else setFormData((current) => ({ ...current, [name]: value }));
   };
 
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+  const selectImage = (event) => {
+    const file = event.target.files?.[0];
     if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file");
-      return;
-    }
-
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size should be less than 5MB");
-      return;
-    }
-
-    // Create preview
-    const previewUrl = URL.createObjectURL(file);
-    setImagePreview(previewUrl);
+    if (!file.type.startsWith("image/")) return toast.error("Choose an image file for your profile picture");
+    if (file.size > 5 * 1024 * 1024) return toast.error("Profile image must be smaller than 5 MB");
+    if (imagePreview.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
     setSelectedFile(file);
-    toast.success("Profile image selected");
+    setImagePreview(URL.createObjectURL(file));
+    toast.success("Profile picture ready to save");
   };
 
-  const handleDeleteImage = async () => {
-    if (!user?.profileImage && !imagePreview) {
-      return;
-    }
-
-    try {
-      setUploadingImage(true);
-      const response = await api.put("/auth/profile", {
-        deleteProfileImage: true,
-      });
-
-      if (response.data.success) {
-        toast.success("Profile image deleted successfully");
-        setImagePreview("");
-        setSelectedFile(null);
-        setUser((prev) => ({ ...prev, profileImage: "" }));
-
-        // Update localStorage
-        const storedUser = getUserFromLocalStorage();
-        if (storedUser) {
-          saveUserToLocalStorage(
-            {
-              ...storedUser,
-              profileImage: "",
-            },
-            true
-          );
-          window.dispatchEvent(new Event("userUpdated"));
-        }
-      }
-    } catch (error) {
-      console.error("Failed to delete profile image:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to delete profile image"
-      );
-    } finally {
-      setUploadingImage(false);
-    }
+  const syncLocalUser = (updatedUser) => {
+    const stored = getUserFromLocalStorage();
+    if (stored) saveUserToLocalStorage({ ...stored, ...updatedUser }, true);
+    window.dispatchEvent(new Event("userUpdated"));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Validation
-    if (!formData.firstname.trim()) {
-      return toast.error("First name is required");
-    }
-    if (!formData.lastname.trim()) {
-      return toast.error("Last name is required");
-    }
-    if (!formData.phone.trim()) {
-      return toast.error("Phone number is required");
-    }
-    if (!/^[0-9]{10}$/.test(formData.phone)) {
-      return toast.error("Phone number must be 10 digits");
-    }
-    if (!formData.address.city.trim()) {
-      return toast.error("City is required");
-    }
-    if (!formData.address.state.trim()) {
-      return toast.error("State is required");
-    }
-    if (!formData.address.pincode.trim()) {
-      return toast.error("Pincode is required");
-    }
-    if (!/^[0-9]{6}$/.test(formData.address.pincode)) {
-      return toast.error("Pincode must be 6 digits");
-    }
-
+  const saveProfile = async (event) => {
+    event.preventDefault();
+    if (!formData.firstname.trim() || !formData.lastname.trim()) return toast.error("Enter your first and last name");
+    if (!/^[0-9]{10}$/.test(formData.phone.trim())) return toast.error("Enter a valid 10-digit phone number");
+    if (!formData.address.city.trim() || !formData.address.state.trim() || !/^[0-9]{6}$/.test(formData.address.pincode.trim())) return toast.error("Complete your city, state, and 6-digit pincode");
     try {
       setSaving(true);
-
-      // If there's a new image selected, upload it with FormData
+      let response;
       if (selectedFile) {
-        const formDataToSend = new FormData();
-        formDataToSend.append("firstname", formData.firstname.trim());
-        formDataToSend.append("lastname", formData.lastname.trim());
-        formDataToSend.append("phone", formData.phone.trim());
-        formDataToSend.append("address.city", formData.address.city.trim());
-        formDataToSend.append("address.state", formData.address.state.trim());
-        formDataToSend.append(
-          "address.country",
-          formData.address.country.trim() || "India"
-        );
-        formDataToSend.append(
-          "address.pincode",
-          formData.address.pincode.trim()
-        );
-        formDataToSend.append("profileImage", selectedFile);
-
-        const response = await api.put("/auth/profile", formDataToSend, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        if (response.data.success) {
-          toast.success("Profile updated successfully!");
-          const updatedUser = response.data.user;
-          setUser(updatedUser);
-          setSelectedFile(null);
-          setImagePreview(updatedUser.profileImage || "");
-
-          // Update localStorage
-          const storedUser = getUserFromLocalStorage();
-          if (storedUser) {
-            saveUserToLocalStorage(
-              {
-                ...storedUser,
-                firstname: updatedUser.firstname,
-                lastname: updatedUser.lastname,
-                phone: updatedUser.phone,
-                address: updatedUser.address,
-                profileImage: updatedUser.profileImage,
-              },
-              true
-            );
-            window.dispatchEvent(new Event("userUpdated"));
-          }
-        }
+        const payload = new FormData();
+        Object.entries({ firstname: formData.firstname.trim(), lastname: formData.lastname.trim(), title: formData.title.trim(), username: formData.username.trim(), phone: formData.phone.trim(), "address.city": formData.address.city.trim(), "address.state": formData.address.state.trim(), "address.country": formData.address.country.trim() || "India", "address.pincode": formData.address.pincode.trim() }).forEach(([key, value]) => payload.append(key, value));
+        payload.append("profileImage", selectedFile);
+        response = await api.put("/auth/profile", payload, { headers: { "Content-Type": "multipart/form-data" } });
       } else {
-        // No new image, just update other fields
-        const response = await api.put("/auth/profile", {
-          firstname: formData.firstname.trim(),
-          lastname: formData.lastname.trim(),
-          phone: formData.phone.trim(),
-          address: {
-            city: formData.address.city.trim(),
-            state: formData.address.state.trim(),
-            country: formData.address.country.trim() || "India",
-            pincode: formData.address.pincode.trim(),
-          },
-        });
-
-        if (response.data.success) {
-          toast.success("Profile updated successfully!");
-          const updatedUser = response.data.user;
-          setUser(updatedUser);
-
-          // Update localStorage
-          const storedUser = getUserFromLocalStorage();
-          if (storedUser) {
-            saveUserToLocalStorage(
-              {
-                ...storedUser,
-                firstname: updatedUser.firstname,
-                lastname: updatedUser.lastname,
-                phone: updatedUser.phone,
-                address: updatedUser.address,
-              },
-              true
-            );
-            window.dispatchEvent(new Event("userUpdated"));
-          }
-        }
+        response = await api.put("/auth/profile", { ...formData, firstname: formData.firstname.trim(), lastname: formData.lastname.trim(), title: formData.title.trim(), username: formData.username.trim(), phone: formData.phone.trim(), address: { ...formData.address, city: formData.address.city.trim(), state: formData.address.state.trim(), country: formData.address.country.trim() || "India", pincode: formData.address.pincode.trim() } });
       }
-    } catch (error) {
-      console.error("Failed to update profile:", error);
-      toast.error(error.response?.data?.message || "Failed to update profile");
-    } finally {
-      setSaving(false);
-    }
+      const updatedUser = response.data.user;
+      setUser(updatedUser);
+      setImagePreview(updatedUser.profileImage || "");
+      setSelectedFile(null);
+      syncLocalUser(updatedUser);
+      toast.success("Your profile has been saved");
+    } catch (error) { toast.error(error.response?.data?.message || "We could not save your profile");
+    } finally { setSaving(false); }
   };
 
-  return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-background transition-colors duration-300">
-        {/* Header */}
-        <motion.header
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="border-b border-border/50 bg-background/80 backdrop-blur-xl sticky top-0 z-50"
-        >
-          <div className="max-w-4xl mx-auto px-6 py-5">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => router.back()}
-                  className="h-10 w-10 rounded-xl hover:bg-blue-500 hover:text-white transition-colors duration-200 ease-out cursor-pointer"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <div>
-                  <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-                    Edit Profile
-                  </h1>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    Update your personal information
-                  </p>
-                </div>
-              </div>
-              <ThemeToggle />
-            </div>
-          </div>
-        </motion.header>
+  const deleteImage = async () => {
+    if (!imagePreview) return;
+    try {
+      setUploadingImage(true);
+      const response = await api.put("/auth/profile", { deleteProfileImage: true });
+      setUser(response.data.user);
+      setImagePreview("");
+      setSelectedFile(null);
+      syncLocalUser(response.data.user);
+      toast.success("Profile picture removed");
+    } catch (error) { toast.error(error.response?.data?.message || "We could not remove your profile picture");
+    } finally { setUploadingImage(false); }
+  };
 
-        {/* Main Content */}
-        <main className="max-w-4xl mx-auto px-6 py-8">
-          {loading ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-20"
-            >
-              <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground text-sm">
-                Loading profile...
-              </p>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <Card className="border-border shadow-lg">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div className="relative group">
-                      {imagePreview ? (
-                        <div className="h-20 w-20 rounded-full overflow-hidden border-2 border-primary shadow-lg shadow-primary/20 relative">
-                          <img
-                            src={imagePreview}
-                            alt={`${user?.firstname} ${user?.lastname}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center gap-2">
-                            <button
-                              type="button"
-                              onClick={handleImageClick}
-                              className="p-2 bg-primary/80 hover:bg-blue-500 hover:scale-110 rounded-full text-white transition-all duration-200 ease-out cursor-pointer"
-                              title="Change Image"
-                            >
-                              <Camera className="h-4 w-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleDeleteImage}
-                              disabled={uploadingImage}
-                              className="p-2 bg-destructive/80 hover:bg-red-500 hover:scale-110 rounded-full text-white transition-all duration-200 ease-out cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                              title="Delete Image"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="h-20 w-20 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/20 relative group">
-                          <User className="h-10 w-10 text-white" />
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center">
-                            <button
-                              type="button"
-                              onClick={handleImageClick}
-                              className="p-2 bg-primary/80 hover:bg-blue-500 hover:scale-110 rounded-full text-white transition-all duration-200 ease-out cursor-pointer"
-                              title="Upload Image"
-                            >
-                              <Camera className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-2xl">
-                        {user?.firstname} {user?.lastname}
-                      </CardTitle>
-                      <CardDescription className="text-base mt-1">
-                        {user?.email}
-                      </CardDescription>
-                      <div className="flex gap-2 mt-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={handleImageClick}
-                          className="h-8 text-xs hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-colors duration-200 ease-out cursor-pointer"
-                        >
-                          <Camera className="h-3 w-3 mr-1" />
-                          {imagePreview ? "Change" : "Upload"} Image
-                        </Button>
-                        {imagePreview && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={handleDeleteImage}
-                            disabled={uploadingImage}
-                            className="h-8 text-xs text-destructive hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors duration-200 ease-out cursor-pointer disabled:cursor-not-allowed"
-                          >
-                            {uploadingImage ? (
-                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-3 w-3 mr-1" />
-                            )}
-                            Delete
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Personal Information */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
-                        Personal Information
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="firstname">
-                            First Name{" "}
-                            <span className="text-destructive">*</span>
-                          </Label>
-                          <Input
-                            id="firstname"
-                            type="text"
-                            value={formData.firstname}
-                            onChange={handleChange}
-                            placeholder="Enter first name"
-                            required
-                            minLength={2}
-                            maxLength={50}
-                            suppressHydrationWarning
-                            className="h-11"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="lastname">
-                            Last Name{" "}
-                            <span className="text-destructive">*</span>
-                          </Label>
-                          <Input
-                            id="lastname"
-                            type="text"
-                            value={formData.lastname}
-                            onChange={handleChange}
-                            placeholder="Enter last name"
-                            required
-                            minLength={2}
-                            maxLength={50}
-                            suppressHydrationWarning
-                            className="h-11"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">
-                          Phone Number{" "}
-                          <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                          id="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="Enter 10-digit phone number"
-                          required
-                          pattern="[0-9]{10}"
-                          maxLength={10}
-                          suppressHydrationWarning
-                          className="h-11"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          10-digit phone number (e.g., 9876543210)
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Address Information */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
-                        Address Information
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="address.city">
-                            City <span className="text-destructive">*</span>
-                          </Label>
-                          <Input
-                            id="address.city"
-                            type="text"
-                            value={formData.address.city}
-                            onChange={handleChange}
-                            placeholder="Enter city"
-                            required
-                            suppressHydrationWarning
-                            className="h-11"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="address.state">
-                            State <span className="text-destructive">*</span>
-                          </Label>
-                          <Input
-                            id="address.state"
-                            type="text"
-                            value={formData.address.state}
-                            onChange={handleChange}
-                            placeholder="Enter state"
-                            required
-                            suppressHydrationWarning
-                            className="h-11"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="address.country">
-                            Country <span className="text-destructive">*</span>
-                          </Label>
-                          <Input
-                            id="address.country"
-                            type="text"
-                            value={formData.address.country}
-                            onChange={handleChange}
-                            placeholder="Enter country"
-                            required
-                            suppressHydrationWarning
-                            className="h-11"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="address.pincode">
-                            Pincode <span className="text-destructive">*</span>
-                          </Label>
-                          <Input
-                            id="address.pincode"
-                            type="text"
-                            value={formData.address.pincode}
-                            onChange={handleChange}
-                            placeholder="Enter 6-digit pincode"
-                            required
-                            pattern="[0-9]{6}"
-                            maxLength={6}
-                            suppressHydrationWarning
-                            className="h-11"
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            6-digit pincode (e.g., 123456)
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Submit Button */}
-                    <div className="flex justify-end gap-3 pt-4 border-t border-border">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => router.back()}
-                        className="h-11 px-6 hover:bg-red-500 hover:text-white hover:border-red-500 transition-colors duration-200 ease-out cursor-pointer"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="submit"
-                        disabled={saving}
-                        className="h-11 px-6 hover:bg-green-500 hover:text-white transition-colors duration-200 ease-out cursor-pointer"
-                      >
-                        {saving ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                            Saving...
-                          </>
-                        ) : (
-                          <>
-                            <Save className="h-4 w-4 mr-2" />
-                            Save Changes
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </main>
-      </div>
-    </ProtectedRoute>
-  );
+  return <ProtectedRoute><main className="min-h-screen bg-white px-4 py-7 text-slate-950 dark:bg-slate-950 dark:text-slate-100 sm:px-8 sm:py-10"><div className="mx-auto w-full max-w-3xl">
+    <header className="mb-8 flex items-center justify-between gap-4"><div className="flex items-center gap-4"><button type="button" onClick={() => router.push("/dashboard")} aria-label="Back to workspace" className="grid h-10 w-10 place-items-center rounded-full text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"><ArrowLeft size={20}/></button><div><h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Profile</h1><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage your account details and workspace preferences.</p></div></div><ThemeToggle /></header>
+    {loading ? <div className="grid min-h-72 place-items-center"><Loader2 className="h-7 w-7 animate-spin text-indigo-600"/></div> : <form onSubmit={saveProfile}>
+      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <SettingRow label="Profile picture"><div className="flex items-center justify-end gap-3"><div className="hidden text-right sm:block"><p className="text-xs text-slate-500 dark:text-slate-400">JPG, PNG, or WebP · max 5 MB</p><button type="button" onClick={() => fileInputRef.current?.click()} className="mt-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">Change picture</button></div><ProfileImage user={user} preview={imagePreview} onClick={() => fileInputRef.current?.click()}/></div></SettingRow>
+        <SettingRow label="Email"><div className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm"><span className="min-w-0 truncate">{user?.email}</span><button type="button" onClick={() => toast("Email changes require account support for security.", { icon: "✉️" })} aria-label="Email change information" className="shrink-0 rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-indigo-600 dark:hover:bg-slate-800"><Pencil size={15}/></button></div></SettingRow>
+        <SettingRow label="Full name"><div className="grid gap-2 sm:grid-cols-2"><input name="firstname" value={formData.firstname} onChange={changeField} maxLength={50} className={fieldClass} placeholder="First name"/><input name="lastname" value={formData.lastname} onChange={changeField} maxLength={50} className={fieldClass} placeholder="Last name"/></div></SettingRow>
+        <SettingRow label="Title" hint="Your job title or role"><input name="title" value={formData.title} onChange={changeField} maxLength={80} className={fieldClass} placeholder="e.g. Product designer"/></SettingRow>
+        <SettingRow label="Username" hint="One word, like a nickname or first name" last><input name="username" value={formData.username} onChange={changeField} maxLength={40} className={fieldClass} placeholder="e.g. dexter"/></SettingRow>
+      </section>
+      <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={selectImage} className="hidden"/>
+      <div className="mt-4 flex flex-wrap items-center justify-end gap-3"><button type="button" disabled={!imagePreview || uploadingImage} onClick={deleteImage} className="inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40 dark:text-rose-400 dark:hover:bg-rose-950/30">{uploadingImage ? <Loader2 size={15} className="animate-spin"/> : <Trash2 size={15}/>}Remove picture</button><button type="submit" disabled={saving} className="inline-flex h-10 items-center gap-2 rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60">{saving ? <Loader2 size={16} className="animate-spin"/> : <Save size={16}/>}Save changes</button></div>
+      <section className="mt-10"><h2 className="mb-4 text-base font-semibold">Additional details</h2><button type="button" onClick={() => setShowDetails((value) => !value)} className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-5 py-4 text-left text-sm font-medium shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"><span>Phone number and address</span><ChevronDown size={18} className={`text-slate-400 transition-transform ${showDetails ? "rotate-180" : ""}`}/></button>{showDetails && <div className="mt-2 grid gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-2"><label className="text-sm font-medium">Phone number<input name="phone" inputMode="numeric" maxLength={10} value={formData.phone} onChange={changeField} className={`${fieldClass} mt-1.5`} placeholder="10-digit number"/></label><label className="text-sm font-medium">City<input name="address.city" value={formData.address.city} onChange={changeField} className={`${fieldClass} mt-1.5`}/></label><label className="text-sm font-medium">State<input name="address.state" value={formData.address.state} onChange={changeField} className={`${fieldClass} mt-1.5`}/></label><label className="text-sm font-medium">Country<input name="address.country" value={formData.address.country} onChange={changeField} className={`${fieldClass} mt-1.5`}/></label><label className="text-sm font-medium sm:col-span-2">Pincode<input name="address.pincode" inputMode="numeric" maxLength={6} value={formData.address.pincode} onChange={changeField} className={`${fieldClass} mt-1.5`}/></label></div>}</section>
+      <section className="mt-10"><h2 className="mb-4 text-base font-semibold">Workspace access</h2><div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between dark:border-slate-800 dark:bg-slate-900"><p className="text-sm text-slate-500 dark:text-slate-400">Manage team membership, projects, and tasks in your workspace.</p><button type="button" onClick={() => router.push("/dashboard")} className="h-10 shrink-0 rounded-lg bg-rose-50 px-4 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:hover:bg-rose-950/50">Manage workspace</button></div></section>
+    </form>}
+  </div></main></ProtectedRoute>;
 }

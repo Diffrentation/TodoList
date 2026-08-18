@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import OTP from "@/models/OTP";
+import TeamInvitation from "@/models/TeamInvitation";
 import { sendOTPEmail } from "@/lib/email";
 import { errorHandler } from "@/lib/middleware/errorHandler";
+import { hashTeamInvitationToken } from "@/lib/team-invitations";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
@@ -20,6 +22,7 @@ export async function POST(req) {
     const password = formData.get("password");
     const phone = formData.get("phone");
     const role = formData.get("role") || "user";
+    const inviteToken = typeof formData.get("inviteToken") === "string" ? formData.get("inviteToken") : "";
     
     const address = {
       city: formData.get("address.city"),
@@ -45,8 +48,10 @@ export async function POST(req) {
       );
     }
 
+    const normalizedEmail = String(email).trim().toLowerCase();
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return NextResponse.json(
         { success: false, message: "Email already registered" },
@@ -94,6 +99,12 @@ export async function POST(req) {
       isVerified: false,
     });
 
+    if (invitation) {
+      invitation.acceptedBy = user._id;
+      invitation.status = "registered";
+      await invitation.save();
+    }
+
     // Generate and send OTP
     const otp = OTP.generateOTP();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
@@ -121,6 +132,32 @@ export async function POST(req) {
 
     // Send OTP email
     const emailResult = await sendOTPEmail(user.email, otp, "registration");
+
+    if (!emailResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "We could not send the verification code. Please try again shortly.",
+        },
+        { status: 502 }
+      );
+    }
+
+    let invitation = null;
+    if (inviteToken) {
+      invitation = await TeamInvitation.findOne({
+        tokenHash: hashTeamInvitationToken(inviteToken),
+        email: normalizedEmail,
+        status: "pending",
+        expiresAt: { $gt: new Date() },
+      });
+      if (!invitation) {
+        return NextResponse.json(
+          { success: false, message: "This invitation is invalid or has expired. Ask the team owner to send a new one." },
+          { status: 400 }
+        );
+      }
+    }
 
     return NextResponse.json(
       {

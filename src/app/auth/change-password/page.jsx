@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { motion } from "framer-motion";
@@ -14,7 +14,7 @@ import { motion } from "framer-motion";
 function ChangePasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const userId = searchParams.get("userId");
+  const resetToken = searchParams.get("resetToken");
 
   const [loading, setLoading] = useState(false);
   const [showNew, setShowNew] = useState(false);
@@ -23,7 +23,7 @@ function ChangePasswordContent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!userId) return toast.error("User not found! Try again");
+    if (!resetToken) return toast.error("This reset link is invalid. Please request a new code.");
 
     const newPassword = e.target.newPassword.value;
     const confirmPassword = e.target.confirmPassword.value;
@@ -35,7 +35,7 @@ function ChangePasswordContent() {
     try {
       setLoading(true);
       const res = await axios.post(`/api/auth/reset-password`, {
-        userId,
+        resetToken,
         newPassword,
         confirmPassword,
       });
@@ -53,7 +53,6 @@ function ChangePasswordContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8 py-12 relative">
-      <Toaster position="top-right" />
 
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4 sm:top-6 sm:right-6">
