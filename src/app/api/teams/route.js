@@ -21,7 +21,6 @@ export async function GET(req) {
     await connectDB();
     const { user, error } = await currentUser(req);
     if (error || !user) return response(error || "Unauthorized", 401);
-
     const teams = await Team.find({ members: user._id })
       .populate("owner", publicUser)
       .populate("members", publicUser)
@@ -38,6 +37,7 @@ export async function POST(req) {
     await connectDB();
     const { user, error } = await currentUser(req);
     if (error || !user) return response(error || "Unauthorized", 401);
+    if (user.isGuest) return response("Guest accounts cannot create teams. Create an account to collaborate.", 403);
 
     const body = await req.json();
     const name = typeof body.name === "string" ? body.name.trim() : "";

@@ -48,5 +48,5 @@ export async function POST(req, { params }) {
     await result.task.save();
     await addActivity({ actor: result.user._id, entityType: "task", entityId: result.task._id, team: result.task.team, action: "attachment_added", details: { name: file.name } });
     return NextResponse.json({ success: true, message: "Attachment added", attachment: result.task.attachments.at(-1) }, { status: 201 });
-  } catch { return NextResponse.json({ success: false, message: "The attachment could not be uploaded. Please try again." }, { status: 500 }); }
+  } catch (error) { console.error("Attachment upload failed:", error); return NextResponse.json({ success: false, message: "The attachment could not be uploaded. Please try again." }, { status: 500 }); }
 }

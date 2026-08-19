@@ -35,9 +35,9 @@ export async function POST(req, { params }) {
 
     const body = await req.json();
     const text = typeof body.body === "string" ? body.body.trim() : "";
-    if (!text || text.length > 4000) {
-      return response("Comment must be between 1 and 4000 characters", 400);
-    }
+    const attachmentId = typeof body.attachmentId === "string" && isObjectId(body.attachmentId) ? body.attachmentId : null;
+    if (!text && !attachmentId) return response("Write a message or attach a file", 400);
+    if (text.length > 4000) return response("Comment must be under 4000 characters", 400);
 
     const teamIds = await accessibleTeamIds(user._id);
     const projectIds = await accessibleProjectIds(user._id);
@@ -50,7 +50,13 @@ export async function POST(req, { params }) {
     if (task.team && !canEditTeamContent(taskTeam, user._id)) return response("Your viewer role allows you to view this task but not comment", 403);
     if (task.locked && !canManageTaskLock(task, taskTeam, user._id)) return response("This task is locked. Only the reporter or a team owner/admin can comment.", 403);
 
-    task.comments.push({ body: text, author: user._id });
+    let attachment;
+    if (attachmentId) {
+      const source = task.attachments.id(attachmentId);
+      if (!source) return response("Attachment not found", 404);
+      attachment = { name: source.name, url: source.url, mimeType: source.mimeType };
+    }
+    task.comments.push({ body: text, author: user._id, ...(attachment ? { attachment } : {}) });
     await task.save();
     const usernames = [...new Set([...text.matchAll(/@([a-z0-9_]{2,40})/gi)].map((match) => match[1].toLowerCase()))];
     const mentioned = usernames.length ? await User.find({ username: { $in: usernames }, isVerified: true }).select("_id") : [];

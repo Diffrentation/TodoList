@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import toast from "react-hot-toast";
 import {
-  BarChart3, CalendarDays, Check, ChevronDown, ChevronRight, ChevronsUpDown, Circle,
+  ArrowLeft, BarChart3, CalendarDays, Check, ChevronDown, ChevronRight, ChevronsUpDown, Circle,
   Columns3, Ellipsis, Eye, FolderKanban, GripVertical, LayoutGrid, LayoutList, Link2, LogOut, Menu,
-  MoreHorizontal, PanelLeft, PanelRight, Plus, Search, Send, Settings, SlidersHorizontal, Sun, Tag, UserRound, Users, X, LockKeyhole, LockOpen, Lock, Unlock, Bell, Archive, Paperclip,
+  MoreHorizontal, PanelLeft, PanelRight, Pencil, Plus, Search, Send, Settings, SlidersHorizontal, Sun, Tag, UserRound, Users, X, LockKeyhole, LockOpen, Lock, Unlock, Bell, Archive, Paperclip,
 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import api from "@/lib/axios";
@@ -120,8 +120,8 @@ function NotificationButton() {
 
 function Priority({ value = "none" }) {
   if (value === "none") return <span className="text-xs text-slate-400">No priority</span>;
-  const colors = { urgent: "text-rose-600", high: "text-red-500", medium: "text-amber-600", low: "text-slate-500" };
-  return <span className={`inline-flex items-center gap-1 text-xs font-medium capitalize ${colors[value] || "text-slate-500"}`}><span aria-hidden>▴</span>{value}</span>;
+  const colors = { urgent: "text-rose-700", high: "text-red-600", medium: "text-amber-600", low: "text-slate-500" };
+  return <span className={`inline-flex items-center gap-1 text-xs font-semibold capitalize ${colors[value] || "text-slate-500"}`}><span aria-hidden>▴</span>{value}</span>;
 }
 
 const projectFieldKeys = ["priority", "members", "dueDate"];
@@ -191,7 +191,7 @@ function NewItemDialog({ kind, initial, onClose, onSubmit, projects, team, user 
   };
   return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4" role="presentation" onMouseDown={onClose}>
     <form onSubmit={submit} onMouseDown={(event) => event.stopPropagation()} className="max-h-[calc(100dvh-2rem)] w-full max-w-6xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:max-h-[88vh] sm:p-6 lg:p-8" role="dialog" aria-modal="true" aria-labelledby="new-item-title">
-      <div className="sticky top-0 z-20 -mx-5 -mt-5 mb-5 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 sm:-mx-6 sm:-mt-6 sm:px-6 sm:py-5 lg:-mx-8 lg:-mt-8 lg:px-8"><h2 id="new-item-title" className="text-lg font-semibold">{isEdit ? `Edit ${kind}` : `Create ${kind}`}</h2><IconButton label="Close dialog" onClick={onClose} className="bg-rose-600 text-white shadow-sm hover:border-rose-700 hover:bg-rose-700 dark:bg-rose-600 dark:text-white dark:hover:bg-rose-700"><X size={18}/></IconButton></div>
+      <div className="sticky top-0 z-20 -mx-5 -mt-5 mb-5 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 sm:-mx-6 sm:-mt-6 sm:px-6 sm:py-5 lg:-mx-8 lg:-mt-8 lg:px-8"><h2 id="new-item-title" className="text-lg font-semibold">{isEdit ? `Edit ${kind}` : `Create ${kind}`}</h2><IconButton label="Close dialog" onClick={onClose} className="bg-rose-600 text-white shadow-sm hover:border-rose-500 hover:bg-rose-500 dark:bg-rose-600 dark:text-white dark:hover:bg-rose-500"><X size={18}/></IconButton></div>
       <label className="mb-4 block text-sm font-medium">{kind === "task" ? "Task title" : "Project name"}<input autoFocus required maxLength={kind === "task" ? 200 : 120} value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1.5 h-11 w-full rounded-lg border border-slate-300 bg-transparent px-3 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700" placeholder={kind === "task" ? "e.g. Write API documentation" : "e.g. Website redesign"}/></label>
       <label className="mb-4 block text-sm font-medium">Description<textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={4000} className="mt-1.5 min-h-24 w-full rounded-lg border border-slate-300 bg-transparent p-3 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700" placeholder="Add context for collaborators"/></label>
       {kind === "task" && <div className="grid gap-x-5 lg:grid-cols-2">
@@ -244,7 +244,7 @@ function TeamSettings({ team, onClose, onCreate, onRename, onInvite, onRemoveMem
   };
   return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4" role="presentation" onMouseDown={onClose}>
     <div onMouseDown={(event) => event.stopPropagation()} className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900" role="dialog" aria-modal="true" aria-labelledby="team-settings-title">
-      <div className="mb-5 flex items-center justify-between"><h2 id="team-settings-title" className="text-lg font-semibold">{isCreate ? "New team" : "Team settings"}</h2><IconButton label="Close" onClick={onClose} className="bg-rose-600 text-white shadow-sm hover:border-rose-700 hover:bg-rose-700 dark:bg-rose-600 dark:text-white dark:hover:bg-rose-700"><X size={18}/></IconButton></div>
+      <div className="mb-5 flex items-center justify-between"><h2 id="team-settings-title" className="text-lg font-semibold">{isCreate ? "New team" : "Team settings"}</h2><IconButton label="Close" onClick={onClose} className="bg-rose-600 text-white shadow-sm hover:border-rose-500 hover:bg-rose-500 dark:bg-rose-600 dark:text-white dark:hover:bg-rose-500"><X size={18}/></IconButton></div>
       {isCreate ? <form onSubmit={submitCreate}>
         <label className="mb-4 block text-sm font-medium">Team name<input autoFocus required maxLength={80} value={name} onChange={(event) => setName(event.target.value)} className="mt-1.5 h-11 w-full rounded-lg border border-slate-300 bg-transparent px-3 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700" placeholder="e.g. Engineering"/></label>
         <div className="flex justify-end gap-2"><button type="button" onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">Cancel</button><button disabled={saving} className="h-10 rounded-lg bg-[hsl(var(--color-primary))] px-4 text-sm font-semibold text-white disabled:opacity-60 hover:opacity-90">{saving ? "Creating…" : "Create team"}</button></div>
@@ -271,20 +271,23 @@ function TeamSettings({ team, onClose, onCreate, onRename, onInvite, onRemoveMem
   </div>;
 }
 
-const TaskCard = memo(function TaskCard({ task, fields, onOpen, onDelete, onMove }) {
+const TaskCard = memo(function TaskCard({ task, fields, onOpen, onDelete, onMove, subtaskSummary }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const assignee = task.assignees?.[0] || task.reporter;
   const currentStatus = displayStatus(task.status);
-  return <article draggable={!task.locked} onDragStart={(event) => event.dataTransfer.setData("text/task-id", task._id)} onClick={() => onOpen(task)} className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
+  const subtaskTotal = (subtaskSummary || task.subtaskSummary)?.total || 0;
+  const completedSubtasks = (subtaskSummary || task.subtaskSummary)?.completed || 0;
+  const subtaskProgress = subtaskTotal ? Math.round((completedSubtasks / subtaskTotal) * 100) : 0;
+  return <article draggable={!task.locked} onDragStart={(event) => event.dataTransfer.setData("text/task-id", task._id)} onClick={() => onOpen(task)} className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
     <div className="flex items-start gap-2">
       {task.locked && <Lock size={13} className="mt-0.5 shrink-0 text-slate-400" aria-label="Locked task"/>}
-      <h3 className="min-w-0 flex-1 text-sm font-semibold leading-snug">{task.title}</h3>
+      <h3 className="min-w-0 flex-1 break-words text-base font-bold leading-snug">{task.title}</h3>
       <div className="relative -mr-1.5 -mt-1 shrink-0">
         <IconButton label={`More actions for ${task.title}`} onClick={(event) => { event.stopPropagation(); setMenuOpen((open) => !open); }} className="h-7 w-7"><Ellipsis size={16}/></IconButton>
         {menuOpen && <>
           <div className="fixed inset-0 z-30" onClick={(event) => { event.stopPropagation(); setMenuOpen(false); }}/>
           <div onClick={(event) => event.stopPropagation()} className="absolute right-0 top-8 z-40 w-40 rounded-lg border border-slate-200 bg-white p-1 shadow-xl dark:border-slate-700 dark:bg-slate-900">
-            <button onClick={() => { setMenuOpen(false); onOpen(task); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">{task.locked ? "View task" : "Edit task"}</button>
+            <button onClick={() => { setMenuOpen(false); onOpen(task); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">View task</button>
             {onMove && !task.locked && <>
               <p className="px-2.5 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Move to</p>
               {columns.filter((item) => item.id !== currentStatus).map((item) => <button key={item.id} onClick={() => { setMenuOpen(false); onMove(task._id, item.id); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">{item.label}</button>)}
@@ -297,23 +300,37 @@ const TaskCard = memo(function TaskCard({ task, fields, onOpen, onDelete, onMove
     </div>
     {fields.status && <div className="mt-2.5 flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{statusMeta[displayStatus(task.status)] && <span className={`h-1.5 w-1.5 rounded-full ${statusMeta[displayStatus(task.status)].dot}`}/>}{statusMeta[displayStatus(task.status)]?.label}</div>}
     {fields.priority && task.priority !== "none" && <div className="mt-2.5"><Priority value={task.priority}/></div>}
-    {fields.labels && task.labels?.length > 0 && <div className="mt-2.5 flex flex-wrap gap-1.5">{task.labels.slice(0, 3).map((label) => <span key={label} className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">{label}</span>)}</div>}
+    {fields.labels && task.labels?.length > 0 && <div className="mt-2.5 flex flex-wrap gap-1.5">{task.labels.slice(0, 3).map((label) => <span key={label} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"><Tag size={12} className="shrink-0 text-slate-400"/>{label}</span>)}</div>}
+    {subtaskTotal > 0 && <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/80 px-2.5 py-2 dark:border-slate-800 dark:bg-slate-950/50">
+      <div className="flex items-center justify-between gap-2 text-[11px] font-medium text-slate-500 dark:text-slate-400"><span className="inline-flex items-center gap-1.5"><Check size={13} className="text-[hsl(var(--color-primary))]"/>Subtasks</span><span className="shrink-0">{completedSubtasks}/{subtaskTotal}</span></div>
+      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800" aria-label={`${completedSubtasks} of ${subtaskTotal} subtasks completed`}><span className="block h-full rounded-full bg-[hsl(var(--color-primary))] transition-[width]" style={{ width: `${subtaskProgress}%` }}/></div>
+    </div>}
     <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
       <span className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-        {fields.members && assignee && <span className="flex min-w-0 items-center gap-1.5"><Avatar user={assignee} size="sm"/><span className="truncate text-xs font-medium text-slate-600 dark:text-slate-300">{assignee.firstname || "You"}</span></span>}
+        {fields.members && assignee && <span className="flex min-w-0 items-center gap-2"><Avatar user={assignee} size="md"/><span className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">{assignee.firstname || "You"}</span></span>}
         {fields.reporter && task.reporter && <span className="flex min-w-0 items-center gap-1.5"><Avatar user={task.reporter} size="sm"/><span className="truncate text-xs text-slate-500 dark:text-slate-400">{task.reporter.firstname || "You"} (reporter)</span></span>}
       </span>
-      {fields.dueDate && task.dueDate && <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-500 dark:bg-rose-950/40 dark:text-rose-400"><CalendarDays size={12}/>{shortDate(task.dueDate)}</span>}
+      {fields.dueDate && task.dueDate && <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-500 dark:bg-rose-950/40 dark:text-rose-400"><CalendarDays size={14}/>{shortDate(task.dueDate)}</span>}
     </div>
   </article>;
 });
 
-const TaskBoard = memo(function TaskBoard({ tasks, fields, onOpen, onMove, onNew, onDelete }) {
+const TaskBoard = memo(function TaskBoard({ tasks, allTasks = tasks, fields, onOpen, onMove, onNew, onDelete }) {
   const [collapsed, setCollapsed] = useState({});
   const [menuColumn, setMenuColumn] = useState(null);
   const [mobileColumn, setMobileColumn] = useState(columns[0].id);
-  return <div>
-    <div className="mb-3 flex gap-1.5 overflow-x-auto sm:hidden" role="tablist" aria-label="Task board columns">
+  const subtaskSummaries = useMemo(() => allTasks.reduce((summaries, item) => {
+    const parentId = item.parentTask?._id || item.parentTask;
+    if (!parentId) return summaries;
+    const key = String(parentId);
+    const current = summaries[key] || { total: 0, completed: 0 };
+    current.total += 1;
+    if (displayStatus(item.status) === "completed") current.completed += 1;
+    summaries[key] = current;
+    return summaries;
+  }, {}), [allTasks]);
+  return <div className="min-w-0">
+    <div className="-mx-1 mb-3 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:hidden" role="tablist" aria-label="Task board columns">
       {columns.map((column) => {
         const count = tasks.filter((task) => displayStatus(task.status) === column.id).length;
         const isActive = mobileColumn === column.id;
@@ -324,11 +341,11 @@ const TaskBoard = memo(function TaskBoard({ tasks, fields, onOpen, onMove, onNew
         </button>;
       })}
     </div>
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Task board">
+    <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-flow-col sm:auto-cols-[minmax(17rem,1fr)] sm:grid-cols-none sm:overflow-x-auto sm:pb-2 xl:grid-flow-row xl:grid-cols-4 xl:overflow-visible xl:pb-0" aria-label="Task board">
     {columns.map((column) => {
       const items = tasks.filter((task) => displayStatus(task.status) === column.id);
       const isCollapsed = collapsed[column.id];
-      return <section key={column.id} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const id = event.dataTransfer.getData("text/task-id"); if (id) onMove(id, column.id, Math.max(-1, ...items.map((item) => item.position || 0)) + 1); }} className={`min-h-72 rounded-xl bg-slate-100/80 p-2 dark:bg-slate-900/70 ${mobileColumn === column.id ? "block" : "hidden"} sm:block`}>
+      return <section key={column.id} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const id = event.dataTransfer.getData("text/task-id"); if (id) onMove(id, column.id, Math.max(-1, ...items.map((item) => item.position || 0)) + 1); }} className={`min-h-72 min-w-0 rounded-xl bg-slate-100/80 p-2 dark:bg-slate-900/70 ${mobileColumn === column.id ? "block" : "hidden"} sm:block`}>
         <div className="mb-2 flex items-center gap-1.5 rounded-lg px-1.5 py-1.5">
           <GripVertical size={14} className="shrink-0 text-slate-400"/>
           <h2 className="flex-1 truncate text-sm font-semibold">{column.label}</h2>
@@ -346,7 +363,7 @@ const TaskBoard = memo(function TaskBoard({ tasks, fields, onOpen, onMove, onNew
           </div>
         </div>
         {!isCollapsed && <>
-          <div className="space-y-2">{items.map((task) => <TaskCard key={task._id} task={task} fields={fields} onOpen={onOpen} onDelete={onDelete}/>)}</div>
+          <div className="space-y-2">{items.map((task) => <TaskCard key={task._id} task={task} fields={fields} onOpen={onOpen} onDelete={onDelete} subtaskSummary={subtaskSummaries[String(task._id)]}/>)}</div>
           <button onClick={() => onNew(column.id)} className="mt-2 flex h-9 w-full items-center gap-1 rounded-lg px-2 text-xs font-medium text-slate-600 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"><Plus size={14}/>Add task</button>
         </>}
       </section>;
@@ -359,46 +376,46 @@ const TaskList = memo(function TaskList({ tasks, fields, onOpen, onMove, onNew, 
   const [collapsed, setCollapsed] = useState({});
   const [menuFor, setMenuFor] = useState(null);
   const colSpan = 2 + (fields.status ? 1 : 0) + (fields.priority ? 1 : 0) + (fields.members ? 1 : 0) + (fields.dueDate ? 1 : 0) + (fields.reporter ? 1 : 0);
-  return <div className="space-y-5">
+  return <div className="min-w-0 space-y-4">
     {columns.map((column) => {
       const group = tasks.filter((task) => displayStatus(task.status) === column.id);
       const isCollapsed = collapsed[column.id];
       return <section key={column.id}>
-        <button onClick={() => setCollapsed((current) => ({ ...current, [column.id]: !current[column.id] }))} className="mb-2 flex items-center gap-2 rounded-md py-1 pr-2 hover:bg-slate-50 dark:hover:bg-slate-900">
-          <ChevronDown size={16} className={`shrink-0 transition-transform ${isCollapsed ? "-rotate-90" : ""}`}/>
+        <button onClick={() => setCollapsed((current) => ({ ...current, [column.id]: !current[column.id] }))} className="mb-2 flex items-center gap-1.5 rounded-md py-1 pr-2 hover:bg-slate-50 dark:hover:bg-slate-900">
+          <ChevronDown size={15} className={`shrink-0 text-slate-500 transition-transform dark:text-slate-400 ${isCollapsed ? "-rotate-90" : ""}`}/>
           <h2 className="text-sm font-semibold">{column.label}</h2>
           <span className="text-xs text-slate-400">{group.length}</span>
         </button>
-        {!isCollapsed && <div className="hidden overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 lg:block">
-          <table className="w-full min-w-[680px] text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-medium text-slate-500 dark:bg-slate-900">
+        {!isCollapsed && <div className="overflow-x-auto rounded-lg border-2 border-slate-300 dark:border-slate-700">
+          <table className="w-full min-w-[640px] table-fixed text-left text-sm">
+            <thead className="bg-slate-50 text-base font-semibold text-slate-700 dark:bg-slate-900/60 dark:text-slate-200">
               <tr>
-                <th className="px-4 py-3">Task</th>
-                {fields.status && <th className="px-4 py-3">Status</th>}
-                {fields.priority && <th className="px-4 py-3">Priority</th>}
-                {fields.members && <th className="px-4 py-3">Members</th>}
-                {fields.dueDate && <th className="px-4 py-3">Due date</th>}
-                {fields.reporter && <th className="px-4 py-3">Reporter</th>}
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className="px-3 py-2.5 font-semibold">Task</th>
+                {fields.status && <th className="w-28 px-3 py-2.5 font-semibold">Status</th>}
+                {fields.priority && <th className="w-28 px-3 py-2.5 font-semibold">Priority</th>}
+                {fields.members && <th className="w-28 px-3 py-2.5 font-semibold">Members</th>}
+                {fields.dueDate && <th className="w-32 px-3 py-2.5 font-semibold">Due Date</th>}
+                {fields.reporter && <th className="w-24 px-3 py-2.5 font-semibold">Reporter</th>}
+                <th className="w-16 px-3 py-2.5 text-right font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {group.map((task) => {
                 const assignees = task.assignees?.length ? task.assignees : (task.reporter ? [task.reporter] : []);
-                return <tr key={task._id} className="border-t border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900">
-                  <td className="px-4 py-3"><button onClick={() => onOpen(task)} className="font-medium hover:text-indigo-600">{task.title}</button></td>
-                  {fields.status && <td className="px-4 py-3"><span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{statusMeta[displayStatus(task.status)] && <span className={`h-1.5 w-1.5 rounded-full ${statusMeta[displayStatus(task.status)].dot}`}/>}{statusMeta[displayStatus(task.status)]?.label}</span></td>}
-                  {fields.priority && <td className="px-4 py-3"><Priority value={task.priority}/></td>}
-                  {fields.members && <td className="px-4 py-3"><MemberAvatars members={assignees}/></td>}
-                  {fields.dueDate && <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-300">{shortDate(task.dueDate)}</td>}
-                  {fields.reporter && <td className="px-4 py-3">{task.reporter ? <Avatar user={task.reporter} size="sm"/> : <span className="text-xs text-slate-400">—</span>}</td>}
-                  <td className="px-4 py-3 text-right">
+                return <tr key={task._id} className="border-t-2 border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900">
+                  <td className="px-3 py-3.5"><div className="flex min-w-0 items-center gap-2"><button onClick={() => onOpen(task)} title={task.title} className="min-w-0 flex-1 truncate text-left font-semibold text-slate-900 hover:text-indigo-600 dark:text-white">{task.title}</button>{task.subtaskSummary?.total > 0 && <span className="shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">{task.subtaskSummary.total} subtask{task.subtaskSummary.total > 1 ? "s" : ""}</span>}</div></td>
+                  {fields.status && <td className="whitespace-nowrap px-3 py-3.5"><span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{statusMeta[displayStatus(task.status)] && <span className={`h-1.5 w-1.5 rounded-full ${statusMeta[displayStatus(task.status)].dot}`}/>}{statusMeta[displayStatus(task.status)]?.label}</span></td>}
+                  {fields.priority && <td className="whitespace-nowrap px-3 py-3.5"><Priority value={task.priority}/></td>}
+                  {fields.members && <td className="whitespace-nowrap px-3 py-3.5"><MemberAvatars members={assignees}/></td>}
+                  {fields.dueDate && <td className="whitespace-nowrap px-3 py-3.5 text-xs font-medium text-slate-700 dark:text-slate-300">{shortDate(task.dueDate)}</td>}
+                  {fields.reporter && <td className="whitespace-nowrap px-3 py-3.5">{task.reporter ? <Avatar user={task.reporter} size="sm"/> : <span className="text-xs text-slate-400">—</span>}</td>}
+                  <td className="whitespace-nowrap px-3 py-3.5 text-right">
                     <div className="relative inline-block">
                       <IconButton label={`More actions for ${task.title}`} onClick={() => setMenuFor(menuFor === task._id ? null : task._id)} className="h-7 w-7"><Ellipsis size={16}/></IconButton>
                       {menuFor === task._id && <>
                         <div className="fixed inset-0 z-30" onClick={() => setMenuFor(null)}/>
                         <div className="absolute right-0 top-8 z-40 w-44 rounded-lg border border-slate-200 bg-white p-1 text-left shadow-xl dark:border-slate-700 dark:bg-slate-900">
-                          <button onClick={() => { setMenuFor(null); onOpen(task); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">Edit task</button>
+                          <button onClick={() => { setMenuFor(null); onOpen(task); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">View task</button>
                           <p className="px-2.5 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Move to</p>
                           {columns.filter((item) => item.id !== column.id).map((item) => <button key={item.id} onClick={() => { setMenuFor(null); onMove(task._id, item.id); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">{item.label}</button>)}
                           <div className="my-1 border-t border-slate-100 dark:border-slate-800"/>
@@ -409,15 +426,10 @@ const TaskList = memo(function TaskList({ tasks, fields, onOpen, onMove, onNew, 
                   </td>
                 </tr>;
               })}
-              {!group.length && <tr><td colSpan={colSpan} className="px-4 py-6 text-center text-sm text-slate-400">No tasks in {column.label}</td></tr>}
+              {!group.length && <tr><td colSpan={colSpan} className="px-3 py-6 text-center text-sm text-slate-400">No tasks in {column.label}</td></tr>}
             </tbody>
           </table>
-          <button onClick={() => onNew(column.id)} className="flex h-10 w-full items-center gap-1.5 border-t border-slate-100 px-4 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-900"><Plus size={14}/>Add Task</button>
-        </div>}
-        {!isCollapsed && <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:hidden">
-          {group.map((task) => <TaskCard key={task._id} task={task} fields={fields} onOpen={onOpen} onDelete={onDelete} onMove={onMove}/>)}
-          {!group.length && <p className="col-span-full rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400 dark:border-slate-700">No tasks in {column.label}</p>}
-          <button onClick={() => onNew(column.id)} className="col-span-full flex h-10 w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"><Plus size={14}/>Add task</button>
+          <button onClick={() => onNew(column.id)} className="flex h-14 w-full items-center gap-1.5 border-t-2 border-slate-200 px-3 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-900"><Plus size={14}/>Add Task</button>
         </div>}
       </section>;
     })}
@@ -484,22 +496,33 @@ function DatePicker({ value, onChange }) {
 
 function TaskPanel({ task, tasks, teams, user, onClose, onSave, onDelete, onOpen, onCreateSubtask, onAddComment, onToggleWatch, onUploadAttachment, onRemoveAttachment, onArchive }) {
   const [draft, setDraft] = useState(task || {});
+  const [isEditing, setIsEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(true);
-  const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false);
   const [addingLabel, setAddingLabel] = useState(false);
   const [labelInput, setLabelInput] = useState("");
   const [subtaskTitle, setSubtaskTitle] = useState("");
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [pendingAttachment, setPendingAttachment] = useState(null);
+  const [attachingComment, setAttachingComment] = useState(false);
   const [activity, setActivity] = useState([]);
   const attachmentInputRef = useRef(null);
+  const commentAttachmentInputRef = useRef(null);
   useEffect(() => { api.get(`/tasks/${task?._id}/activity`).then((response) => setActivity(response.data.activity || [])).catch(() => {}); }, [task?._id]);
   if (!task) return null;
   const update = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
-  const save = async () => { await onSave(draft._id, { title: draft.title, description: draft.description, priority: draft.priority, status: draft.status, startDate: draft.startDate || null, dueDate: draft.dueDate || null, labels: draft.labels || [], assignees: draft.assignees?.map((person) => person._id || person) || [] }); };
+  const save = async () => { const savedTask = await onSave(draft._id, { title: draft.title, description: draft.description, priority: draft.priority, status: draft.status, startDate: draft.startDate || null, dueDate: draft.dueDate || null, labels: draft.labels || [], assignees: draft.assignees?.map((person) => person._id || person) || [] }); if (savedTask) setIsEditing(false); };
   const uploadAttachment = async (event) => { const file = event.target.files?.[0]; event.target.value = ""; if (!file) return; setUploading(true); try { await onUploadAttachment(task._id, file); } finally { setUploading(false); } };
+  const attachCommentImage = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setAttachingComment(true);
+    try { const attachment = await onUploadAttachment(task._id, file, { silent: true }); if (attachment) setPendingAttachment(attachment); } finally { setAttachingComment(false); }
+  };
+  const cancelPendingAttachment = () => { if (pendingAttachment) onRemoveAttachment(task._id, pendingAttachment._id); setPendingAttachment(null); };
   const togglePrivate = () => { const next = !draft.private; update("private", next); onSave(task._id, { private: next }, next ? "Task is now private" : "Task is now shared with the team"); };
   const toggleLock = () => {
     if (!isTaskManager) { toast.error("Only the reporter or a team owner/admin can lock or unlock this task."); return; }
@@ -528,53 +551,57 @@ function TaskPanel({ task, tasks, teams, user, onClose, onSave, onDelete, onOpen
   const submitComment = async (event) => {
     event.preventDefault();
     const body = commentText.trim();
-    if (!body) return;
+    if (!body && !pendingAttachment) return;
     setPosting(true);
-    try { await onAddComment(task._id, body); setCommentText(""); } finally { setPosting(false); }
+    try { await onAddComment(task._id, body, pendingAttachment?._id); setCommentText(""); setPendingAttachment(null); } finally { setPosting(false); }
   };
   const taskTeamId = task.team?._id || task.team || null;
   const taskTeam = teams?.find((item) => item._id === taskTeamId) || (task.team && typeof task.team === "object" ? task.team : null);
   const isTaskManager = String(task.reporter?._id || task.reporter) === String(user?.id) || isTeamManager(taskTeam, user?.id);
-  const readOnly = Boolean(draft.locked) && !isTaskManager;
+  const permissionReadOnly = Boolean(draft.locked) && !isTaskManager;
+  const readOnly = !isEditing || permissionReadOnly;
   const teamMembers = taskTeam?.members?.length ? taskTeam.members : (user ? [user] : []);
   const assigneeId = (draft.assignees?.[0] && (draft.assignees[0]._id || draft.assignees[0])) || user?.id;
   const assignee = teamMembers.find((member) => String(member._id) === String(assigneeId)) || task.assignees?.[0] || user;
   const subtasks = (tasks || []).filter((item) => item.parentTask && String(item.parentTask) === String(task._id));
   const watcherCount = task.watchers?.length || 0;
   const isWatching = (task.watchers || []).some((watcher) => String(watcher._id || watcher) === String(user?.id));
-  const detailsFields = <div className={`divide-y divide-slate-100 dark:divide-slate-800 ${readOnly ? "pointer-events-none opacity-60" : ""}`}>
-    <div className="flex items-center justify-between py-2 text-sm"><span className="text-slate-500 dark:text-slate-400">Status</span><InlineSelect value={displayStatus(draft.status)} onChange={(value) => update("status", value)} options={columns.map((column) => ({ value: column.id }))} render={(option) => <span className="flex items-center gap-1.5">{statusMeta[option.value] && <span className={`h-1.5 w-1.5 rounded-full ${statusMeta[option.value].dot}`}/>}{statusMeta[option.value]?.label}</span>}/></div>
-    <div className="flex items-center justify-between py-2 text-sm"><span className="text-slate-500 dark:text-slate-400">Priority</span><InlineSelect value={draft.priority || "none"} onChange={(value) => update("priority", value)} options={priorities.map((value) => ({ value }))} render={(option) => <span className={`font-medium ${priorityMeta[option.value]?.text}`}>{priorityMeta[option.value]?.label}</span>}/></div>
-    <div className="flex items-center justify-between py-2.5 text-sm"><span className="text-slate-500 dark:text-slate-400">Assignee</span>{teamMembers.length > 1 ? <InlineSelect value={assigneeId} onChange={(value) => update("assignees", [value])} options={teamMembers.map((member) => ({ value: member._id }))} render={(option) => { const person = teamMembers.find((member) => member._id === option.value); return <span className="flex items-center gap-1.5"><Avatar user={person} size="sm"/><span className="font-medium">{person?.firstname || "Unknown"}</span></span>; }}/> : <span className="flex items-center gap-1.5"><Avatar user={assignee} size="sm"/><span className="font-medium">{assignee?.firstname || "You"}</span></span>}</div>
-    <div className="flex items-center justify-between py-2.5 text-sm"><span className="text-slate-500 dark:text-slate-400">Dates</span><span className="flex items-center gap-1"><DatePicker value={draft.startDate} onChange={(value) => update("startDate", value)}/><span className="text-slate-300 dark:text-slate-600">→</span><DatePicker value={draft.dueDate} onChange={(value) => update("dueDate", value)}/></span></div>
-    <div className="flex items-center justify-between py-2.5 text-sm"><span className="text-slate-500 dark:text-slate-400">Reporter</span><span className="flex items-center gap-1.5"><Avatar user={task.reporter} size="sm"/><span className="font-medium">{task.reporter?.firstname || "You"}</span></span></div>
+  const detailsFields = <div className="overflow-hidden rounded-lg border-2 border-slate-300 dark:border-slate-700">
+    <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Status</span>{isEditing && !permissionReadOnly ? <InlineSelect value={displayStatus(draft.status)} onChange={(value) => update("status", value)} options={columns.map((column) => ({ value: column.id }))} render={(option) => <span className="flex items-center gap-1.5">{statusMeta[option.value] && <span className={`h-1.5 w-1.5 rounded-full ${statusMeta[option.value].dot}`}/>}{statusMeta[option.value]?.label}</span>}/> : <span className="flex min-w-0 items-center justify-end gap-1.5 font-semibold"><span className={`h-1.5 w-1.5 shrink-0 rounded-full ${statusMeta[displayStatus(draft.status)]?.dot}`}/><span className="break-words">{statusMeta[displayStatus(draft.status)]?.label}</span></span>}</div>
+    <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Priority</span>{isEditing && !permissionReadOnly ? <InlineSelect value={draft.priority || "none"} onChange={(value) => update("priority", value)} options={priorities.map((value) => ({ value }))} render={(option) => <span className={`font-semibold ${priorityMeta[option.value]?.text}`}>{priorityMeta[option.value]?.label}</span>}/> : <span className={`min-w-0 break-words text-right font-semibold ${priorityMeta[draft.priority || "none"]?.text}`}>{priorityMeta[draft.priority || "none"]?.label}</span>}</div>
+    <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Assignee</span>{isEditing && !permissionReadOnly && teamMembers.length > 1 ? <InlineSelect value={assigneeId} onChange={(value) => update("assignees", [value])} options={teamMembers.map((member) => ({ value: member._id }))} render={(option) => { const person = teamMembers.find((member) => member._id === option.value); return <span className="flex min-w-0 items-center gap-1.5"><Avatar user={person} size="sm"/><span className="truncate font-semibold">{person?.firstname || "Unknown"}</span></span>; }}/> : <span className="flex min-w-0 items-center justify-end gap-1.5"><Avatar user={assignee} size="sm"/><span className="min-w-0 break-words text-right font-semibold">{assignee?.firstname || "You"}</span></span>}</div>
+    <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Reporter</span><span className="flex min-w-0 items-center justify-end gap-1.5"><Avatar user={task.reporter} size="sm"/><span className="min-w-0 break-words text-right font-semibold">{task.reporter?.firstname || "You"}</span></span></div>
+    <div className="flex min-w-0 items-center justify-between gap-3 px-3 py-3.5 text-sm"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Dates</span>{isEditing && !permissionReadOnly ? <span className="flex min-w-0 flex-wrap items-center justify-end gap-1"><DatePicker value={draft.startDate} onChange={(value) => update("startDate", value)}/><span className="text-slate-300 dark:text-slate-600">→</span><DatePicker value={draft.dueDate} onChange={(value) => update("dueDate", value)}/></span> : <span className="min-w-0 break-words text-right font-semibold">{draft.startDate ? shortDate(draft.startDate) : "No start date"} → {draft.dueDate ? shortDate(draft.dueDate) : "No due date"}</span>}</div>
   </div>;
 
-  return <div className="fixed inset-0 z-40 flex items-stretch justify-center bg-slate-950/40 sm:items-center sm:p-6" role="presentation" onMouseDown={onClose}>
-    <div onMouseDown={(event) => event.stopPropagation()} className="flex h-full w-full max-w-[90rem] overflow-hidden bg-white shadow-2xl dark:bg-slate-950 sm:h-[88vh] sm:rounded-2xl" role="dialog" aria-modal="true" aria-labelledby="task-detail-title">
-      <div className="flex min-w-0 flex-1 flex-col lg:basis-[58%] lg:flex-none">
+  return <div className={`flex h-[calc(100dvh-5rem)] min-h-0 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 lg:grid lg:grid-rows-[minmax(0,1fr)] ${detailsOpen ? "lg:grid-cols-[minmax(0,1.25fr)_minmax(22rem,0.75fr)]" : "lg:grid-cols-1"}`} role="region" aria-labelledby="task-detail-title">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 px-3 dark:border-slate-800 sm:px-5">
-          <span className="hidden text-sm font-medium text-slate-500 sm:inline">Task details</span>
+          <button type="button" onClick={onClose} className="flex min-w-0 items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800 sm:gap-2"><ArrowLeft size={20} className="shrink-0"/><span className="truncate">Back to tasks</span></button>
           <div className="flex items-center gap-1">
             <IconButton label={draft.locked ? (isTaskManager ? "Locked — click to unlock" : "Locked by the reporter or a team owner/admin") : "Click to lock this task from further edits"} onClick={toggleLock} disabled={draft.locked && !isTaskManager} className={draft.locked ? "bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:hover:bg-rose-950/50" : "text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"}>{draft.locked ? <Lock size={17}/> : <Unlock size={18}/>}</IconButton>
-            {taskTeamId && <IconButton label={draft.private ? "Private to assignees — click to share with the whole team" : "Shared with the whole team — click to make private"} onClick={togglePrivate} disabled={readOnly} className={draft.private ? "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:hover:bg-amber-950/50" : "text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"}>{draft.private ? <LockKeyhole size={17}/> : <LockOpen size={18}/>}</IconButton>}
+            {taskTeamId && <div className="hidden sm:block"><IconButton label={draft.private ? "Private to assignees — click to share with the whole team" : "Shared with the whole team — click to make private"} onClick={togglePrivate} disabled={readOnly} className={draft.private ? "bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:hover:bg-amber-950/50" : "text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"}>{draft.private ? <LockKeyhole size={17}/> : <LockOpen size={18}/>}</IconButton></div>}
             <IconButton label={isWatching ? "Stop watching" : "Watch this task"} onClick={() => onToggleWatch(task._id)} className={`gap-1 !w-auto px-2 ${isWatching ? "text-[hsl(var(--color-primary))]" : ""}`}><Eye size={17}/>{watcherCount > 0 && <span className="text-xs font-semibold">{watcherCount}</span>}</IconButton>
             <IconButton label="Copy link to this task" onClick={copyLink}><Link2 size={17}/></IconButton>
-            {!readOnly && <div className="relative">
+            {!permissionReadOnly && <div className="relative">
               <IconButton label="Task menu" onClick={() => setMenuOpen((o) => !o)}><Ellipsis size={18}/></IconButton>
               {menuOpen && <>
                 <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)}/>
-                <div className="absolute right-0 top-9 z-40 w-40 rounded-lg border border-slate-200 bg-white p-1 shadow-xl dark:border-slate-700 dark:bg-slate-900"><button onClick={() => { setMenuOpen(false); onArchive(task); }} className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800"><Archive size={13}/>{task.archivedAt ? "Restore task" : "Archive task"}</button><button onClick={() => { setMenuOpen(false); onDelete(task); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40">Delete task</button></div>
+                <div className="absolute right-0 top-9 z-40 w-48 rounded-lg border border-slate-200 bg-white p-1 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                  {!isEditing && <button onClick={() => { setMenuOpen(false); setIsEditing(true); }} className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800"><Pencil size={13}/>Edit task</button>}
+                  {taskTeamId && isEditing && <button onClick={() => { setMenuOpen(false); togglePrivate(); }} className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 sm:hidden">{draft.private ? <LockOpen size={13}/> : <LockKeyhole size={13}/>}Make task {draft.private ? "shared" : "private"}</button>}
+                  <button onClick={() => { setMenuOpen(false); onArchive(task); }} className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800"><Archive size={13}/>{task.archivedAt ? "Restore task" : "Archive task"}</button>
+                  <button onClick={() => { setMenuOpen(false); onDelete(task); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40">Delete task</button>
+                </div>
               </>}
             </div>}
-            <IconButton label={detailsOpen ? "Hide details" : "Show details"} onClick={() => setDetailsOpen((o) => !o)} className="hidden sm:inline-flex"><PanelRight size={18}/></IconButton>
-            <IconButton label="Close task details" onClick={onClose} className="bg-rose-600 text-white shadow-sm hover:border-rose-700 hover:bg-rose-700 dark:bg-rose-600 dark:text-white dark:hover:bg-rose-700"><X size={19}/></IconButton>
+            <div className="hidden lg:block"><IconButton label={detailsOpen ? "Hide details" : "Show details"} onClick={() => setDetailsOpen((o) => !o)}><PanelRight size={18}/></IconButton></div>
           </div>
         </header>
-        <div className="flex-1 overflow-y-auto p-5 sm:p-7">
-          {readOnly && <p className="mb-3 flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 dark:bg-rose-950/30 dark:text-rose-400"><Lock size={13}/>This task is locked. Only the reporter or a team owner/admin can make changes.</p>}
-          <input id="task-detail-title" value={draft.title} readOnly={readOnly} onChange={(event) => update("title", event.target.value)} maxLength={200} className="w-full border-0 bg-transparent p-0 text-2xl font-semibold outline-none focus:ring-0"/>
-          <textarea value={draft.description || ""} readOnly={readOnly} onChange={(event) => update("description", event.target.value)} maxLength={4000} className="mt-2 min-h-16 w-full resize-none border-0 bg-transparent p-0 text-sm leading-6 text-slate-600 outline-none focus:ring-0 dark:text-slate-300" placeholder="Add a description…"/>
+        <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto p-4 sm:p-6 xl:p-7">
+          {permissionReadOnly && <p className="mb-3 flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 dark:bg-rose-950/30 dark:text-rose-400"><Lock size={13}/>This task is locked. Only the reporter or a team owner/admin can make changes.</p>}
+          {isEditing && !permissionReadOnly ? <textarea id="task-detail-title" value={draft.title} onChange={(event) => update("title", event.target.value)} maxLength={200} rows={2} className="min-h-14 w-full resize-y break-words border-0 bg-transparent p-0 text-lg font-semibold leading-6 outline-none focus:ring-0 sm:text-2xl sm:leading-8"/> : <h2 id="task-detail-title" className="break-words text-lg font-semibold leading-6 [overflow-wrap:anywhere] sm:text-2xl sm:leading-8">{draft.title}</h2>}
+          {isEditing && !permissionReadOnly ? <textarea value={draft.description || ""} onChange={(event) => update("description", event.target.value)} maxLength={4000} className="mt-2 min-h-16 w-full resize-y border-0 bg-transparent p-0 text-xs leading-5 text-slate-600 outline-none focus:ring-0 dark:text-slate-300 sm:text-sm sm:leading-6" placeholder="Add a description…"/> : <p className="mt-2 whitespace-pre-wrap break-words text-xs leading-5 text-slate-600 [overflow-wrap:anywhere] dark:text-slate-300 sm:text-sm sm:leading-6">{draft.description || "No description added."}</p>}
 
           <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-slate-100 pt-5 text-sm dark:border-slate-800">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Properties</span>
@@ -588,48 +615,71 @@ function TaskPanel({ task, tasks, teams, user, onClose, onSave, onDelete, onOpen
             {!readOnly && (addingLabel ? <form onSubmit={addLabel}><input autoFocus value={labelInput} onChange={(event) => setLabelInput(event.target.value)} onBlur={addLabel} maxLength={40} className="h-6 w-28 rounded-full border border-slate-300 bg-transparent px-2 text-xs outline-none focus:border-indigo-600 dark:border-slate-700"/></form> : (draft.labels || []).length < 12 && <button onClick={() => setAddingLabel(true)} className="inline-flex items-center gap-1 rounded-full border border-dashed border-slate-300 px-2 py-0.5 text-xs font-medium text-slate-500 hover:border-slate-400 dark:border-slate-600"><Plus size={11}/>Add label</button>)}
           </div>
 
-          <div className="mt-5 sm:hidden">
-            <button type="button" onClick={() => setMobileDetailsOpen((open) => !open)} className="flex h-10 w-full items-center justify-between rounded-lg border border-slate-200 px-3 text-sm font-medium dark:border-slate-700">
-              <span>Details</span>
-              <ChevronDown size={16} className={`text-slate-400 transition-transform ${mobileDetailsOpen ? "rotate-180" : ""}`}/>
-            </button>
-            {mobileDetailsOpen && <div className="mt-2 rounded-lg border border-slate-200 px-3 dark:border-slate-700">{detailsFields}</div>}
-          </div>
-
-          <section className="mt-5"><div className="mb-2 flex items-center justify-between"><h3 className="text-sm font-semibold">Attachments</h3>{!readOnly && <><input ref={attachmentInputRef} onChange={uploadAttachment} type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv" className="hidden"/><button onClick={() => attachmentInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 dark:hover:bg-indigo-950/30"><Paperclip size={14}/>{uploading ? "Uploading…" : "Add file"}</button></>}</div>{(task.attachments || []).length ? <div className="flex flex-wrap gap-2">{task.attachments.map((attachment) => <span key={attachment._id || attachment.url} className="inline-flex max-w-full items-center gap-1 rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-medium dark:border-slate-700"><a href={attachment.url} target="_blank" rel="noreferrer" className="inline-flex min-w-0 items-center gap-1.5 hover:text-indigo-600"><Paperclip size={13}/><span className="max-w-36 truncate">{attachment.name}</span></a>{!readOnly && <button onClick={() => onRemoveAttachment(task._id, attachment._id)} aria-label={`Remove ${attachment.name}`} className="rounded p-0.5 text-slate-400 hover:bg-rose-50 hover:text-rose-500"><X size={13}/></button>}</span>)}</div> : <p className="text-xs text-slate-400">Attach PDFs, images, text files, or CSVs (up to 10 MB).</p>}</section>
-          <section className="mt-7"><h3 className="mb-2 text-sm font-semibold">Activity</h3>{activity.length ? <div className="space-y-2">{activity.slice(0, 8).map((entry) => <div key={entry._id} className="flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400"><Avatar user={entry.actor} size="sm"/><span><strong className="font-semibold text-slate-700 dark:text-slate-200">{entry.actor?.firstname || "Someone"}</strong> {entry.action.replaceAll("_", " ")}<span className="ml-1 text-slate-400">{shortDate(entry.createdAt)}</span></span></div>)}</div> : <p className="text-xs text-slate-400">No activity yet.</p>}</section>
+          <section className="mt-5"><div className="mb-2 flex items-center justify-between"><h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Attachments</h3>{!readOnly && <><input ref={attachmentInputRef} onChange={uploadAttachment} type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv" className="hidden"/><button onClick={() => attachmentInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 dark:hover:bg-indigo-950/30"><Paperclip size={14}/>{uploading ? "Uploading…" : "Add file"}</button></>}</div>{(task.attachments || []).length ? <div className="flex flex-wrap gap-2">{task.attachments.map((attachment) => <span key={attachment._id || attachment.url} className="inline-flex max-w-full items-center gap-1 rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-medium dark:border-slate-700"><a href={attachment.url} target="_blank" rel="noreferrer" className="inline-flex min-w-0 items-center gap-1.5 hover:text-indigo-600"><Paperclip size={13}/><span className="max-w-36 truncate">{attachment.name}</span></a>{!readOnly && <button onClick={() => onRemoveAttachment(task._id, attachment._id)} aria-label={`Remove ${attachment.name}`} className="rounded p-0.5 text-slate-400 hover:bg-rose-50 hover:text-rose-500"><X size={13}/></button>}</span>)}</div> : <p className="text-xs text-slate-400">Attach PDFs, images, text files, or CSVs (up to 10 MB).</p>}</section>
+          <section className="mt-7"><h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Activity</h3>{activity.length ? <div className="space-y-2">{activity.slice(0, 8).map((entry) => <div key={entry._id} className="flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400"><Avatar user={entry.actor} size="sm"/><span><strong className="font-semibold text-slate-700 dark:text-slate-200">{entry.actor?.firstname || "Someone"}</strong> {entry.action.replaceAll("_", " ")}<span className="ml-1 text-slate-400">{shortDate(entry.createdAt)}</span></span></div>)}</div> : <p className="text-xs text-slate-400">No activity yet.</p>}</section>
 
           <section className="mt-7">
-            <h3 className="mb-2 text-sm font-semibold">Subtasks</h3>
-            <div className="space-y-2">
-              {subtasks.map((subtask) => <article key={subtask._id} onClick={() => onOpen(subtask)} className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700 dark:bg-slate-900">
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">{subtask.title}</span>
-                {subtask.priority !== "none" && <Priority value={subtask.priority}/>}
-                {subtask.dueDate && <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-500 dark:bg-rose-950/40 dark:text-rose-400"><CalendarDays size={12}/>{shortDate(subtask.dueDate)}</span>}
-                <IconButton label={`Delete ${subtask.title}`} onClick={(event) => { event.stopPropagation(); onDelete(subtask); }} className="h-7 w-7 shrink-0"><X size={14}/></IconButton>
-              </article>)}
-              {!subtasks.length && <p className="rounded-xl border border-dashed border-slate-200 p-3 text-center text-xs text-slate-400 dark:border-slate-700">No subtasks yet</p>}
+            <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Subtasks<span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold normal-case text-slate-500 dark:bg-slate-800 dark:text-slate-400">{subtasks.length}</span></h3>
+            <div className="overflow-x-auto rounded-lg border-2 border-slate-300 dark:border-slate-700">
+              <table className="w-full min-w-[560px] table-fixed text-left text-sm">
+                <thead className="bg-slate-50 text-base font-semibold text-slate-700 dark:bg-slate-900/60 dark:text-slate-200">
+                  <tr><th className="px-3 py-2.5 font-semibold">Task</th><th className="w-24 px-3 py-2.5 font-semibold">Priority</th><th className="w-24 px-3 py-2.5 font-semibold">Members</th><th className="w-28 px-3 py-2.5 font-semibold">Due Date</th><th className="w-16 px-3 py-2.5 text-right font-semibold">Actions</th></tr>
+                </thead>
+                <tbody>
+                  {subtasks.map((subtask) => {
+                    const members = subtask.assignees?.length ? subtask.assignees : (subtask.reporter ? [subtask.reporter] : []);
+                    return <tr key={subtask._id} tabIndex={0} onClick={() => onOpen(subtask)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onOpen(subtask); } }} className="cursor-pointer border-t-2 border-slate-200 transition hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-indigo-600 dark:border-slate-700 dark:hover:bg-slate-900">
+                      <td className="px-3 py-3.5"><span className="block truncate font-semibold text-slate-900 dark:text-white">{subtask.title}</span></td>
+                      <td className="whitespace-nowrap px-3 py-3.5">{subtask.priority && subtask.priority !== "none" ? <Priority value={subtask.priority}/> : <span className="text-xs text-slate-400">No priority</span>}</td>
+                      <td className="whitespace-nowrap px-3 py-3.5">{members.length ? <MemberAvatars members={members}/> : <span className="text-xs text-slate-400">Unassigned</span>}</td>
+                      <td className="whitespace-nowrap px-3 py-3.5 text-xs font-medium text-slate-700 dark:text-slate-300">{subtask.dueDate ? shortDate(subtask.dueDate) : "No date"}</td>
+                      <td className="whitespace-nowrap px-3 py-3.5"><span className="flex items-center justify-end gap-1"><ChevronRight size={15} className="text-slate-400" aria-hidden/>{!readOnly && <IconButton label={`Delete ${subtask.title}`} onClick={(event) => { event.stopPropagation(); onDelete(subtask); }} className="h-7 w-7 shrink-0 text-rose-500 hover:bg-rose-50"><X size={14}/></IconButton>}</span></td>
+                    </tr>;
+                  })}
+                  {!subtasks.length && <tr><td colSpan={5} className="border-t-2 border-slate-200 px-3 py-6 text-center text-sm text-slate-400 dark:border-slate-700">No subtasks yet</td></tr>}
+                </tbody>
+              </table>
+              {!readOnly && <form onSubmit={addSubtask} className="flex h-14 items-center gap-2 border-t-2 border-slate-200 px-3 dark:border-slate-700"><Plus size={14} className="shrink-0 text-slate-400"/><input value={subtaskTitle} onChange={(event) => setSubtaskTitle(event.target.value)} maxLength={200} placeholder="Add subtask" className="h-7 min-w-0 flex-1 border-0 bg-transparent text-sm outline-none focus:ring-0"/>{subtaskTitle.trim() && <button type="submit" className="shrink-0 rounded-md bg-slate-900 px-2.5 py-1 text-xs font-semibold text-white dark:bg-white dark:text-slate-950">Add</button>}</form>}
             </div>
-            <form onSubmit={addSubtask} className="mt-2 flex items-center gap-2 rounded-xl border border-dashed border-slate-200 px-3 py-2 dark:border-slate-700"><Plus size={14} className="shrink-0 text-slate-400"/><input value={subtaskTitle} onChange={(event) => setSubtaskTitle(event.target.value)} maxLength={200} placeholder="Add subtask" className="h-7 flex-1 border-0 bg-transparent text-xs outline-none focus:ring-0"/>{subtaskTitle.trim() && <button type="submit" className="shrink-0 rounded-md bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white dark:bg-white dark:text-slate-950">Add</button>}</form>
+          </section>
+
+          <section className="mt-7 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50 lg:hidden sm:p-5">
+            <h3 className="mb-1 text-sm font-semibold uppercase tracking-wide">Details</h3>
+            <p className="mb-2 text-xs text-slate-500 dark:text-slate-400">Status, ownership, and schedule for this task.</p>
+            {detailsFields}
           </section>
 
           <section className="mt-7">
             <h3 className="mb-3 text-sm font-semibold">Comments</h3>
             <div className="space-y-3">
-              {(task.comments || []).map((comment) => <div key={comment._id} className="flex gap-2.5"><Avatar user={comment.author} size="sm"/><div className="min-w-0 flex-1 rounded-xl bg-slate-50 px-3 py-2 dark:bg-slate-900"><div className="flex items-center gap-2 text-xs"><span className="font-semibold">{comment.author?.firstname || "Someone"}</span><span className="text-slate-400">{shortDate(comment.createdAt)}</span></div><p className="mt-0.5 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-200">{comment.body}</p></div></div>)}
+              {(task.comments || []).map((comment) => <div key={comment._id} className="flex gap-2.5"><Avatar user={comment.author} size="sm"/><div className="min-w-0 flex-1 rounded-xl bg-slate-50 px-3 py-2 dark:bg-slate-900"><div className="flex flex-wrap items-center gap-2 text-xs"><span className="min-w-0 break-words font-semibold">{comment.author?.firstname || "Someone"}</span><span className="text-slate-400">{shortDate(comment.createdAt)}</span></div>{comment.body && <p className="mt-0.5 whitespace-pre-wrap break-words text-xs leading-5 text-slate-700 [overflow-wrap:anywhere] dark:text-slate-200 sm:text-sm">{comment.body}</p>}{comment.attachment && (comment.attachment.mimeType?.startsWith("image/") ? <a href={comment.attachment.url} target="_blank" rel="noreferrer" className="mt-1.5 block"><img src={comment.attachment.url} alt={comment.attachment.name} className="max-h-56 max-w-full rounded-lg border border-slate-200 object-cover dark:border-slate-700"/></a> : <a href={comment.attachment.url} target="_blank" rel="noreferrer" className="mt-1.5 inline-flex max-w-full items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-medium hover:text-indigo-600 dark:border-slate-700 dark:bg-slate-950"><Paperclip size={13} className="shrink-0"/><span className="truncate">{comment.attachment.name}</span></a>)}</div></div>)}
               {!(task.comments || []).length && <p className="text-xs text-slate-400">No comments yet.</p>}
             </div>
-            {readOnly ? <p className="mt-4 text-xs text-slate-400">Commenting is disabled while this task is locked.</p> : <form onSubmit={submitComment} className="mt-4 flex items-center gap-2"><Avatar user={user} size="sm"/><input value={commentText} onChange={(event) => setCommentText(event.target.value)} maxLength={4000} placeholder="Leave a reply…" className="h-9 flex-1 rounded-lg border border-slate-200 bg-transparent px-3 text-sm outline-none focus:border-indigo-600 dark:border-slate-700"/><button disabled={posting || !commentText.trim()} className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-white disabled:opacity-50 dark:bg-white dark:text-slate-950"><Send size={14}/></button></form>}
+            {!readOnly ? <form onSubmit={submitComment} className="mt-4 flex items-end gap-2.5">
+              <Avatar user={user} size="sm"/>
+              <div className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-1.5 dark:border-slate-700 dark:bg-slate-900">
+                {(pendingAttachment || attachingComment) && <div className="flex items-center gap-2 border-b border-slate-100 py-2 dark:border-slate-800">
+                  {attachingComment ? <span className="text-xs text-slate-400">Uploading…</span> : pendingAttachment.mimeType?.startsWith("image/") ? <img src={pendingAttachment.url} alt={pendingAttachment.name} className="h-12 w-12 rounded-lg border border-slate-200 object-cover dark:border-slate-700"/> : <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium dark:border-slate-700"><Paperclip size={13}/><span className="max-w-32 truncate">{pendingAttachment.name}</span></span>}
+                  {pendingAttachment && !attachingComment && <button type="button" onClick={cancelPendingAttachment} aria-label="Remove attachment" className="ml-auto rounded p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-500"><X size={13}/></button>}
+                </div>}
+                <div className="flex items-center gap-1">
+                  <input value={commentText} onChange={(event) => setCommentText(event.target.value)} maxLength={4000} placeholder="Add a comment…" className="h-9 min-w-0 flex-1 border-0 bg-transparent text-xs outline-none focus:ring-0 sm:text-sm"/>
+                  <input ref={commentAttachmentInputRef} onChange={attachCommentImage} type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv" className="hidden"/>
+                  <button type="button" onClick={() => commentAttachmentInputRef.current?.click()} disabled={attachingComment || Boolean(pendingAttachment)} aria-label="Attach a file" className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-slate-300"><Paperclip size={15}/></button>
+                  <button type="submit" disabled={posting || attachingComment || (!commentText.trim() && !pendingAttachment)} aria-label="Send comment" className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white disabled:opacity-40 dark:bg-white dark:text-slate-950"><Send size={13}/></button>
+                </div>
+              </div>
+            </form> : permissionReadOnly ? <p className="mt-4 text-xs text-slate-400">Commenting is disabled while this task is locked.</p> : null}
           </section>
         </div>
-        <footer className="flex shrink-0 gap-2 border-t border-slate-200 p-4 dark:border-slate-800"><button onClick={save} disabled={readOnly} className="h-10 flex-1 rounded-lg bg-[hsl(var(--color-primary))] text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">{readOnly ? <span className="inline-flex items-center justify-center gap-1.5"><Lock size={14}/>Locked</span> : "Save changes"}</button></footer>
+        <footer className="flex shrink-0 gap-2 border-t border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-950 sm:p-4">{permissionReadOnly ? <span className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-slate-100 text-xs font-semibold text-slate-500 dark:bg-slate-900 dark:text-slate-400"><Lock size={14}/>View only</span> : isEditing ? <><button type="button" onClick={() => { setDraft(task); setIsEditing(false); }} className="h-10 rounded-lg border border-slate-200 px-4 text-xs font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900">Cancel</button><button onClick={save} className="h-10 flex-1 rounded-lg bg-[hsl(var(--color-primary))] text-xs font-semibold text-white shadow-sm hover:opacity-90 sm:text-sm">Save changes</button></> : <button type="button" onClick={() => setIsEditing(true)} className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-[hsl(var(--color-primary))] text-xs font-semibold text-white shadow-sm hover:opacity-90 sm:text-sm"><Pencil size={14}/>Edit task</button>}</footer>
       </div>
-      {detailsOpen && <aside className="hidden w-80 shrink-0 flex-col overflow-y-auto border-l border-slate-200 p-5 dark:border-slate-800 sm:flex lg:w-[42%] lg:p-6">
-        <h3 className="mb-2 text-sm font-semibold">Details</h3>
+      {detailsOpen && <aside className="hidden min-h-0 min-w-0 flex-col overscroll-contain overflow-y-auto border-l border-slate-200 p-5 dark:border-slate-800 lg:flex lg:p-6 xl:p-7">
+        <h3 className="mb-1 text-sm font-semibold">Task details</h3>
+        <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">Keep ownership, priority, and dates in sync.</p>
         {detailsFields}
       </aside>}
-    </div>
-  </div>;
+    </div>;
 }
 
 export default function WorkspaceApp() {
@@ -650,16 +700,20 @@ export default function WorkspaceApp() {
   useEffect(() => { load(); const saved = localStorage.getItem("accentColor"); if (saved && accentPalette[saved]) setAccent(saved); const savedTeam = localStorage.getItem("activeTeamId"); if (savedTeam) setActiveTeamId(savedTeam); }, []);
   useEffect(() => { if (activeTeamId) localStorage.setItem("activeTeamId", activeTeamId); else localStorage.removeItem("activeTeamId"); }, [activeTeamId]);
   useEffect(() => { if (activeTeamId && validTeams.length && !validTeams.some((team) => team._id === activeTeamId)) setActiveTeamId(null); }, [validTeams, activeTeamId]);
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const taskId = params.get("task");
-    if (!taskId) return;
-    setSelected({ _id: taskId });
-    api.get(`/tasks/${taskId}`).then((response) => setSelected(response.data.task)).catch(() => {});
-    const url = new URL(window.location.href);
-    url.searchParams.delete("task");
-    window.history.replaceState({}, "", url.toString());
+  const openTaskById = useCallback((taskId) => {
+    setSelected((current) => (current && String(current._id) === String(taskId)) ? current : { _id: taskId });
+    api.get(`/tasks/${taskId}`).then((response) => setSelected(response.data.task)).catch(() => setSelected(null));
   }, []);
+  useEffect(() => {
+    const initialTaskId = new URLSearchParams(window.location.search).get("task");
+    if (initialTaskId) { window.history.replaceState({ taskId: initialTaskId }, "", window.location.href); openTaskById(initialTaskId); }
+    const onPopState = (event) => {
+      const taskId = event.state?.taskId || new URLSearchParams(window.location.search).get("task");
+      if (taskId) openTaskById(taskId); else setSelected(null);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [openTaskById]);
   useEffect(() => {
     const value = accentPalette[accent]?.value;
     if (!value) return;
@@ -695,15 +749,31 @@ export default function WorkspaceApp() {
   }, [debouncedQuery, priority, page]);
   const taskSearchIds = searchMatch?.page === "tasks" ? searchMatch.ids : null;
   const projectSearchIds = searchMatch?.page === "projects" ? searchMatch.ids : null;
-  const shownTasks = useMemo(() => tasks.filter((task) => { if (task.parentTask || task.archivedAt) return false; const teamId = task.team?._id || task.team || null; const inScope = activeTeamId ? String(teamId) === String(activeTeamId) : !teamId; if (!inScope) return false; return !taskSearchIds || taskSearchIds.has(task._id); }), [tasks, taskSearchIds, activeTeamId]);
+  const shownTasks = useMemo(() => {
+    const subtasksByParent = tasks.reduce((summaries, item) => {
+      const parentId = item.parentTask?._id || item.parentTask;
+      if (!parentId) return summaries;
+      const key = String(parentId);
+      const current = summaries[key] || { total: 0, completed: 0 };
+      current.total += 1;
+      if (displayStatus(item.status) === "completed") current.completed += 1;
+      summaries[key] = current;
+      return summaries;
+    }, {});
+    return tasks.filter((task) => { if (task.parentTask || task.archivedAt) return false; const teamId = task.team?._id || task.team || null; const inScope = activeTeamId ? String(teamId) === String(activeTeamId) : !teamId; if (!inScope) return false; return !taskSearchIds || taskSearchIds.has(task._id); }).map((task) => ({ ...task, subtaskSummary: subtasksByParent[String(task._id)] }));
+  }, [tasks, taskSearchIds, activeTeamId]);
   const shownProjects = useMemo(() => projects.filter((project) => { if (project.archivedAt) return false; const teamId = project.team?._id || project.team || null; const inScope = activeTeamId ? String(teamId) === String(activeTeamId) : !teamId; if (!inScope) return false; return !projectSearchIds || projectSearchIds.has(project._id); }), [projects, projectSearchIds, activeTeamId]);
   const create = useCallback(async (kind, payload) => { try { const response = await api.post(`/${kind === "task" ? "tasks" : "projects"}`, { ...payload, ...(activeTeamId ? { team: activeTeamId } : {}) }); if (kind === "task") { setTasks((current) => [normalizeTeamRelation(response.data.task), ...current]); setQuery(""); setPriority("all"); } else setProjects((current) => [normalizeTeamRelation(response.data.project), ...current]); toast.success(`${kind === "task" ? "Task" : "Project"} created`); } catch (error) { toast.error(error.response?.data?.message || "Unable to save"); throw error; } }, [activeTeamId]);
-  const updateTask = useCallback(async (id, patch, successMessage = "Task updated") => { try { const response = await api.put(`/tasks/${id}`, patch); setTasks((current) => current.map((item) => item._id === id ? response.data.task : item)); setSelected(response.data.task); toast.success(successMessage); } catch (error) { toast.error(error.response?.data?.message || "Unable to update task"); } }, []);
-  const deleteTask = useCallback(async (task) => { if (!window.confirm(`Delete "${task.title}"? This cannot be undone.`)) return; try { await api.delete(`/tasks/${task._id}`); setTasks((current) => current.filter((item) => item._id !== task._id)); setSelected((current) => (current?._id === task._id ? null : current)); toast.success("Task deleted"); } catch (error) { toast.error(error.response?.data?.message || "Unable to delete task"); } }, []);
+  const updateTask = useCallback(async (id, patch, successMessage = "Task updated") => { try { const response = await api.put(`/tasks/${id}`, patch); setTasks((current) => current.map((item) => item._id === id ? response.data.task : item)); setSelected(response.data.task); toast.success(successMessage); return response.data.task; } catch (error) { toast.error(error.response?.data?.message || "Unable to update task"); return null; } }, []);
+  const goBackFromTask = useCallback(() => {
+    if (new URLSearchParams(window.location.search).get("task")) window.history.back();
+    else setSelected(null);
+  }, []);
+  const deleteTask = useCallback(async (task) => { if (!window.confirm(`Delete "${task.title}"? This cannot be undone.`)) return; try { await api.delete(`/tasks/${task._id}`); setTasks((current) => current.filter((item) => item._id !== task._id)); setSelected((current) => { if (current?._id !== task._id) return current; goBackFromTask(); return current; }); toast.success("Task deleted"); } catch (error) { toast.error(error.response?.data?.message || "Unable to delete task"); } }, [goBackFromTask]);
   const updateProject = useCallback(async (id, patch) => { try { const response = await api.put(`/projects/${id}`, patch); setProjects((current) => current.map((item) => item._id === id ? normalizeTeamRelation(response.data.project) : item)); if (patch.members) { const updatedTasks = new Map((response.data.tasks || []).map((task) => [task._id, normalizeTeamRelation(task)])); setTasks((current) => current.map((task) => updatedTasks.get(task._id) || task)); toast.success("Project members updated and assigned to its tasks"); } else { toast.success("Project updated"); } } catch (error) { toast.error(error.response?.data?.message || "Unable to update project"); throw error; } }, []);
   const deleteProject = useCallback(async (project) => { if (!window.confirm(`Delete "${project.title}"? Tasks linked to it will be kept but unlinked.`)) return; try { await api.delete(`/projects/${project._id}`); setProjects((current) => current.filter((item) => item._id !== project._id)); toast.success("Project deleted"); } catch (error) { toast.error(error.response?.data?.message || "Unable to delete project"); } }, []);
   const archiveProject = useCallback(async (project) => { try { const response = await api.put(`/projects/${project._id}`, { archived: true }); setProjects((current) => current.map((item) => item._id === project._id ? normalizeTeamRelation(response.data.project) : item)); toast.success("Project archived. Its tasks are kept safely."); } catch (error) { toast.error(error.response?.data?.message || "Unable to archive project"); } }, []);
-  const openTask = useCallback(async (task) => { setSelected(task); try { const response = await api.get(`/tasks/${task._id}`); setSelected(response.data.task); } catch { /* keep the lightweight version already shown */ } }, []);
+  const openTask = useCallback(async (task) => { setSelected(task); window.history.pushState({ taskId: task._id }, "", `${window.location.pathname}?task=${task._id}`); try { const response = await api.get(`/tasks/${task._id}`); setSelected(response.data.task); } catch { /* keep the lightweight version already shown */ } }, []);
   const moveTask = useCallback((id, status, position) => updateTask(id, { status, ...(Number.isFinite(position) ? { position } : {}) }), [updateTask]);
   const openNewTask = useCallback((status) => setDialog({ kind: "task", ...(status ? { status } : {}) }), []);
   const openNewProject = useCallback(() => setDialog({ kind: "project" }), []);
@@ -715,15 +785,15 @@ export default function WorkspaceApp() {
   const inviteMember = async (id, email, role = "editor") => { try { const response = await api.post(`/teams/${id}/members`, { email, role }); if (response.data.team) setTeams((current) => current.map((item) => item?._id === id ? response.data.team : item).filter(Boolean)); toast.success(response.data.message || "Invitation sent"); } catch (error) { toast.error(error.response?.data?.message || "Unable to send invitation"); } };
   const removeMember = async (id, memberId) => { try { const response = await api.delete(`/teams/${id}/members/${memberId}`); setTeams((current) => current.map((item) => item._id === id ? response.data.team : item)); if (String(memberId) === String(user.id)) { if (activeTeamId === id) setActiveTeamId(null); setTeamModal(null); } toast.success("Member removed"); } catch (error) { toast.error(error.response?.data?.message || "Unable to remove member"); } };
   const deleteTeamFn = async (id) => { if (!window.confirm("Delete this team? Its tasks and projects will become personal again.")) return; try { await api.delete(`/teams/${id}`); setTeams((current) => current.filter((item) => item._id !== id)); if (activeTeamId === id) setActiveTeamId(null); setTeamModal(null); toast.success("Team deleted"); } catch (error) { toast.error(error.response?.data?.message || "Unable to delete team"); } };
-  const addComment = async (id, body) => { try { const response = await api.post(`/tasks/${id}/comments`, { body }); setTasks((current) => current.map((item) => item._id === id ? response.data.task : item)); setSelected((current) => (current?._id === id ? response.data.task : current)); } catch (error) { toast.error(error.response?.data?.message || "Unable to post comment"); } };
+  const addComment = async (id, body, attachmentId) => { try { const response = await api.post(`/tasks/${id}/comments`, { body, attachmentId }); setTasks((current) => current.map((item) => item._id === id ? response.data.task : item)); setSelected((current) => (current?._id === id ? response.data.task : current)); } catch (error) { toast.error(error.response?.data?.message || "Unable to post comment"); } };
   const toggleWatch = async (id) => { try { const response = await api.post(`/tasks/${id}/watch`); setTasks((current) => current.map((item) => item._id === id ? response.data.task : item)); setSelected((current) => (current?._id === id ? response.data.task : current)); toast.success(response.data.watching ? "Watching task" : "Stopped watching"); } catch (error) { toast.error(error.response?.data?.message || "Unable to update watch status"); } };
-  const uploadAttachment = async (id, file) => { try { const form = new FormData(); form.append("file", file); const response = await api.post(`/tasks/${id}/attachments`, form); setTasks((current) => current.map((item) => item._id === id ? { ...item, attachments: [...(item.attachments || []), response.data.attachment] } : item)); setSelected((current) => current?._id === id ? { ...current, attachments: [...(current.attachments || []), response.data.attachment] } : current); toast.success("Attachment added"); } catch (error) { toast.error(error.response?.data?.message || "Unable to upload attachment"); } };
+  const uploadAttachment = async (id, file, { silent = false } = {}) => { try { const form = new FormData(); form.append("file", file); const response = await api.post(`/tasks/${id}/attachments`, form, { headers: { "Content-Type": undefined } }); setTasks((current) => current.map((item) => item._id === id ? { ...item, attachments: [...(item.attachments || []), response.data.attachment] } : item)); setSelected((current) => current?._id === id ? { ...current, attachments: [...(current.attachments || []), response.data.attachment] } : current); if (!silent) toast.success("Attachment added"); return response.data.attachment; } catch (error) { toast.error(error.response?.data?.message || "Unable to upload attachment"); return null; } };
   const removeAttachment = async (id, attachmentId) => { try { await api.delete(`/tasks/${id}/attachments/${attachmentId}`); const remove = (item) => ({ ...item, attachments: (item.attachments || []).filter((attachment) => attachment._id !== attachmentId) }); setTasks((current) => current.map((item) => item._id === id ? remove(item) : item)); setSelected((current) => current?._id === id ? remove(current) : current); toast.success("Attachment removed"); } catch (error) { toast.error(error.response?.data?.message || "Unable to remove attachment"); } };
-  const archiveTask = async (task) => { await updateTask(task._id, { archived: !task.archivedAt }, task.archivedAt ? "Task restored" : "Task archived"); if (!task.archivedAt) setSelected(null); };
+  const archiveTask = async (task) => { await updateTask(task._id, { archived: !task.archivedAt }, task.archivedAt ? "Task restored" : "Task archived"); if (!task.archivedAt) goBackFromTask(); };
   const logOut = async () => { try { await api.post("/auth/logout"); } finally { clearAuth(); router.push("/auth/login"); } };
   const navItems = [{ id: "tasks", label: "Tasks", icon: LayoutGrid }, { id: "projects", label: "Projects", icon: FolderKanban }].map(({ id, label, icon: Icon }) => <button key={id} onClick={() => { setPage(id); setMobileOpen(false); }} className={`flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium ${page === id ? "bg-slate-100 text-slate-950 dark:bg-slate-800 dark:text-white" : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"}`}><Icon size={17} className={page === id ? "text-[hsl(var(--color-primary))]" : ""}/>{label}</button>);
-  return <ProtectedRoute><div className="min-h-screen bg-white text-slate-950 dark:bg-slate-950 dark:text-slate-100"><div className="flex min-h-screen">
-    <aside className={`${sidebarCollapsed ? "hidden" : "hidden md:flex"} w-64 shrink-0 flex-col border-r border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-950`}>
+  return <ProtectedRoute><div className="min-h-[100dvh] overflow-x-clip bg-white text-slate-950 dark:bg-slate-950 dark:text-slate-100"><div className="flex min-h-[100dvh] min-w-0">
+    <aside className={`${sidebarCollapsed ? "hidden" : "hidden lg:flex"} w-64 shrink-0 flex-col border-r border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-950`}>
       <div ref={profileMenuRef} className="relative border-b border-slate-200 p-3 dark:border-slate-800">
         <button onClick={() => setProfileOpen(!profileOpen)} className="flex w-full items-center gap-2 rounded-lg p-2 text-left hover:bg-white dark:hover:bg-slate-900"><Avatar user={user} size="sm"/><span className="min-w-0 flex-1 truncate text-sm font-semibold">{user ? `${user.firstname} ${user.lastname}` : "Workspace"}</span><ChevronsUpDown size={15}/></button>
         {profileOpen && <div className="absolute left-3 right-3 top-14 z-50 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -751,8 +821,8 @@ export default function WorkspaceApp() {
       </nav>}
       <div className="mt-auto border-t border-slate-200 p-4 text-xs leading-5 text-slate-500 dark:border-slate-800">Your data is visible only to your authenticated account and any teams you belong to.</div>
     </aside>
-    {mobileOpen && <div className="fixed inset-0 z-40 bg-slate-950/40 md:hidden" onClick={() => setMobileOpen(false)}>
-      <aside ref={mobileDrawerRef} className="flex h-full w-[85vw] max-w-80 flex-col overflow-y-auto bg-white shadow-2xl dark:bg-slate-950" onClick={(event) => event.stopPropagation()}>
+    {mobileOpen && <div className="fixed inset-0 z-40 bg-slate-950/40 lg:hidden" onClick={() => setMobileOpen(false)}>
+      <aside ref={mobileDrawerRef} className="flex h-full w-[min(22rem,88vw)] flex-col overflow-y-auto bg-white shadow-2xl dark:bg-slate-950" onClick={(event) => event.stopPropagation()}>
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-4 dark:border-slate-800">
           <div className="flex min-w-0 items-center gap-2"><Avatar user={user} size="sm"/><span className="min-w-0 truncate text-sm font-semibold">{user ? `${user.firstname} ${user.lastname}` : "Workspace"}</span></div>
           <IconButton label="Close navigation" onClick={() => setMobileOpen(false)}><X size={18}/></IconButton>
@@ -783,9 +853,23 @@ export default function WorkspaceApp() {
         </div>
       </aside>
     </div>}
-    <main className="min-w-0 flex-1"><header className="sticky top-0 z-20 flex min-h-16 items-center gap-2 border-b border-slate-200 bg-white/90 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90 sm:px-6"><IconButton label="Open navigation" onClick={() => setMobileOpen(true)} className="md:hidden"><Menu size={19}/></IconButton><IconButton label={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"} onClick={() => setSidebarCollapsed((value) => !value)} className="hidden md:inline-flex"><PanelLeft size={18}/></IconButton><div className="hidden h-5 w-px bg-slate-200 dark:bg-slate-700 md:block"/><div className="flex min-w-0 flex-1 items-center gap-3"><h1 className="truncate text-lg font-semibold">{page === "tasks" ? "Tasks" : "Projects"}</h1><span className="hidden shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400 sm:inline">{activeTeam ? activeTeam.name : "Personal"}</span>{user && page === "tasks" && <span className="hidden items-center gap-2 rounded-full border border-slate-200 py-1 pl-1 pr-3 dark:border-slate-700 sm:inline-flex"><Avatar user={user} size="sm"/><span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{shownTasks.length} active</span></span>}</div><div className="relative hidden sm:block"><Search size={16} className="pointer-events-none absolute left-3 top-2.5 text-slate-400"/><input value={query} onChange={(event) => setQuery(event.target.value)} className="h-9 w-52 rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-indigo-600 dark:border-slate-700 dark:bg-slate-900 lg:w-72" placeholder={`Search ${page}`}/></div><NotificationButton/><div className="relative"><button onClick={() => setMenu(menu === "fields" ? null : "fields")} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"><SlidersHorizontal size={15}/><span className="hidden md:inline">Fields</span>{priority !== "all" && <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--color-primary))]"/>}</button>{menu === "fields" && <FieldMenu view={view} setView={setView} fields={fields} setFields={setFields} priority={priority} setPriority={setPriority} page={page} close={() => setMenu(null)}/>}</div><button onClick={() => setDialog(page === "tasks" ? { kind: "task" } : { kind: "project" })} className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[hsl(var(--color-primary))] px-3 text-sm font-semibold text-white hover:opacity-90"><Plus size={16}/><span>Add {page === "tasks" ? "Task" : "Project"}</span></button></header>
-    <div className="px-4 py-5 sm:px-6 lg:px-8"><div className="mb-4 sm:hidden"><label className="relative block"><Search size={16} className="pointer-events-none absolute left-3 top-2.5 text-slate-400"/><input value={query} onChange={(event) => setQuery(event.target.value)} className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-indigo-600 dark:border-slate-700 dark:bg-slate-900" placeholder={`Search ${page}`}/></label></div>{loading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, index) => <div key={index} className="h-48 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-900"/>)}</div> : page === "tasks" ? <div className="overflow-x-auto pb-4">{view === "board" ? <TaskBoard tasks={shownTasks} fields={fields} onOpen={openTask} onMove={moveTask} onNew={openNewTask} onDelete={deleteTask}/> : <TaskList tasks={shownTasks} fields={fields} onOpen={openTask} onMove={moveTask} onNew={openNewTask} onDelete={deleteTask}/>}</div> : <ProjectTable projects={shownProjects} teams={validTeams} currentUser={user} fields={fields} onNew={openNewProject} onEdit={editProject} onDelete={deleteProject} onUpdateMembers={updateProjectMembers}/>}</div></main>
-  </div>{dialog && <NewItemDialog kind={dialog.kind} initial={dialog.initial} projects={shownProjects} team={activeTeam} user={user} onClose={() => setDialog(null)} onSubmit={(payload) => dialog.id ? updateProject(dialog.id, payload) : create(dialog.kind, { ...payload, ...(dialog.status ? { status: dialog.status } : {}) })}/>} {selected && <TaskPanel key={selected._id} task={selected} tasks={tasks} teams={teams} user={user} onClose={() => setSelected(null)} onSave={updateTask} onDelete={deleteTask} onOpen={openTask} onCreateSubtask={createSubtask} onAddComment={addComment} onToggleWatch={toggleWatch} onUploadAttachment={uploadAttachment} onRemoveAttachment={removeAttachment} onArchive={archiveTask}/>} {teamModal && <TeamSettings team={teamModal.team} onClose={() => setTeamModal(null)} onCreate={createTeam} onRename={renameTeam} onInvite={inviteMember} onRemoveMember={removeMember} onDeleteTeam={deleteTeamFn} currentUserId={user?.id}/>}</div></ProtectedRoute>;
+    <main className="min-w-0 flex-1">
+      <header className="sticky top-0 z-20 flex min-h-16 items-center gap-2 border-b border-slate-200 bg-white/90 px-3 py-2 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90 sm:px-4 lg:flex-nowrap lg:px-6">
+        <IconButton label="Open navigation" onClick={() => setMobileOpen(true)} className="lg:hidden"><Menu size={20}/></IconButton>
+        <div className="hidden lg:block"><IconButton label={sidebarCollapsed ? "Show sidebar" : "Hide sidebar"} onClick={() => setSidebarCollapsed((value) => !value)}><PanelLeft size={18}/></IconButton></div>
+        <div className="hidden h-5 w-px bg-slate-200 dark:bg-slate-700 lg:block"/>
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+          <h1 className="hidden truncate text-lg font-semibold sm:block">{page === "tasks" ? "Tasks" : "Projects"}</h1>
+          <span className="hidden shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400 md:inline">{activeTeam ? activeTeam.name : "Personal"}</span>
+          {user && page === "tasks" && <span className="hidden items-center gap-2 rounded-full border border-slate-200 py-1 pl-1 pr-3 dark:border-slate-700 2xl:inline-flex"><Avatar user={user} size="sm"/><span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{shownTasks.length} active</span></span>}
+        </div>
+        <div className="relative hidden xl:block"><Search size={16} className="pointer-events-none absolute left-3 top-2.5 text-slate-400"/><input value={query} onChange={(event) => setQuery(event.target.value)} className="h-9 w-48 rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-indigo-600 dark:border-slate-700 dark:bg-slate-900 2xl:w-72" placeholder={`Search ${page}`}/></div>
+        <NotificationButton/>
+        <div className="relative"><button onClick={() => setMenu(menu === "fields" ? null : "fields")} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 sm:px-3"><SlidersHorizontal size={16}/><span className="hidden xl:inline">Fields</span>{priority !== "all" && <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--color-primary))]"/>}</button>{menu === "fields" && <FieldMenu view={view} setView={setView} fields={fields} setFields={setFields} priority={priority} setPriority={setPriority} page={page} close={() => setMenu(null)}/>}</div>
+        <button onClick={() => setDialog(page === "tasks" ? { kind: "task" } : { kind: "project" })} className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[hsl(var(--color-primary))] px-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:h-9 sm:rounded-lg"><Plus size={17}/><span>Add {page === "tasks" ? "Task" : "Project"}</span></button>
+      </header>
+    <div className="min-w-0 px-3 py-4 sm:px-5 lg:px-6 xl:px-8">{selected ? <TaskPanel key={selected._id} task={selected} tasks={tasks} teams={teams} user={user} onClose={goBackFromTask} onSave={updateTask} onDelete={deleteTask} onOpen={openTask} onCreateSubtask={createSubtask} onAddComment={addComment} onToggleWatch={toggleWatch} onUploadAttachment={uploadAttachment} onRemoveAttachment={removeAttachment} onArchive={archiveTask}/> : <><div className="mb-4 xl:hidden"><label className="relative block"><Search size={16} className="pointer-events-none absolute left-3 top-2.5 text-slate-400"/><input value={query} onChange={(event) => setQuery(event.target.value)} className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-indigo-600 dark:border-slate-700 dark:bg-slate-900" placeholder={`Search ${page}`}/></label></div>{loading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, index) => <div key={index} className="h-48 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-900"/>)}</div> : page === "tasks" ? <div className="min-w-0 pb-4">{view === "board" ? <TaskBoard tasks={shownTasks} fields={fields} onOpen={openTask} onMove={moveTask} onNew={openNewTask} onDelete={deleteTask}/> : <TaskList tasks={shownTasks} fields={fields} onOpen={openTask} onMove={moveTask} onNew={openNewTask} onDelete={deleteTask}/>}</div> : <ProjectTable projects={shownProjects} teams={validTeams} currentUser={user} fields={fields} onNew={openNewProject} onEdit={editProject} onDelete={deleteProject} onUpdateMembers={updateProjectMembers}/>}</>}</div></main>
+  </div>{dialog && <NewItemDialog kind={dialog.kind} initial={dialog.initial} projects={shownProjects} team={activeTeam} user={user} onClose={() => setDialog(null)} onSubmit={(payload) => dialog.id ? updateProject(dialog.id, payload) : create(dialog.kind, { ...payload, ...(dialog.status ? { status: dialog.status } : {}) })}/>} {teamModal && <TeamSettings team={teamModal.team} onClose={() => setTeamModal(null)} onCreate={createTeam} onRename={renameTeam} onInvite={inviteMember} onRemoveMember={removeMember} onDeleteTeam={deleteTeamFn} currentUserId={user?.id}/>}</div></ProtectedRoute>;
 }
 
 function MemberAvatars({ members = [], onAdd, label = "Manage members" }) {
@@ -816,39 +900,11 @@ function ProjectActivityDialog({ project, onClose }) {
   }, [project._id]);
   return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4" role="presentation" onMouseDown={onClose}>
     <section onMouseDown={(event) => event.stopPropagation()} className="max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-900" role="dialog" aria-modal="true" aria-labelledby="project-activity-title">
-      <div className="flex items-start justify-between gap-4"><div><h2 id="project-activity-title" className="text-lg font-semibold">Project activity</h2><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">A record of changes to {project.title}.</p></div><IconButton label="Close" onClick={onClose} className="bg-rose-600 text-white shadow-sm hover:border-rose-700 hover:bg-rose-700 dark:bg-rose-600 dark:text-white dark:hover:bg-rose-700"><X size={18}/></IconButton></div>
+      <div className="flex items-start justify-between gap-4"><div><h2 id="project-activity-title" className="text-lg font-semibold">Project activity</h2><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">A record of changes to {project.title}.</p></div><IconButton label="Close" onClick={onClose} className="bg-rose-600 text-white shadow-sm hover:border-rose-500 hover:bg-rose-500 dark:bg-rose-600 dark:text-white dark:hover:bg-rose-500"><X size={18}/></IconButton></div>
       <div className="mt-5 max-h-[60vh] space-y-4 overflow-y-auto pr-1">{loading ? <p className="py-8 text-center text-sm text-slate-500">Loading activity…</p> : activity.length ? activity.map((entry) => <div key={entry._id} className="flex gap-3"><Avatar user={entry.actor} size="sm"/><div className="min-w-0"><p className="text-sm font-medium">{entry.actor ? `${entry.actor.firstname || ""} ${entry.actor.lastname || ""}`.trim() : "Workspace"} <span className="font-normal text-slate-600 dark:text-slate-300">{entry.action}</span></p><p className="mt-0.5 text-xs text-slate-400">{new Date(entry.createdAt).toLocaleString()}</p></div></div>) : <p className="py-8 text-center text-sm text-slate-500">No project activity yet.</p>}</div>
     </section>
   </div>;
 }
-
-const ProjectCard = memo(function ProjectCard({ row, onEdit, onOpenActivity, onArchive, onDelete, onManageMembers }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const { project, members, canManageMembers, totalTasks, completedTasks, progress } = row;
-  return <article className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-    <div className="flex items-start gap-2">
-      <button onClick={onEdit} className="min-w-0 flex-1 text-left text-sm font-semibold leading-snug hover:text-indigo-600">{project.title}</button>
-      <div className="relative -mr-1.5 -mt-1 shrink-0">
-        <IconButton label={`More actions for ${project.title}`} onClick={() => setMenuOpen((open) => !open)} className="h-7 w-7"><Ellipsis size={16}/></IconButton>
-        {menuOpen && <>
-          <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)}/>
-          <div onClick={(event) => event.stopPropagation()} className="absolute right-0 top-8 z-40 w-40 rounded-lg border border-slate-200 bg-white p-1 text-left shadow-xl dark:border-slate-700 dark:bg-slate-900">
-            <button onClick={() => { setMenuOpen(false); onEdit(); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">Edit project</button>
-            <button onClick={() => { setMenuOpen(false); onOpenActivity(); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">Project activity</button>
-            <button onClick={() => { setMenuOpen(false); onArchive(); }} className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800"><Archive size={13}/>Archive project</button>
-            <button onClick={() => { setMenuOpen(false); onDelete(); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40">Delete project</button>
-          </div>
-        </>}
-      </div>
-    </div>
-    <div className="mt-2 flex items-center gap-2 text-[11px] text-slate-500"><span className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><span className="block h-full bg-emerald-500" style={{ width: `${progress}%` }}/></span>{completedTasks}/{totalTasks}</div>
-    <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-      <Priority value={project.priority}/>
-      <MemberAvatars members={members} onAdd={canManageMembers ? onManageMembers : undefined} label={`Manage members for ${project.title}`}/>
-    </div>
-    {project.dueDate && <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">Due {shortDate(project.dueDate)}</div>}
-  </article>;
-});
 
 const ProjectTable = memo(function ProjectTable({ projects, tasks = [], teams, currentUser, fields, onNew, onEdit, onDelete, onArchive, onUpdateMembers }) {
   const [menuFor, setMenuFor] = useState(null);
@@ -870,26 +926,26 @@ const ProjectTable = memo(function ProjectTable({ projects, tasks = [], teams, c
     const progress = projectTasks.length ? Math.round((completedTasks / projectTasks.length) * 100) : 0;
     return { project, members, canManageMembers, totalTasks: projectTasks.length, completedTasks, progress };
   });
-  return <div>
-    <div className="hidden overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 lg:block">
-    <table className="w-full min-w-[650px] text-left text-sm">
-      <thead className="bg-slate-50 text-xs font-medium text-slate-500 dark:bg-slate-900">
+  return <div className="min-w-0">
+    <div className="overflow-x-auto rounded-lg border-2 border-slate-300 dark:border-slate-700">
+    <table className="w-full min-w-[640px] table-fixed text-left text-sm">
+      <thead className="bg-slate-50 text-base font-semibold text-slate-700 dark:bg-slate-900/60 dark:text-slate-200">
         <tr>
-          <th className="px-4 py-3">Project</th>
-          {fields.priority && <th className="px-4 py-3">Priority</th>}
-          {fields.members && <th className="px-4 py-3">Members</th>}
-          {fields.dueDate && <th className="px-4 py-3">Due date</th>}
-          <th className="px-4 py-3 text-right">Actions</th>
+          <th className="px-3 py-2.5 font-semibold">Project</th>
+          {fields.priority && <th className="w-28 px-3 py-2.5 font-semibold">Priority</th>}
+          {fields.members && <th className="w-28 px-3 py-2.5 font-semibold">Members</th>}
+          {fields.dueDate && <th className="w-32 px-3 py-2.5 font-semibold">Due Date</th>}
+          <th className="w-16 px-3 py-2.5 text-right font-semibold">Actions</th>
         </tr>
       </thead>
       <tbody>
         {rows.map(({ project, members, canManageMembers, totalTasks, completedTasks, progress }) => {
-          return <tr key={project._id} className="border-t border-slate-100 dark:border-slate-800">
-            <td className="px-4 py-3"><span className="block font-medium">{project.title}</span><span className="mt-1 flex max-w-40 items-center gap-2 text-[11px] text-slate-500"><span className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><span className="block h-full bg-emerald-500" style={{ width: `${progress}%` }}/></span>{completedTasks}/{totalTasks}</span></td>
-            {fields.priority && <td className="px-4 py-3"><Priority value={project.priority}/></td>}
-            {fields.members && <td className="px-4 py-3"><MemberAvatars members={members} onAdd={canManageMembers ? () => setMemberProject(project) : undefined} label={`Manage members for ${project.title}`}/></td>}
-            {fields.dueDate && <td className="px-4 py-3 text-xs text-slate-600 dark:text-slate-300">{shortDate(project.dueDate)}</td>}
-            <td className="px-4 py-3 text-right">
+          return <tr key={project._id} className="border-t-2 border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900">
+            <td className="px-3 py-3.5"><button onClick={() => onEdit(project)} title={project.title} className="block w-full truncate text-left font-semibold text-slate-900 hover:text-indigo-600 dark:text-white">{project.title}</button><span className="mt-1 flex max-w-40 items-center gap-2 text-[11px] text-slate-500"><span className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><span className="block h-full bg-emerald-500" style={{ width: `${progress}%` }}/></span>{completedTasks}/{totalTasks}</span></td>
+            {fields.priority && <td className="whitespace-nowrap px-3 py-3.5"><Priority value={project.priority}/></td>}
+            {fields.members && <td className="whitespace-nowrap px-3 py-3.5"><MemberAvatars members={members} onAdd={canManageMembers ? () => setMemberProject(project) : undefined} label={`Manage members for ${project.title}`}/></td>}
+            {fields.dueDate && <td className="whitespace-nowrap px-3 py-3.5 text-xs font-medium text-slate-700 dark:text-slate-300">{shortDate(project.dueDate)}</td>}
+            <td className="whitespace-nowrap px-3 py-3.5 text-right">
               <div className="relative inline-block">
                 <IconButton label={`More actions for ${project.title}`} onClick={() => setMenuFor(menuFor === project._id ? null : project._id)} className="h-7 w-7"><Ellipsis size={16}/></IconButton>
                 {menuFor === project._id && <>
@@ -905,15 +961,10 @@ const ProjectTable = memo(function ProjectTable({ projects, tasks = [], teams, c
             </td>
           </tr>;
         })}
-        {!projects.length && <tr><td colSpan={colSpan} className="px-4 py-12 text-center text-slate-500"><FolderKanban className="mx-auto mb-3"/>No projects yet.<br/><button onClick={onNew} className="mt-3 font-semibold text-indigo-600">Create your first project</button></td></tr>}
+        {!projects.length && <tr><td colSpan={colSpan} className="px-3 py-12 text-center text-slate-500"><FolderKanban className="mx-auto mb-3"/>No projects yet.<br/><button onClick={onNew} className="mt-3 font-semibold text-indigo-600">Create your first project</button></td></tr>}
       </tbody>
     </table>
-    {projects.length > 0 && <button onClick={onNew} className="flex h-10 w-full items-center gap-1.5 border-t border-slate-100 px-4 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-900"><Plus size={14}/>Add Project</button>}
-    </div>
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:hidden">
-      {rows.map((row) => <ProjectCard key={row.project._id} row={row} onEdit={() => onEdit(row.project)} onOpenActivity={() => setActivityProject(row.project)} onArchive={() => archiveRow(row.project)} onDelete={() => onDelete(row.project)} onManageMembers={() => setMemberProject(row.project)}/>)}
-      {!projects.length && <div className="col-span-full rounded-xl border border-dashed border-slate-200 p-8 text-center text-slate-500 dark:border-slate-700"><FolderKanban className="mx-auto mb-3"/>No projects yet.<br/><button onClick={onNew} className="mt-3 font-semibold text-indigo-600">Create your first project</button></div>}
-      {projects.length > 0 && <button onClick={onNew} className="col-span-full flex h-10 w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"><Plus size={14}/>Add Project</button>}
+    {projects.length > 0 && <button onClick={onNew} className="flex h-14 w-full items-center gap-1.5 border-t-2 border-slate-200 px-3 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-900"><Plus size={14}/>Add Project</button>}
     </div>
     {memberProject && <ProjectMembersDialog project={memberProject} team={teams.find((team) => String(team._id) === String(memberProject.team?._id || memberProject.team))} currentUser={currentUser} onClose={() => setMemberProject(null)} onSave={onUpdateMembers}/>}
     {activityProject && <ProjectActivityDialog key={activityProject._id} project={activityProject} onClose={() => setActivityProject(null)}/>}

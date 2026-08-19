@@ -92,6 +92,16 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isGuest: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    guestExpiresAt: {
+      type: Date,
+      default: null,
+      index: true,
+    },
     role: {
       type: String,
       enum: ['user', 'admin', 'buyer'],

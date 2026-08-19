@@ -217,7 +217,7 @@ export async function POST(req) {
     await task.populate(["project", { path: "assignees", select: taskSelect }, { path: "reporter", select: taskSelect }]);
     await addActivity({ actor: user._id, entityType: "task", entityId: task._id, team: task.team, action: "created", details: { title: task.title } });
     await notifyMany({
-      recipients: task.assignees,
+      recipients: defaultAssignees,
       actor: user._id,
       type: "assignment",
       title: "You were assigned a task",

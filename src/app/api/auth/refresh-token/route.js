@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import connectDB from "@/lib/db";
+import User from "@/models/User";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -59,6 +60,13 @@ export async function POST(req) {
         { success: false, message: "Invalid or expired refresh token" },
         { status: 401 }
       );
+    }
+
+    const user = await User.findById(decoded.userId).select("isGuest guestExpiresAt");
+    if (!user || (user.isGuest && (!user.guestExpiresAt || user.guestExpiresAt <= new Date()))) {
+      cookieStore.set("accessToken", "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 0, path: "/" });
+      cookieStore.set("refreshToken", "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 0, path: "/" });
+      return NextResponse.json({ success: false, message: "Your guest session has expired. Please sign up to continue." }, { status: 401 });
     }
 
     // Generate new tokens

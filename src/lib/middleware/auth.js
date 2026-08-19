@@ -14,14 +14,14 @@ const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 // Records a signed-in device as a new session, evicting the oldest ones
 // beyond MAX_SESSIONS_PER_USER instead of letting the array grow forever.
-export async function recordSession(userId, refreshToken, { userAgent = "", ipHash = null } = {}) {
+export async function recordSession(userId, refreshToken, { userAgent = "", ipHash = null, ttlMs = SESSION_TTL_MS } = {}) {
   const now = new Date();
   await User.updateOne(
     { _id: userId },
     {
       $push: {
         sessions: {
-          $each: [{ tokenHash: hashRefreshToken(refreshToken), userAgent, ipHash, createdAt: now, lastUsedAt: now, expiresAt: new Date(now.getTime() + SESSION_TTL_MS) }],
+          $each: [{ tokenHash: hashRefreshToken(refreshToken), userAgent, ipHash, createdAt: now, lastUsedAt: now, expiresAt: new Date(now.getTime() + ttlMs) }],
           $slice: -MAX_SESSIONS_PER_USER,
         },
       },
@@ -169,6 +169,10 @@ export async function authenticateToken(req, cookies) {
     const user = await User.findById(decoded.userId).select("-password");
     if (!user) {
       return { user: null, error: "User not found" };
+    }
+
+    if (user.isGuest && (!user.guestExpiresAt || user.guestExpiresAt <= new Date())) {
+      return { user: null, error: "Your guest session has expired. Please sign up to continue." };
     }
 
     if (!user.isVerified) {

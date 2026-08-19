@@ -2,8 +2,13 @@ import mongoose from "mongoose";
 
 const commentSchema = new mongoose.Schema(
   {
-    body: { type: String, required: true, trim: true, maxlength: 4000 },
+    body: { type: String, trim: true, maxlength: 4000, default: "" },
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    attachment: {
+      name: { type: String, maxlength: 180 },
+      url: { type: String, maxlength: 500 },
+      mimeType: { type: String, maxlength: 120 },
+    },
   },
   { timestamps: true, _id: true }
 );

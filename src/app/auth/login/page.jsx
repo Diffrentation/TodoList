@@ -77,6 +77,22 @@ function Login() {
 
   const handleSignup = () => router.push("/auth/signup");
   const handleforgotPass = () => router.push("/auth/forgot-password");
+  const continueAsGuest = async () => {
+    setLoading(true);
+    try {
+      const response = await api.post("/auth/guest");
+      if (response.data.user) {
+        saveUserToLocalStorage(response.data.user, true);
+        window.dispatchEvent(new Event("userUpdated"));
+      }
+      toast.success(response.data.message || "Guest workspace ready");
+      router.push("/dashboard");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Unable to start a guest workspace");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 sm:px-6 lg:px-8 py-12 relative">
@@ -198,6 +214,22 @@ function Login() {
               )}
               <BottomGradient />
             </button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55, duration: 0.3, ease: "easeOut" }}
+          >
+            <button
+              type="button"
+              onClick={continueAsGuest}
+              disabled={loading}
+              className="flex h-11 w-full items-center justify-center rounded-xl bg-slate-900 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+            >
+              Continue as guest
+            </button>
+            <p className="mt-2 text-center text-xs leading-5 text-muted-foreground">Your private guest workspace expires after 24 hours.</p>
           </motion.div>
 
           <div className="relative my-8">

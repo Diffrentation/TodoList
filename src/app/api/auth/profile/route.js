@@ -34,6 +34,8 @@ export async function GET(req) {
       username: user.username || "",
       address: user.address,
       isVerified: user.isVerified,
+      isGuest: Boolean(user.isGuest),
+      guestExpiresAt: user.guestExpiresAt,
     };
 
     return NextResponse.json(
@@ -170,6 +172,8 @@ export async function PUT(req) {
       username: user.username || "",
       address: user.address,
       isVerified: user.isVerified,
+      isGuest: Boolean(user.isGuest),
+      guestExpiresAt: user.guestExpiresAt,
     };
 
     return NextResponse.json(

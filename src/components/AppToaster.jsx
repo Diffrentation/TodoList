@@ -6,15 +6,15 @@ export default function AppToaster() {
   return (
     <Toaster
       position="top-right"
-      gutter={10}
-      containerStyle={{ top: 20, right: 20 }}
+      gutter={6}
+      containerStyle={{ top: 12, right: 12 }}
       toastOptions={{
         duration: 3600,
         style: {
           background: "transparent",
           boxShadow: "none",
           color: "inherit",
-          maxWidth: "calc(100vw - 32px)",
+          maxWidth: "calc(100vw - 24px)",
           padding: 0,
         },
         success: { duration: 2800 },
@@ -34,7 +34,7 @@ export default function AppToaster() {
                 : "bg-indigo-500";
             return (
               <div
-                className={`flex w-[min(22rem,calc(100vw-2rem))] items-center gap-3 overflow-hidden rounded-xl border bg-white p-3 shadow-lg shadow-slate-950/10 dark:bg-slate-950 ${
+                className={`flex w-[min(18rem,calc(100vw-1.5rem))] items-center gap-2 overflow-hidden rounded-lg border bg-white p-2 shadow-md shadow-slate-950/10 dark:bg-slate-950 ${
                   isError
                     ? "border-rose-200 text-slate-900 dark:border-rose-900/70 dark:text-slate-100"
                     : isSuccess
@@ -42,16 +42,16 @@ export default function AppToaster() {
                       : "border-slate-200 text-slate-900 dark:border-slate-700 dark:text-slate-100"
                 }`}
               >
-                <span className={`h-9 w-1 shrink-0 rounded-full ${accent}`} aria-hidden />
-                <span className="shrink-0" aria-hidden>{icon}</span>
-                <div className="min-w-0 flex-1 pr-1">
-                  <p className="text-sm font-medium leading-5 text-slate-700 dark:text-slate-200">{message}</p>
+                <span className={`h-7 w-0.5 shrink-0 rounded-full ${accent}`} aria-hidden />
+                <span className="shrink-0 [&>svg]:h-4 [&>svg]:w-4" aria-hidden>{icon}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium leading-4 text-slate-700 dark:text-slate-200">{message}</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => toast.dismiss(notification.id)}
                   aria-label="Dismiss notification"
-                  className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                  className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded text-xs text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
                 >
                   <span aria-hidden>×</span>
                 </button>
