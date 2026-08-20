@@ -4,9 +4,7 @@ import connectDB from "@/lib/db";
 import User from "@/models/User";
 import { authenticateToken } from "@/lib/middleware/auth";
 import { errorHandler } from "@/lib/middleware/errorHandler";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { uploadImageBuffer, destroyImage } from "@/lib/cloudinary";
 
 // GET profile
 export async function GET(req) {
@@ -106,17 +104,13 @@ export async function PUT(req) {
           const bytes = await profileImageFile.arrayBuffer();
           const buffer = Buffer.from(bytes);
 
-          const uploadsDir = join(process.cwd(), "public", "uploads", "profiles");
-          if (!existsSync(uploadsDir)) {
-            await mkdir(uploadsDir, { recursive: true });
-          }
+          const result = await uploadImageBuffer(buffer, {
+            folder: "todolist/profiles",
+            publicId: String(user._id),
+          });
 
-          const timestamp = Date.now();
-          const filename = `${timestamp}-${profileImageFile.name}`;
-          const filepath = join(uploadsDir, filename);
-
-          await writeFile(filepath, buffer);
-          updateData.profileImage = `/uploads/profiles/${filename}`;
+          updateData.profileImage = result.secure_url;
+          updateData.profileImagePublicId = result.public_id;
         } catch (error) {
           console.error("Error saving profile image:", error);
         }
@@ -140,19 +134,11 @@ export async function PUT(req) {
       
       // Handle profile image deletion
       if (deleteProfileImage === true) {
-        // Delete old image file if it exists
-        if (user.profileImage) {
-          try {
-            const { unlink } = require("fs/promises");
-            const oldImagePath = join(process.cwd(), "public", user.profileImage);
-            if (existsSync(oldImagePath)) {
-              await unlink(oldImagePath);
-            }
-          } catch (error) {
-            console.error("Error deleting old profile image:", error);
-          }
+        if (user.profileImagePublicId) {
+          await destroyImage(user.profileImagePublicId);
         }
         updateData.profileImage = "";
+        updateData.profileImagePublicId = "";
       }
     }
 

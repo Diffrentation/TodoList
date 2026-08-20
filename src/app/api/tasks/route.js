@@ -128,6 +128,7 @@ export async function GET(req) {
     const priority = searchParams.get("priority");
     const project = searchParams.get("project");
     const search = searchParams.get("search")?.trim();
+    const team = searchParams.get("team");
 
     if (status) {
       const normalized = normalizeStatus(status);
@@ -143,6 +144,11 @@ export async function GET(req) {
       if (!isObjectId(project)) return NextResponse.json({ success: false, message: "Invalid project" }, { status: 400 });
       conditions.push({ project });
     }
+    if (team) {
+      if (team === "personal") conditions.push({ team: null });
+      else if (isObjectId(team) && teamIds.some((id) => String(id) === team)) conditions.push({ team });
+      else return NextResponse.json({ success: false, message: "Invalid team" }, { status: 400 });
+    }
     if (search) {
       conditions.push({
         $or: [
@@ -155,16 +161,31 @@ export async function GET(req) {
 
     const query = conditions.length > 1 ? { $and: conditions } : conditions[0];
 
-    const tasks = await Task.find(query)
+    // Pagination is opt-in: omitting `limit` keeps the historical
+    // "return everything matching" behavior other callers rely on.
+    const skip = Math.max(0, parseInt(searchParams.get("skip"), 10) || 0);
+    const limitParam = parseInt(searchParams.get("limit"), 10);
+    const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 200) : null;
+
+    let taskQuery = Task.find(query)
       .populate("project", "title")
       .populate("assignees", taskSelect)
       .populate("reporter", taskSelect)
-      .sort({ position: 1, createdAt: -1 })
-      .lean();
+      .sort({ position: 1, createdAt: -1 });
+    if (limit) taskQuery = taskQuery.skip(skip).limit(limit);
+    const [tasks, total] = await Promise.all([
+      taskQuery.lean(),
+      limit ? Task.countDocuments(query) : null,
+    ]);
 
     await createDueReminders(tasks.filter((task) => (task.assignees || []).some((assignee) => String(assignee?._id || assignee) === String(user._id))), user._id);
 
-    return NextResponse.json({ success: true, tasks, count: tasks.length });
+    return NextResponse.json({
+      success: true,
+      tasks,
+      count: tasks.length,
+      ...(limit ? { total, hasMore: skip + tasks.length < total } : {}),
+    });
   } catch (error) {
     return errorHandler(error);
   }

@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
@@ -63,6 +63,16 @@ function OTPPageContent() {
       });
     }
   }, [userId, type]);
+
+  // A short cooldown on "Resend" — an email that was just sent on this same
+  // page load can take a moment to arrive, so give it time before offering
+  // another send instead of inviting an immediate re-click.
+  const [resendCooldown, setResendCooldown] = useState(30);
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = window.setTimeout(() => setResendCooldown((value) => value - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendCooldown]);
 
   const onSubmit = async (data) => {
     if (type === "forgot" && !email) {
@@ -141,7 +151,15 @@ function OTPPageContent() {
     <div className="flex justify-center items-center min-h-screen px-4 sm:px-6 lg:px-8 py-12">
       <div className="w-full max-w-md">
         <div className="border border-border bg-gradient-to-br from-card via-card/95 to-muted/20 p-6 sm:p-8 md:p-10 rounded-2xl shadow-xl shadow-primary/10 backdrop-blur-sm">
-        <h2 className="text-2xl font-bold mb-6 text-center">Enter OTP</h2>
+        <h2 className="text-2xl font-bold mb-2 text-center">Enter OTP</h2>
+        <p className="mb-6 text-center text-sm text-muted-foreground">
+          {email ? (
+            <>We sent a 6-digit code to <strong>{email}</strong>.</>
+          ) : (
+            <>We sent a 6-digit code to your email.</>
+          )}{" "}
+          It can take a minute to arrive — check your spam folder if you don&apos;t see it.
+        </p>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -178,6 +196,7 @@ function OTPPageContent() {
             <div className="text-center mt-4">
               <button
                 type="button"
+                disabled={resendCooldown > 0}
                 onClick={async () => {
                   if (type === "forgot" && !email) {
                     toast.error("Start again from the password reset page.");
@@ -198,6 +217,7 @@ function OTPPageContent() {
                       toast.success(
                         res.data.message || "OTP resent successfully!"
                       );
+                      setResendCooldown(30);
                     }
                   } catch (error) {
                     toast.error(
@@ -205,9 +225,9 @@ function OTPPageContent() {
                     );
                   }
                 }}
-                className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 ease-out cursor-pointer"
+                className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 ease-out cursor-pointer disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline dark:disabled:text-slate-500"
               >
-                Resend OTP
+                {resendCooldown > 0 ? `Resend OTP in ${resendCooldown}s` : "Resend OTP"}
               </button>
             </div>
           </form>

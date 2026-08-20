@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import toast from "react-hot-toast";
 import {
-  ArrowLeft, BarChart3, CalendarDays, Check, ChevronDown, ChevronRight, ChevronsUpDown, Circle,
+  ArrowLeft, BarChart3, CalendarDays, Check, ChevronDown, ChevronRight, ChevronsUpDown, Circle, Loader2,
   Columns3, Ellipsis, Eye, FolderKanban, GripVertical, LayoutGrid, LayoutList, Link2, LogOut, Menu,
   MoreHorizontal, PanelLeft, PanelRight, Pencil, Plus, Search, Send, Settings, SlidersHorizontal, Sun, Tag, UserRound, Users, X, LockKeyhole, LockOpen, Lock, Unlock, Bell, Archive, Paperclip,
 } from "lucide-react";
@@ -29,6 +29,7 @@ const columns = [
   { id: "on_hold", label: "On Hold" },
 ];
 const priorities = ["none", "urgent", "high", "medium", "low"];
+const PAGE_SIZE = 12;
 const defaultFields = { status: false, priority: true, members: true, dueDate: true, labels: true, reporter: false };
 const fieldMeta = {
   status: { icon: Circle, label: "Status" },
@@ -189,9 +190,10 @@ function NewItemDialog({ kind, initial, onClose, onSubmit, projects, team, user 
       onClose();
     } finally { setSaving(false); }
   };
-  return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4" role="presentation" onMouseDown={onClose}>
-    <form onSubmit={submit} onMouseDown={(event) => event.stopPropagation()} className="max-h-[calc(100dvh-2rem)] w-full max-w-6xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:max-h-[88vh] sm:p-6 lg:p-8" role="dialog" aria-modal="true" aria-labelledby="new-item-title">
-      <div className="sticky top-0 z-20 -mx-5 -mt-5 mb-5 flex items-center justify-between border-b border-slate-100 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 sm:-mx-6 sm:-mt-6 sm:px-6 sm:py-5 lg:-mx-8 lg:-mt-8 lg:px-8"><h2 id="new-item-title" className="text-lg font-semibold">{isEdit ? `Edit ${kind}` : `Create ${kind}`}</h2><IconButton label="Close dialog" onClick={onClose} className="bg-rose-600 text-white shadow-sm hover:border-rose-500 hover:bg-rose-500 dark:bg-rose-600 dark:text-white dark:hover:bg-rose-500"><X size={18}/></IconButton></div>
+  return <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-2 sm:p-4" role="presentation" onMouseDown={onClose}>
+    <form onSubmit={submit} onMouseDown={(event) => event.stopPropagation()} className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-slate-900 sm:rounded-2xl" role="dialog" aria-modal="true" aria-labelledby="new-item-title">
+      <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6 sm:py-5 lg:px-8"><h2 id="new-item-title" className="text-lg font-semibold">{isEdit ? `Edit ${kind}` : `Create ${kind}`}</h2><IconButton label="Close dialog" onClick={onClose} className="bg-rose-600 text-white shadow-sm hover:border-rose-500 hover:bg-rose-500 dark:bg-rose-600 dark:text-white dark:hover:bg-rose-500"><X size={18}/></IconButton></div>
+      <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6 lg:p-8">
       <label className="mb-4 block text-sm font-medium">{kind === "task" ? "Task title" : "Project name"}<input autoFocus required maxLength={kind === "task" ? 200 : 120} value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1.5 h-11 w-full rounded-lg border border-slate-300 bg-transparent px-3 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700" placeholder={kind === "task" ? "e.g. Write API documentation" : "e.g. Website redesign"}/></label>
       <label className="mb-4 block text-sm font-medium">Description<textarea value={description} onChange={(e) => setDescription(e.target.value)} maxLength={4000} className="mt-1.5 min-h-24 w-full rounded-lg border border-slate-300 bg-transparent p-3 outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700" placeholder="Add context for collaborators"/></label>
       {kind === "task" && <div className="grid gap-x-5 lg:grid-cols-2">
@@ -212,7 +214,8 @@ function NewItemDialog({ kind, initial, onClose, onSubmit, projects, team, user 
         <label className="mb-4 block text-sm font-medium">Priority<select value={priority} onChange={(e) => setPriority(e.target.value)} className="mt-1.5 h-11 w-full rounded-lg border border-slate-300 bg-transparent px-3 dark:border-slate-700">{priorities.map((item) => <option key={item} value={item}>{item === "none" ? "No priority" : item[0].toUpperCase() + item.slice(1)}</option>)}</select></label>
         <label className="mb-5 block text-sm font-medium">Due date<div className="mt-1.5"><DatePicker value={dueDate} onChange={setDueDate}/></div></label>
       </>}
-      <div className="flex justify-end gap-2"><button type="button" onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">Cancel</button><button disabled={saving} className="h-10 rounded-lg bg-[hsl(var(--color-primary))] px-4 text-sm font-semibold text-white disabled:opacity-60 hover:opacity-90">{saving ? "Saving…" : isEdit ? "Save changes" : `Create ${kind}`}</button></div>
+      </div>
+      <div className="flex shrink-0 justify-end gap-2 border-t border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6 lg:px-8"><button type="button" onClick={onClose} className="h-10 rounded-lg px-4 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">Cancel</button><button disabled={saving} className="h-10 rounded-lg bg-[hsl(var(--color-primary))] px-4 text-sm font-semibold text-white disabled:opacity-60 hover:opacity-90">{saving ? "Saving…" : isEdit ? "Save changes" : `Create ${kind}`}</button></div>
     </form>
   </div>;
 }
@@ -315,7 +318,7 @@ const TaskCard = memo(function TaskCard({ task, fields, onOpen, onDelete, onMove
   </article>;
 });
 
-const TaskBoard = memo(function TaskBoard({ tasks, allTasks = tasks, fields, onOpen, onMove, onNew, onDelete }) {
+const TaskBoard = memo(function TaskBoard({ tasks, allTasks = tasks, fields, onOpen, onMove, onNew, onDelete, columnVisible = {}, columnLoading = {}, onLoadMore }) {
   const [collapsed, setCollapsed] = useState({});
   const [menuColumn, setMenuColumn] = useState(null);
   const [mobileColumn, setMobileColumn] = useState(columns[0].id);
@@ -329,6 +332,17 @@ const TaskBoard = memo(function TaskBoard({ tasks, allTasks = tasks, fields, onO
     summaries[key] = current;
     return summaries;
   }, {}), [allTasks]);
+  // One combined "Show more" for the whole board instead of one per column:
+  // only the columns that actually still have unloaded tasks get fetched.
+  const columnStats = useMemo(() => columns.map((column) => {
+    const total = tasks.filter((task) => displayStatus(task.status) === column.id).length;
+    const visibleCount = Math.min(columnVisible[column.id] ?? PAGE_SIZE, total);
+    return { id: column.id, total, visibleCount, hasMore: visibleCount < total };
+  }), [tasks, columnVisible]);
+  const pendingColumns = columnStats.filter((stat) => stat.hasMore);
+  const remainingTotal = pendingColumns.reduce((sum, stat) => sum + (stat.total - stat.visibleCount), 0);
+  const boardLoading = pendingColumns.some((stat) => columnLoading[stat.id]);
+  const loadMoreAll = () => pendingColumns.forEach((stat) => onLoadMore(stat.id, stat.visibleCount));
   return <div className="min-w-0">
     <div className="-mx-1 mb-3 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:hidden" role="tablist" aria-label="Task board columns">
       {columns.map((column) => {
@@ -345,6 +359,9 @@ const TaskBoard = memo(function TaskBoard({ tasks, allTasks = tasks, fields, onO
     {columns.map((column) => {
       const items = tasks.filter((task) => displayStatus(task.status) === column.id);
       const isCollapsed = collapsed[column.id];
+      const visibleCount = Math.min(columnVisible[column.id] ?? PAGE_SIZE, items.length);
+      const visibleItems = items.slice(0, visibleCount);
+      const hasMore = visibleCount < items.length;
       return <section key={column.id} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const id = event.dataTransfer.getData("text/task-id"); if (id) onMove(id, column.id, Math.max(-1, ...items.map((item) => item.position || 0)) + 1); }} className={`min-h-72 min-w-0 rounded-xl bg-slate-100/80 p-2 dark:bg-slate-900/70 ${mobileColumn === column.id ? "block" : "hidden"} sm:block`}>
         <div className="mb-2 flex items-center gap-1.5 rounded-lg px-1.5 py-1.5">
           <GripVertical size={14} className="shrink-0 text-slate-400"/>
@@ -363,76 +380,98 @@ const TaskBoard = memo(function TaskBoard({ tasks, allTasks = tasks, fields, onO
           </div>
         </div>
         {!isCollapsed && <>
-          <div className="space-y-2">{items.map((task) => <TaskCard key={task._id} task={task} fields={fields} onOpen={onOpen} onDelete={onDelete} subtaskSummary={subtaskSummaries[String(task._id)]}/>)}</div>
+          <div className="space-y-2">{visibleItems.map((task) => <TaskCard key={task._id} task={task} fields={fields} onOpen={onOpen} onDelete={onDelete} subtaskSummary={subtaskSummaries[String(task._id)]}/>)}</div>
+          {hasMore && <button onClick={() => onLoadMore(column.id, visibleCount)} disabled={columnLoading[column.id]} className="mt-2 flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-2 text-xs font-medium text-slate-600 hover:bg-white disabled:opacity-60 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 sm:hidden">{columnLoading[column.id] ? <Loader2 size={14} className="animate-spin"/> : <ChevronDown size={14}/>}{columnLoading[column.id] ? "Loading…" : `Show more (${items.length - visibleCount} left)`}</button>}
           <button onClick={() => onNew(column.id)} className="mt-2 flex h-9 w-full items-center gap-1 rounded-lg px-2 text-xs font-medium text-slate-600 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"><Plus size={14}/>Add task</button>
         </>}
       </section>;
     })}
     </div>
+    {pendingColumns.length > 0 && <button onClick={loadMoreAll} disabled={boardLoading} className="mt-4 hidden h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-slate-300 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900 sm:flex">{boardLoading ? <Loader2 size={15} className="animate-spin"/> : <ChevronDown size={15}/>}{boardLoading ? "Loading…" : `Show more (${remainingTotal} left)`}</button>}
   </div>;
 });
 
-const TaskList = memo(function TaskList({ tasks, fields, onOpen, onMove, onNew, onDelete }) {
+const TaskList = memo(function TaskList({ tasks, fields, onOpen, onMove, onNew, onDelete, columnVisible = {}, columnLoading = {}, onLoadMore }) {
   const [collapsed, setCollapsed] = useState({});
   const [menuFor, setMenuFor] = useState(null);
   const colSpan = 2 + (fields.status ? 1 : 0) + (fields.priority ? 1 : 0) + (fields.members ? 1 : 0) + (fields.dueDate ? 1 : 0) + (fields.reporter ? 1 : 0);
+  // One combined "Show more" for the whole list instead of one per status
+  // table: only the groups that actually still have unloaded tasks get fetched.
+  const columnStats = useMemo(() => columns.map((column) => {
+    const total = tasks.filter((task) => displayStatus(task.status) === column.id).length;
+    const visibleCount = Math.min(columnVisible[column.id] ?? PAGE_SIZE, total);
+    return { id: column.id, total, visibleCount, hasMore: visibleCount < total };
+  }), [tasks, columnVisible]);
+  const pendingColumns = columnStats.filter((stat) => stat.hasMore);
+  const remainingTotal = pendingColumns.reduce((sum, stat) => sum + (stat.total - stat.visibleCount), 0);
+  const listLoading = pendingColumns.some((stat) => columnLoading[stat.id]);
+  const loadMoreAll = () => pendingColumns.forEach((stat) => onLoadMore(stat.id, stat.visibleCount));
   return <div className="min-w-0 space-y-4">
     {columns.map((column) => {
       const group = tasks.filter((task) => displayStatus(task.status) === column.id);
       const isCollapsed = collapsed[column.id];
+      const visibleCount = Math.min(columnVisible[column.id] ?? PAGE_SIZE, group.length);
+      const visibleGroup = group.slice(0, visibleCount);
+      const hasMore = visibleCount < group.length;
       return <section key={column.id}>
         <button onClick={() => setCollapsed((current) => ({ ...current, [column.id]: !current[column.id] }))} className="mb-2 flex items-center gap-1.5 rounded-md py-1 pr-2 hover:bg-slate-50 dark:hover:bg-slate-900">
           <ChevronDown size={15} className={`shrink-0 text-slate-500 transition-transform dark:text-slate-400 ${isCollapsed ? "-rotate-90" : ""}`}/>
           <h2 className="text-sm font-semibold">{column.label}</h2>
           <span className="text-xs text-slate-400">{group.length}</span>
         </button>
-        {!isCollapsed && <div className="overflow-x-auto rounded-lg border-2 border-slate-300 dark:border-slate-700">
-          <table className="w-full min-w-[640px] table-fixed text-left text-sm">
-            <thead className="bg-slate-50 text-base font-semibold text-slate-700 dark:bg-slate-900/60 dark:text-slate-200">
-              <tr>
-                <th className="px-3 py-2.5 font-semibold">Task</th>
-                {fields.status && <th className="w-28 px-3 py-2.5 font-semibold">Status</th>}
-                {fields.priority && <th className="w-28 px-3 py-2.5 font-semibold">Priority</th>}
-                {fields.members && <th className="w-28 px-3 py-2.5 font-semibold">Members</th>}
-                {fields.dueDate && <th className="w-32 px-3 py-2.5 font-semibold">Due Date</th>}
-                {fields.reporter && <th className="w-24 px-3 py-2.5 font-semibold">Reporter</th>}
-                <th className="w-16 px-3 py-2.5 text-right font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {group.map((task) => {
-                const assignees = task.assignees?.length ? task.assignees : (task.reporter ? [task.reporter] : []);
-                return <tr key={task._id} className="border-t-2 border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900">
-                  <td className="px-3 py-3.5"><div className="flex min-w-0 items-center gap-2"><button onClick={() => onOpen(task)} title={task.title} className="min-w-0 flex-1 truncate text-left font-semibold text-slate-900 hover:text-indigo-600 dark:text-white">{task.title}</button>{task.subtaskSummary?.total > 0 && <span className="shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">{task.subtaskSummary.total} subtask{task.subtaskSummary.total > 1 ? "s" : ""}</span>}</div></td>
-                  {fields.status && <td className="whitespace-nowrap px-3 py-3.5"><span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{statusMeta[displayStatus(task.status)] && <span className={`h-1.5 w-1.5 rounded-full ${statusMeta[displayStatus(task.status)].dot}`}/>}{statusMeta[displayStatus(task.status)]?.label}</span></td>}
-                  {fields.priority && <td className="whitespace-nowrap px-3 py-3.5"><Priority value={task.priority}/></td>}
-                  {fields.members && <td className="whitespace-nowrap px-3 py-3.5"><MemberAvatars members={assignees}/></td>}
-                  {fields.dueDate && <td className="whitespace-nowrap px-3 py-3.5 text-xs font-medium text-slate-700 dark:text-slate-300">{shortDate(task.dueDate)}</td>}
-                  {fields.reporter && <td className="whitespace-nowrap px-3 py-3.5">{task.reporter ? <Avatar user={task.reporter} size="sm"/> : <span className="text-xs text-slate-400">—</span>}</td>}
-                  <td className="whitespace-nowrap px-3 py-3.5 text-right">
-                    <div className="relative inline-block">
-                      <IconButton label={`More actions for ${task.title}`} onClick={() => setMenuFor(menuFor === task._id ? null : task._id)} className="h-7 w-7"><Ellipsis size={16}/></IconButton>
-                      {menuFor === task._id && <>
-                        <div className="fixed inset-0 z-30" onClick={() => setMenuFor(null)}/>
-                        <div className="absolute right-0 top-8 z-40 w-44 rounded-lg border border-slate-200 bg-white p-1 text-left shadow-xl dark:border-slate-700 dark:bg-slate-900">
-                          <button onClick={() => { setMenuFor(null); onOpen(task); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">View task</button>
-                          <p className="px-2.5 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Move to</p>
-                          {columns.filter((item) => item.id !== column.id).map((item) => <button key={item.id} onClick={() => { setMenuFor(null); onMove(task._id, item.id); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">{item.label}</button>)}
-                          <div className="my-1 border-t border-slate-100 dark:border-slate-800"/>
-                          <button onClick={() => { setMenuFor(null); onDelete(task); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40">Delete task</button>
-                        </div>
-                      </>}
-                    </div>
-                  </td>
-                </tr>;
-              })}
-              {!group.length && <tr><td colSpan={colSpan} className="px-3 py-6 text-center text-sm text-slate-400">No tasks in {column.label}</td></tr>}
-            </tbody>
-          </table>
-          <button onClick={() => onNew(column.id)} className="flex h-14 w-full items-center gap-1.5 border-t-2 border-slate-200 px-3 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-900"><Plus size={14}/>Add Task</button>
+        {!isCollapsed && <div className="overflow-hidden rounded-lg border-2 border-slate-300 dark:border-slate-700">
+          <div className="max-h-[26rem] overflow-auto">
+            <table className="w-full min-w-[640px] table-fixed text-left text-sm">
+              <thead className="sticky top-0 z-10 bg-slate-50 text-base font-semibold text-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                <tr>
+                  <th className="px-3 py-2.5 font-semibold">Task</th>
+                  {fields.status && <th className="w-28 px-3 py-2.5 font-semibold">Status</th>}
+                  {fields.priority && <th className="w-28 px-3 py-2.5 font-semibold">Priority</th>}
+                  {fields.members && <th className="w-28 px-3 py-2.5 font-semibold">Members</th>}
+                  {fields.dueDate && <th className="w-32 px-3 py-2.5 font-semibold">Due Date</th>}
+                  {fields.reporter && <th className="w-24 px-3 py-2.5 font-semibold">Reporter</th>}
+                  <th className="w-16 px-3 py-2.5 text-right font-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visibleGroup.map((task) => {
+                  const assignees = task.assignees?.length ? task.assignees : (task.reporter ? [task.reporter] : []);
+                  return <tr key={task._id} className="border-t-2 border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900">
+                    <td className="px-3 py-3.5"><div className="flex min-w-0 items-center gap-2"><button onClick={() => onOpen(task)} title={task.title} className="min-w-0 flex-1 truncate text-left font-semibold text-slate-900 hover:text-indigo-600 dark:text-white">{task.title}</button>{task.subtaskSummary?.total > 0 && <span className="shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">{task.subtaskSummary.total} subtask{task.subtaskSummary.total > 1 ? "s" : ""}</span>}</div></td>
+                    {fields.status && <td className="whitespace-nowrap px-3 py-3.5"><span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">{statusMeta[displayStatus(task.status)] && <span className={`h-1.5 w-1.5 rounded-full ${statusMeta[displayStatus(task.status)].dot}`}/>}{statusMeta[displayStatus(task.status)]?.label}</span></td>}
+                    {fields.priority && <td className="whitespace-nowrap px-3 py-3.5"><Priority value={task.priority}/></td>}
+                    {fields.members && <td className="whitespace-nowrap px-3 py-3.5"><MemberAvatars members={assignees}/></td>}
+                    {fields.dueDate && <td className="whitespace-nowrap px-3 py-3.5 text-xs font-medium text-slate-700 dark:text-slate-300">{shortDate(task.dueDate)}</td>}
+                    {fields.reporter && <td className="whitespace-nowrap px-3 py-3.5">{task.reporter ? <Avatar user={task.reporter} size="sm"/> : <span className="text-xs text-slate-400">—</span>}</td>}
+                    <td className="whitespace-nowrap px-3 py-3.5 text-right">
+                      <div className="relative inline-block">
+                        <IconButton label={`More actions for ${task.title}`} onClick={(event) => { const openUp = window.innerHeight - event.currentTarget.getBoundingClientRect().bottom < 240; setMenuFor(menuFor?.id === task._id ? null : { id: task._id, openUp }); }} className="h-7 w-7"><Ellipsis size={16}/></IconButton>
+                        {menuFor?.id === task._id && <>
+                          <div className="fixed inset-0 z-30" onClick={() => setMenuFor(null)}/>
+                          <div className={`absolute right-0 z-40 max-h-72 w-44 overflow-y-auto rounded-lg border border-slate-200 bg-white p-1 text-left shadow-xl dark:border-slate-700 dark:bg-slate-900 ${menuFor.openUp ? "bottom-8" : "top-8"}`}>
+                            <button onClick={() => { setMenuFor(null); onOpen(task); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">View task</button>
+                            <p className="px-2.5 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Move to</p>
+                            {columns.filter((item) => item.id !== column.id).map((item) => <button key={item.id} onClick={() => { setMenuFor(null); onMove(task._id, item.id); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">{item.label}</button>)}
+                            <div className="my-1 border-t border-slate-100 dark:border-slate-800"/>
+                            <button onClick={() => { setMenuFor(null); onDelete(task); }} className="flex w-full items-center rounded-md px-2.5 py-1.5 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40">Delete task</button>
+                          </div>
+                        </>}
+                      </div>
+                    </td>
+                  </tr>;
+                })}
+                {!group.length && <tr><td colSpan={colSpan} className="px-3 py-6 text-center text-sm text-slate-400">No tasks in {column.label}</td></tr>}
+                {hasMore && <tr className="sm:hidden"><td colSpan={colSpan} className="border-t-2 border-slate-200 px-3 py-2.5 text-center dark:border-slate-700">
+                  <button onClick={() => onLoadMore(column.id, visibleCount)} disabled={columnLoading[column.id]} className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-60 dark:text-slate-300 dark:hover:bg-slate-800">{columnLoading[column.id] ? <Loader2 size={13} className="animate-spin"/> : <ChevronDown size={13}/>}{columnLoading[column.id] ? "Loading…" : `Show more (${group.length - visibleCount} left)`}</button>
+                </td></tr>}
+              </tbody>
+            </table>
+          </div>
+          <button onClick={() => onNew(column.id)} className="flex h-14 w-full shrink-0 items-center gap-1.5 border-t-2 border-slate-200 px-3 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-900"><Plus size={14}/>Add Task</button>
         </div>}
       </section>;
     })}
+    {pendingColumns.length > 0 && <button onClick={loadMoreAll} disabled={listLoading} className="hidden h-10 w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-slate-300 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900 sm:flex">{listLoading ? <Loader2 size={15} className="animate-spin"/> : <ChevronDown size={15}/>}{listLoading ? "Loading…" : `Show more (${remainingTotal} left)`}</button>}
   </div>;
 });
 
@@ -459,6 +498,20 @@ function InlineSelect({ value, options, onChange, render }) {
       <div className="fixed inset-0 z-30" onClick={() => setOpen(false)}/>
       <div className="absolute right-0 top-8 z-40 w-44 rounded-lg border border-slate-200 bg-white p-1 shadow-xl dark:border-slate-700 dark:bg-slate-900">
         {options.map((option) => <button key={option.value} onClick={() => { onChange(option.value); setOpen(false); }} className="flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800"><span className="flex items-center gap-1.5">{render(option)}</span>{value === option.value && <Check size={13}/>}</button>)}
+      </div>
+    </>}
+  </div>;
+}
+
+function InlineMultiSelect({ options, selectedIds, onToggle, renderTrigger, renderOption, getId = (option) => String(option._id || option.id) }) {
+  const [open, setOpen] = useState(false);
+  return <div className="relative">
+    <button type="button" onClick={() => setOpen((o) => !o)} className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-800">{renderTrigger()}<ChevronDown size={13} className="text-slate-400"/></button>
+    {open && <>
+      <div className="fixed inset-0 z-30" onClick={() => setOpen(false)}/>
+      <div className="absolute right-0 top-8 z-40 max-h-64 w-56 overflow-y-auto rounded-lg border border-slate-200 bg-white p-1 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+        {options.map((option) => { const id = getId(option); const checked = selectedIds.includes(id); return <button key={id} type="button" onClick={() => onToggle(option)} className="flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800">{renderOption(option)}{checked && <Check size={13} className="shrink-0"/>}</button>; })}
+        {!options.length && <p className="px-2.5 py-1.5 text-xs text-slate-400">No team members yet</p>}
       </div>
     </>}
   </div>;
@@ -513,7 +566,7 @@ function TaskPanel({ task, tasks, teams, user, onClose, onSave, onDelete, onOpen
   useEffect(() => { api.get(`/tasks/${task?._id}/activity`).then((response) => setActivity(response.data.activity || [])).catch(() => {}); }, [task?._id]);
   if (!task) return null;
   const update = (key, value) => setDraft((current) => ({ ...current, [key]: value }));
-  const save = async () => { const savedTask = await onSave(draft._id, { title: draft.title, description: draft.description, priority: draft.priority, status: draft.status, startDate: draft.startDate || null, dueDate: draft.dueDate || null, labels: draft.labels || [], assignees: draft.assignees?.map((person) => person._id || person) || [] }); if (savedTask) setIsEditing(false); };
+  const save = async () => { const savedTask = await onSave(draft._id, { title: draft.title, description: draft.description, priority: draft.priority, status: draft.status, startDate: draft.startDate || null, dueDate: draft.dueDate || null, labels: draft.labels || [], assignees: draft.assignees?.map((person) => person._id || person.id || person) || [] }); if (savedTask) setIsEditing(false); };
   const uploadAttachment = async (event) => { const file = event.target.files?.[0]; event.target.value = ""; if (!file) return; setUploading(true); try { await onUploadAttachment(task._id, file); } finally { setUploading(false); } };
   const attachCommentImage = async (event) => {
     const file = event.target.files?.[0];
@@ -561,17 +614,19 @@ function TaskPanel({ task, tasks, teams, user, onClose, onSave, onDelete, onOpen
   const permissionReadOnly = Boolean(draft.locked) && !isTaskManager;
   const readOnly = !isEditing || permissionReadOnly;
   const teamMembers = taskTeam?.members?.length ? taskTeam.members : (user ? [user] : []);
-  const assigneeId = (draft.assignees?.[0] && (draft.assignees[0]._id || draft.assignees[0])) || user?.id;
-  const assignee = teamMembers.find((member) => String(member._id) === String(assigneeId)) || task.assignees?.[0] || user;
+  const assignedIds = (draft.assignees || []).map((person) => String(person._id || person.id || person));
+  const toggleAssignee = (member) => { const id = String(member._id || member.id); update("assignees", assignedIds.includes(id) ? (draft.assignees || []).filter((person) => String(person._id || person.id || person) !== id) : [...(draft.assignees || []), member]); };
   const subtasks = (tasks || []).filter((item) => item.parentTask && String(item.parentTask) === String(task._id));
   const watcherCount = task.watchers?.length || 0;
   const isWatching = (task.watchers || []).some((watcher) => String(watcher._id || watcher) === String(user?.id));
   const detailsFields = <div className="overflow-hidden rounded-lg border-2 border-slate-300 dark:border-slate-700">
     <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Status</span>{isEditing && !permissionReadOnly ? <InlineSelect value={displayStatus(draft.status)} onChange={(value) => update("status", value)} options={columns.map((column) => ({ value: column.id }))} render={(option) => <span className="flex items-center gap-1.5">{statusMeta[option.value] && <span className={`h-1.5 w-1.5 rounded-full ${statusMeta[option.value].dot}`}/>}{statusMeta[option.value]?.label}</span>}/> : <span className="flex min-w-0 items-center justify-end gap-1.5 font-semibold"><span className={`h-1.5 w-1.5 shrink-0 rounded-full ${statusMeta[displayStatus(draft.status)]?.dot}`}/><span className="break-words">{statusMeta[displayStatus(draft.status)]?.label}</span></span>}</div>
-    <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Priority</span>{isEditing && !permissionReadOnly ? <InlineSelect value={draft.priority || "none"} onChange={(value) => update("priority", value)} options={priorities.map((value) => ({ value }))} render={(option) => <span className={`font-semibold ${priorityMeta[option.value]?.text}`}>{priorityMeta[option.value]?.label}</span>}/> : <span className={`min-w-0 break-words text-right font-semibold ${priorityMeta[draft.priority || "none"]?.text}`}>{priorityMeta[draft.priority || "none"]?.label}</span>}</div>
-    <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Assignee</span>{isEditing && !permissionReadOnly && teamMembers.length > 1 ? <InlineSelect value={assigneeId} onChange={(value) => update("assignees", [value])} options={teamMembers.map((member) => ({ value: member._id }))} render={(option) => { const person = teamMembers.find((member) => member._id === option.value); return <span className="flex min-w-0 items-center gap-1.5"><Avatar user={person} size="sm"/><span className="truncate font-semibold">{person?.firstname || "Unknown"}</span></span>; }}/> : <span className="flex min-w-0 items-center justify-end gap-1.5"><Avatar user={assignee} size="sm"/><span className="min-w-0 break-words text-right font-semibold">{assignee?.firstname || "You"}</span></span>}</div>
-    <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Reporter</span><span className="flex min-w-0 items-center justify-end gap-1.5"><Avatar user={task.reporter} size="sm"/><span className="min-w-0 break-words text-right font-semibold">{task.reporter?.firstname || "You"}</span></span></div>
-    <div className="flex min-w-0 items-center justify-between gap-3 px-3 py-3.5 text-sm"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Dates</span>{isEditing && !permissionReadOnly ? <span className="flex min-w-0 flex-wrap items-center justify-end gap-1"><DatePicker value={draft.startDate} onChange={(value) => update("startDate", value)}/><span className="text-slate-300 dark:text-slate-600">→</span><DatePicker value={draft.dueDate} onChange={(value) => update("dueDate", value)}/></span> : <span className="min-w-0 break-words text-right font-semibold">{draft.startDate ? shortDate(draft.startDate) : "No start date"} → {draft.dueDate ? shortDate(draft.dueDate) : "No due date"}</span>}</div>
+    <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Priority</span>{isEditing && !permissionReadOnly ? <InlineSelect value={draft.priority || "none"} onChange={(value) => update("priority", value)} options={priorities.map((value) => ({ value }))} render={(option) => <span className={`flex items-center gap-1.5 font-semibold ${priorityMeta[option.value]?.text}`}><BarChart3 size={13}/>{priorityMeta[option.value]?.label}</span>}/> : <span className={`flex min-w-0 items-center justify-end gap-1.5 break-words text-right font-semibold ${priorityMeta[draft.priority || "none"]?.text}`}><BarChart3 size={13} className="shrink-0"/>{priorityMeta[draft.priority || "none"]?.label}</span>}</div>
+    <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Members</span>{isEditing && !permissionReadOnly ? <InlineMultiSelect options={teamMembers} selectedIds={assignedIds} onToggle={toggleAssignee} renderTrigger={() => (draft.assignees || []).length ? <MemberAvatars members={draft.assignees}/> : <span className="text-xs font-semibold text-slate-400">Unassigned</span>} renderOption={(member) => <span className="flex min-w-0 items-center gap-1.5"><Avatar user={member} size="sm"/><span className="truncate">{member.firstname} {member.lastname}</span></span>}/> : (draft.assignees || []).length ? <MemberAvatars members={draft.assignees}/> : <span className="text-xs font-semibold text-slate-400">Unassigned</span>}</div>
+    <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Dates</span>{isEditing && !permissionReadOnly ? <span className="flex min-w-0 flex-wrap items-center justify-end gap-1"><DatePicker value={draft.startDate} onChange={(value) => update("startDate", value)}/><span className="text-slate-300 dark:text-slate-600">→</span><DatePicker value={draft.dueDate} onChange={(value) => update("dueDate", value)}/></span> : <span className="min-w-0 break-words text-right font-semibold">{draft.startDate ? shortDate(draft.startDate) : "No start date"} → {draft.dueDate ? shortDate(draft.dueDate) : "No due date"}</span>}</div>
+    <div className="flex min-w-0 items-start justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 pt-0.5 font-medium text-slate-500 dark:text-slate-400">Labels</span><div className="flex min-w-0 flex-wrap justify-end gap-1">{(draft.labels || []).length ? draft.labels.map((label) => <span key={label} className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">{label}</span>) : <span className="text-xs font-semibold text-slate-400">No labels</span>}</div></div>
+    <div className="flex min-w-0 items-center justify-between gap-3 border-b-2 border-slate-200 px-3 py-3.5 text-sm dark:border-slate-700"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Team</span><span className="min-w-0 truncate text-right font-semibold">{taskTeam?.name || "Personal"}</span></div>
+    <div className="flex min-w-0 items-center justify-between gap-3 px-3 py-3.5 text-sm"><span className="shrink-0 font-medium text-slate-500 dark:text-slate-400">Reporter</span><span className="flex min-w-0 items-center justify-end gap-1.5"><Avatar user={task.reporter} size="sm"/><span className="min-w-0 break-words text-right font-semibold">{task.reporter?.firstname || "You"}</span></span></div>
   </div>;
 
   return <div className={`flex h-[calc(100dvh-5rem)] min-h-0 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 lg:grid lg:grid-rows-[minmax(0,1fr)] ${detailsOpen ? "lg:grid-cols-[minmax(0,1.25fr)_minmax(22rem,0.75fr)]" : "lg:grid-cols-1"}`} role="region" aria-labelledby="task-detail-title">
@@ -605,7 +660,8 @@ function TaskPanel({ task, tasks, teams, user, onClose, onSave, onDelete, onOpen
 
           <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-slate-100 pt-5 text-sm dark:border-slate-800">
             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Properties</span>
-            <span className="flex items-center gap-1.5"><Avatar user={assignee} size="sm"/><span className="text-slate-600 dark:text-slate-300">{assignee?.firstname || "You"}</span></span>
+            {(draft.assignees || []).length ? <MemberAvatars members={draft.assignees}/> : <span className="flex items-center gap-1.5"><Avatar user={user} size="sm"/><span className="text-slate-600 dark:text-slate-300">Unassigned</span></span>}
+            {draft.priority && draft.priority !== "none" && <span className={`inline-flex items-center gap-1 text-xs font-semibold ${priorityMeta[draft.priority]?.text}`}><BarChart3 size={12}/>{priorityMeta[draft.priority]?.label}</span>}
             {draft.dueDate && <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-500 dark:bg-rose-950/40 dark:text-rose-400"><CalendarDays size={12}/>{shortDate(draft.dueDate)}</span>}
           </div>
 
@@ -616,7 +672,7 @@ function TaskPanel({ task, tasks, teams, user, onClose, onSave, onDelete, onOpen
           </div>
 
           <section className="mt-5"><div className="mb-2 flex items-center justify-between"><h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Attachments</h3>{!readOnly && <><input ref={attachmentInputRef} onChange={uploadAttachment} type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.csv" className="hidden"/><button onClick={() => attachmentInputRef.current?.click()} disabled={uploading} className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-50 dark:hover:bg-indigo-950/30"><Paperclip size={14}/>{uploading ? "Uploading…" : "Add file"}</button></>}</div>{(task.attachments || []).length ? <div className="flex flex-wrap gap-2">{task.attachments.map((attachment) => <span key={attachment._id || attachment.url} className="inline-flex max-w-full items-center gap-1 rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-medium dark:border-slate-700"><a href={attachment.url} target="_blank" rel="noreferrer" className="inline-flex min-w-0 items-center gap-1.5 hover:text-indigo-600"><Paperclip size={13}/><span className="max-w-36 truncate">{attachment.name}</span></a>{!readOnly && <button onClick={() => onRemoveAttachment(task._id, attachment._id)} aria-label={`Remove ${attachment.name}`} className="rounded p-0.5 text-slate-400 hover:bg-rose-50 hover:text-rose-500"><X size={13}/></button>}</span>)}</div> : <p className="text-xs text-slate-400">Attach PDFs, images, text files, or CSVs (up to 10 MB).</p>}</section>
-          <section className="mt-7"><h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Activity</h3>{activity.length ? <div className="space-y-2">{activity.slice(0, 8).map((entry) => <div key={entry._id} className="flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400"><Avatar user={entry.actor} size="sm"/><span><strong className="font-semibold text-slate-700 dark:text-slate-200">{entry.actor?.firstname || "Someone"}</strong> {entry.action.replaceAll("_", " ")}<span className="ml-1 text-slate-400">{shortDate(entry.createdAt)}</span></span></div>)}</div> : <p className="text-xs text-slate-400">No activity yet.</p>}</section>
+          <section className="mt-7"><h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Activity</h3>{activity.length ? <div className="max-h-[13rem] space-y-2 overflow-y-auto pr-1">{activity.map((entry) => <div key={entry._id} className="flex items-start gap-2 text-xs text-slate-500 dark:text-slate-400"><Avatar user={entry.actor} size="sm"/><span><strong className="font-semibold text-slate-700 dark:text-slate-200">{entry.actor?.firstname || "Someone"}</strong> {entry.action.replaceAll("_", " ")}<span className="ml-1 text-slate-400">{shortDate(entry.createdAt)}</span></span></div>)}</div> : <p className="text-xs text-slate-400">No activity yet.</p>}</section>
 
           <section className="mt-7">
             <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Subtasks<span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold normal-case text-slate-500 dark:bg-slate-800 dark:text-slate-400">{subtasks.length}</span></h3>
@@ -688,6 +744,11 @@ export default function WorkspaceApp() {
   const [user, setUser] = useState(null); const [tasks, setTasks] = useState([]); const [projects, setProjects] = useState([]); const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true); const [page, setPage] = useState("tasks"); const [view, setView] = useState("board"); const [fields, setFields] = useState(defaultFields);
   const [query, setQuery] = useState(""); const [priority, setPriority] = useState("all"); const [menu, setMenu] = useState(null); const [mobileOpen, setMobileOpen] = useState(false); const [selected, setSelected] = useState(null); const [dialog, setDialog] = useState(null); const [profileOpen, setProfileOpen] = useState(false); const [profileMenu, setProfileMenu] = useState(null); const [workspaceOpen, setWorkspaceOpen] = useState(true); const [teamsOpen, setTeamsOpen] = useState(true); const [sidebarCollapsed, setSidebarCollapsed] = useState(false); const [accent, setAccent] = useState("blue"); const [activeTeamId, setActiveTeamId] = useState(null); const [teamModal, setTeamModal] = useState(null);
+  // How many rows are rendered per status column, e.g. { todo: 12, doing: 24 }.
+  // Missing entries default to PAGE_SIZE. Reset whenever the active
+  // team/search/priority scope changes so a new scope starts at the top.
+  const [columnVisible, setColumnVisible] = useState({});
+  const [columnLoading, setColumnLoading] = useState({});
   const profileMenuRef = useRef(null);
   const closeProfileMenu = useCallback(() => { setProfileOpen(false); setProfileMenu(null); }, []);
   useDismissOnOutsideClick(profileMenuRef, closeProfileMenu);
@@ -747,6 +808,7 @@ export default function WorkspaceApp() {
       .catch(() => { if (!cancelled) setSearchMatch({ page, ids: new Set() }); });
     return () => { cancelled = true; };
   }, [debouncedQuery, priority, page]);
+  useEffect(() => { setColumnVisible({}); }, [activeTeamId, debouncedQuery, priority, page]);
   const taskSearchIds = searchMatch?.page === "tasks" ? searchMatch.ids : null;
   const projectSearchIds = searchMatch?.page === "projects" ? searchMatch.ids : null;
   const shownTasks = useMemo(() => {
@@ -765,6 +827,29 @@ export default function WorkspaceApp() {
   const shownProjects = useMemo(() => projects.filter((project) => { if (project.archivedAt) return false; const teamId = project.team?._id || project.team || null; const inScope = activeTeamId ? String(teamId) === String(activeTeamId) : !teamId; if (!inScope) return false; return !projectSearchIds || projectSearchIds.has(project._id); }), [projects, projectSearchIds, activeTeamId]);
   const create = useCallback(async (kind, payload) => { try { const response = await api.post(`/${kind === "task" ? "tasks" : "projects"}`, { ...payload, ...(activeTeamId ? { team: activeTeamId } : {}) }); if (kind === "task") { setTasks((current) => [normalizeTeamRelation(response.data.task), ...current]); setQuery(""); setPriority("all"); } else setProjects((current) => [normalizeTeamRelation(response.data.project), ...current]); toast.success(`${kind === "task" ? "Task" : "Project"} created`); } catch (error) { toast.error(error.response?.data?.message || "Unable to save"); throw error; } }, [activeTeamId]);
   const updateTask = useCallback(async (id, patch, successMessage = "Task updated") => { try { const response = await api.put(`/tasks/${id}`, patch); setTasks((current) => current.map((item) => item._id === id ? response.data.task : item)); setSelected(response.data.task); toast.success(successMessage); return response.data.task; } catch (error) { toast.error(error.response?.data?.message || "Unable to update task"); return null; } }, []);
+  // "Show more" for one status column: a real GET /tasks?status=&skip=&limit=
+  // round trip against the DB, merged into local state. Only that column's
+  // visible-row count grows — nothing else on the page re-renders or reloads.
+  const loadMoreForStatus = useCallback(async (status, alreadyVisible) => {
+    setColumnLoading((current) => ({ ...current, [status]: true }));
+    try {
+      const params = { status, skip: alreadyVisible, limit: PAGE_SIZE, team: activeTeamId || "personal" };
+      if (priority !== "all") params.priority = priority;
+      if (debouncedQuery) params.search = debouncedQuery;
+      const response = await api.get("/tasks", { params });
+      const fetched = (response.data.tasks || []).map(normalizeTeamRelation);
+      setTasks((current) => {
+        const byId = new Map(current.map((item) => [item._id, item]));
+        fetched.forEach((item) => byId.set(item._id, item));
+        return Array.from(byId.values());
+      });
+      setColumnVisible((current) => ({ ...current, [status]: alreadyVisible + PAGE_SIZE }));
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Unable to load more tasks");
+    } finally {
+      setColumnLoading((current) => ({ ...current, [status]: false }));
+    }
+  }, [activeTeamId, priority, debouncedQuery]);
   const goBackFromTask = useCallback(() => {
     if (new URLSearchParams(window.location.search).get("task")) window.history.back();
     else setSelected(null);
@@ -793,7 +878,7 @@ export default function WorkspaceApp() {
   const logOut = async () => { try { await api.post("/auth/logout"); } finally { clearAuth(); router.push("/auth/login"); } };
   const navItems = [{ id: "tasks", label: "Tasks", icon: LayoutGrid }, { id: "projects", label: "Projects", icon: FolderKanban }].map(({ id, label, icon: Icon }) => <button key={id} onClick={() => { setPage(id); setMobileOpen(false); }} className={`flex h-10 w-full items-center gap-3 rounded-lg px-3 text-sm font-medium ${page === id ? "bg-slate-100 text-slate-950 dark:bg-slate-800 dark:text-white" : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"}`}><Icon size={17} className={page === id ? "text-[hsl(var(--color-primary))]" : ""}/>{label}</button>);
   return <ProtectedRoute><div className="min-h-[100dvh] overflow-x-clip bg-white text-slate-950 dark:bg-slate-950 dark:text-slate-100"><div className="flex min-h-[100dvh] min-w-0">
-    <aside className={`${sidebarCollapsed ? "hidden" : "hidden lg:flex"} w-64 shrink-0 flex-col border-r border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-950`}>
+    <aside className={`${sidebarCollapsed ? "hidden" : "hidden lg:flex"} sticky top-0 h-[100dvh] w-64 shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-950`}>
       <div ref={profileMenuRef} className="relative border-b border-slate-200 p-3 dark:border-slate-800">
         <button onClick={() => setProfileOpen(!profileOpen)} className="flex w-full items-center gap-2 rounded-lg p-2 text-left hover:bg-white dark:hover:bg-slate-900"><Avatar user={user} size="sm"/><span className="min-w-0 flex-1 truncate text-sm font-semibold">{user ? `${user.firstname} ${user.lastname}` : "Workspace"}</span><ChevronsUpDown size={15}/></button>
         {profileOpen && <div className="absolute left-3 right-3 top-14 z-50 rounded-xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
@@ -868,7 +953,7 @@ export default function WorkspaceApp() {
         <div className="relative"><button onClick={() => setMenu(menu === "fields" ? null : "fields")} className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 sm:px-3"><SlidersHorizontal size={16}/><span className="hidden xl:inline">Fields</span>{priority !== "all" && <span className="ml-0.5 h-1.5 w-1.5 rounded-full bg-[hsl(var(--color-primary))]"/>}</button>{menu === "fields" && <FieldMenu view={view} setView={setView} fields={fields} setFields={setFields} priority={priority} setPriority={setPriority} page={page} close={() => setMenu(null)}/>}</div>
         <button onClick={() => setDialog(page === "tasks" ? { kind: "task" } : { kind: "project" })} className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-[hsl(var(--color-primary))] px-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 sm:h-9 sm:rounded-lg"><Plus size={17}/><span>Add {page === "tasks" ? "Task" : "Project"}</span></button>
       </header>
-    <div className="min-w-0 px-3 py-4 sm:px-5 lg:px-6 xl:px-8">{selected ? <TaskPanel key={selected._id} task={selected} tasks={tasks} teams={teams} user={user} onClose={goBackFromTask} onSave={updateTask} onDelete={deleteTask} onOpen={openTask} onCreateSubtask={createSubtask} onAddComment={addComment} onToggleWatch={toggleWatch} onUploadAttachment={uploadAttachment} onRemoveAttachment={removeAttachment} onArchive={archiveTask}/> : <><div className="mb-4 xl:hidden"><label className="relative block"><Search size={16} className="pointer-events-none absolute left-3 top-2.5 text-slate-400"/><input value={query} onChange={(event) => setQuery(event.target.value)} className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-indigo-600 dark:border-slate-700 dark:bg-slate-900" placeholder={`Search ${page}`}/></label></div>{loading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, index) => <div key={index} className="h-48 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-900"/>)}</div> : page === "tasks" ? <div className="min-w-0 pb-4">{view === "board" ? <TaskBoard tasks={shownTasks} fields={fields} onOpen={openTask} onMove={moveTask} onNew={openNewTask} onDelete={deleteTask}/> : <TaskList tasks={shownTasks} fields={fields} onOpen={openTask} onMove={moveTask} onNew={openNewTask} onDelete={deleteTask}/>}</div> : <ProjectTable projects={shownProjects} teams={validTeams} currentUser={user} fields={fields} onNew={openNewProject} onEdit={editProject} onDelete={deleteProject} onUpdateMembers={updateProjectMembers}/>}</>}</div></main>
+    <div className="min-w-0 px-3 py-4 sm:px-5 lg:px-6 xl:px-8">{selected ? <TaskPanel key={selected._id} task={selected} tasks={tasks} teams={teams} user={user} onClose={goBackFromTask} onSave={updateTask} onDelete={deleteTask} onOpen={openTask} onCreateSubtask={createSubtask} onAddComment={addComment} onToggleWatch={toggleWatch} onUploadAttachment={uploadAttachment} onRemoveAttachment={removeAttachment} onArchive={archiveTask}/> : <><div className="mb-4 xl:hidden"><label className="relative block"><Search size={16} className="pointer-events-none absolute left-3 top-2.5 text-slate-400"/><input value={query} onChange={(event) => setQuery(event.target.value)} className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-indigo-600 dark:border-slate-700 dark:bg-slate-900" placeholder={`Search ${page}`}/></label></div>{loading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, index) => <div key={index} className="h-48 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-900"/>)}</div> : page === "tasks" ? <div className="min-w-0 pb-4">{view === "board" ? <TaskBoard tasks={shownTasks} fields={fields} onOpen={openTask} onMove={moveTask} onNew={openNewTask} onDelete={deleteTask} columnVisible={columnVisible} columnLoading={columnLoading} onLoadMore={loadMoreForStatus}/> : <TaskList tasks={shownTasks} fields={fields} onOpen={openTask} onMove={moveTask} onNew={openNewTask} onDelete={deleteTask} columnVisible={columnVisible} columnLoading={columnLoading} onLoadMore={loadMoreForStatus}/>}</div> : <ProjectTable projects={shownProjects} teams={validTeams} currentUser={user} fields={fields} onNew={openNewProject} onEdit={editProject} onDelete={deleteProject} onUpdateMembers={updateProjectMembers}/>}</>}</div></main>
   </div>{dialog && <NewItemDialog kind={dialog.kind} initial={dialog.initial} projects={shownProjects} team={activeTeam} user={user} onClose={() => setDialog(null)} onSubmit={(payload) => dialog.id ? updateProject(dialog.id, payload) : create(dialog.kind, { ...payload, ...(dialog.status ? { status: dialog.status } : {}) })}/>} {teamModal && <TeamSettings team={teamModal.team} onClose={() => setTeamModal(null)} onCreate={createTeam} onRename={renameTeam} onInvite={inviteMember} onRemoveMember={removeMember} onDeleteTeam={deleteTeamFn} currentUserId={user?.id}/>}</div></ProtectedRoute>;
 }
 

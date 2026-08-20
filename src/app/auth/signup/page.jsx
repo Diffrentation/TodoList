@@ -170,7 +170,7 @@ export default function Signup() {
       if (data.success) {
         toast.success("OTP sent to your email! Please Verify the OTP.");
         const userId = data.userId;
-        router.push(`/auth/otp?type=register&userId=${userId}`);
+        router.push(`/auth/otp?type=register&userId=${userId}&email=${encodeURIComponent(formData.email)}`);
       } else {
         toast.error(data.message || "Signup failed");
       }

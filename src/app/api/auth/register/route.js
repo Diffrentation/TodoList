@@ -6,9 +6,7 @@ import TeamInvitation from "@/models/TeamInvitation";
 import { sendOTPEmail } from "@/lib/email";
 import { errorHandler } from "@/lib/middleware/errorHandler";
 import { hashTeamInvitationToken } from "@/lib/team-invitations";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
+import { uploadImageBuffer } from "@/lib/cloudinary";
 
 export async function POST(req) {
   try {
@@ -78,25 +76,14 @@ export async function POST(req) {
 
     // Handle profile image upload
     let profileImagePath = "";
+    let profileImagePublicId = "";
     if (profileImageFile && profileImageFile.size > 0) {
       try {
         const bytes = await profileImageFile.arrayBuffer();
         const buffer = Buffer.from(bytes);
-
-        // Create uploads directory if it doesn't exist
-        const uploadsDir = join(process.cwd(), "public", "uploads", "profiles");
-        if (!existsSync(uploadsDir)) {
-          await mkdir(uploadsDir, { recursive: true });
-        }
-
-        // Generate unique filename
-        const timestamp = Date.now();
-        const filename = `${timestamp}-${profileImageFile.name}`;
-        const filepath = join(uploadsDir, filename);
-
-        // Save file
-        await writeFile(filepath, buffer);
-        profileImagePath = `/uploads/profiles/${filename}`;
+        const result = await uploadImageBuffer(buffer, { folder: "todolist/profiles" });
+        profileImagePath = result.secure_url;
+        profileImagePublicId = result.public_id;
       } catch (error) {
         console.error("Error saving profile image:", error);
         // Continue without image if upload fails
@@ -113,6 +100,7 @@ export async function POST(req) {
       role: "user",
       address,
       profileImage: profileImagePath,
+      profileImagePublicId,
       isVerified: false,
     });
 

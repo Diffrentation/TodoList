@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "setup-env": "node scripts/setup-env.js"
+    "setup-env": "node scripts/setup-env.js",
+    "seed": "node --env-file=.env scripts/seed.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -23,6 +24,7 @@
     "axios": "^1.6.2",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.10.1",
     "clsx": "^2.1.1",
     "cookie": "^0.6.0",
     "framer-motion": "^12.23.26",
