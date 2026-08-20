@@ -1,6 +1,6 @@
-# 📝 Todo List Application
+# Taskspace
 
-A modern, production-ready full-stack Todo List application built with Next.js, featuring OTP-based authentication, premium UI components, and comprehensive task management.
+A full-stack task, project, and team management app built with Next.js — OTP-verified authentication (with a one-click guest mode), a Kanban board and list view with server-side pagination, subtasks, comments, file attachments, team roles, and saved views.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16.0-black?style=for-the-badge&logo=next.js)
 ![React](https://img.shields.io/badge/React-19.2-blue?style=for-the-badge&logo=react)
@@ -9,707 +9,266 @@ A modern, production-ready full-stack Todo List application built with Next.js, 
 
 ## ✨ Features
 
-### 🔐 Authentication System
+### 🔐 Authentication & Account
 
-- **User Registration** with email verification via OTP
-- **OTP Verification** (6-digit code, 5-minute expiry)
-- **Secure Login** with JWT tokens
-- **Password Reset** via email OTP
-- **Profile Management** with image upload
-- **Automatic Token Refresh** via HTTP-only cookies
-- **Rate Limiting** for security
+- Email/OTP registration (6-digit code, 5-minute expiry) with a resend cooldown
+- **Guest mode** — a one-click, no-signup workspace that expires after 24 hours
+- Login with JWT access + refresh tokens (HTTP-only cookies, automatic refresh via an axios interceptor)
+- Forgot / reset password via OTP
+- Profile editing with avatar upload to **Cloudinary**
+- Security page: active sessions per device, sign-out-everywhere, recent account activity log, and self-service account deletion (cascades across owned teams/tasks/projects)
+- Rate limiting on auth endpoints
 
-### 📋 Task Management
+### 📋 Tasks
 
-- **Full CRUD Operations** (Create, Read, Update, Delete)
-- **Task Status Tracking** (Pending, In Progress, Completed)
-- **Responsive Grid Display** - Tasks displayed in adaptive grid layout
-- **Real-time Search** functionality with smooth transitions
-- **Status Filtering** (All, Pending, Progress, Completed)
-- **Task Descriptions** with expandable details
-- **User-Specific Tasks** (isolated per user)
-- **Enhanced Statistics Dashboard** with:
-  - Circular progress indicator for completion rate
-  - Color-coded statistics cards
-  - Task breakdown visualization
-  - Animated progress bars
-- **Color-Coded Task Cards** - Visual status indicators with matching hover effects
+- Kanban **board** and **list** views, switchable per session
+- Statuses: To Do / Doing / Completed / On Hold, with drag-and-drop between board columns
+- Priorities, start/due dates, labels, descriptions
+- **Subtasks** nested under a parent task
+- **Comments** (with an optional file/image attachment per comment)
+- **File attachments** per task (PDF, image, text, CSV — up to 10MB, served through an authenticated route)
+- Assignees, a reporter, and watchers; per-task lock (only the reporter or a team owner/admin can edit a locked task) and a private flag for team tasks
+- Archiving instead of hard deletion for tasks and projects
+- Per-task activity log and due-date reminders
+- **Server-side pagination** — each status column loads 12 tasks at a time; "Show more" fetches the next page directly from the database (desktop shows one combined button across all columns; mobile keeps a per-column button since only one column is visible at a time there)
+- Server-side search and priority filtering
 
-### 🎨 Premium UI/UX
+### 🗂️ Projects & Teams
 
-- **Modern Design** with Ant Design and Material UI components
-- **Dark/Light Mode** support with smooth theme transitions
-- **Smooth Animations** with Framer Motion (no bouncing effects)
-- **Fully Responsive Design** - Works perfectly on all screen sizes and zoom levels
-- **Responsive Grid Layout** - Tasks displayed in adaptive grid structure that adjusts to screen size
-- **No Max-Width Constraints** - Content utilizes full available width
-- **Interactive Components** with beautiful color-coded hover effects
-- **Color-Coded Buttons** - Red (delete/cancel), Green (add/save), Yellow (edit/pending), Blue (primary/navigation)
-- **Gradient Card Backgrounds** - Beautiful gradient backgrounds on all cards
-- **Circular Progress Indicator** - Visual completion rate with task breakdown
-- **Loading States** and skeleton screens
-- **Toast Notifications** for user feedback
-- **Glassmorphism Effects** with backdrop blur
-- **Pointer Cursor** on all interactive elements
-- **Smooth Hover Transitions** with ease-out timing
+- Projects with a lead, members, priority, and due date; project-level activity log
+- Teams with role-based access (owner / admin / editor / viewer) and email invitations
+- A "Personal" scope (no team) alongside any number of teams, switchable from the sidebar
 
-### 🔒 Security Features
+### 🔖 Saved Views & Notifications
 
-- HTTP-only cookies for token storage
-- OTP hashing before database storage
-- Password hashing with bcrypt
-- JWT token expiration (15min access, 7day refresh)
-- Rate limiting on sensitive endpoints
-- Input validation on frontend and backend
-- Protected routes with authentication middleware
-- CORS configuration
+- Save the current filter/field combination as a named view, scoped to Tasks or Projects
+- In-app notifications (assignments, due-soon reminders, team activity) with a "mark all read" action
+
+### 🎨 UI/UX
+
+- Dark / light / system theme, with a user-selectable accent color
+- Sticky sidebar navigation
+- Fully responsive board, list, and task-detail layouts
+- Toast notifications, skeleton loading states, keyboard-friendly forms
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 
-- **Next.js 16** (App Router) - React framework
-- **React 19** - UI library
-- **Tailwind CSS 4** - Utility-first CSS
-- **Ant Design** - Enterprise UI components
-- **Material UI** - React component library
-- **Framer Motion** - Animation library
-- **React Hot Toast** - Toast notifications
-- **Lucide React** - Icon library
-- **Axios** - HTTP client
-- **Next Themes** - Theme management
+- **Next.js 16** (App Router) + **React 19**
+- **Tailwind CSS 4**
+- **Ant Design** + **Material UI** (select surfaces) and a small **shadcn/ui**-style component set (`src/components/ui`)
+- **Framer Motion** — animations
+- **React Hook Form** + **Zod** — form handling and validation
+- **React Hot Toast** — notifications
+- **Lucide React** — icons
+- **Axios** — HTTP client with a token-refresh interceptor
+- **next-themes** — theme management
 
 ### Backend
 
-- **Next.js API Routes** - Serverless functions
-- **MongoDB** with Mongoose ODM
-- **JWT** (jsonwebtoken) - Authentication
-- **bcryptjs** - Password hashing
-- **Nodemailer** - Email service
-- **Rate Limiting** - Security middleware
-
-### Development Tools
-
-- **ESLint** - Code linting
-- **TypeScript** - Type checking
-- **PostCSS** - CSS processing
+- **Next.js Route Handlers** (`src/app/api/**`) — 29 endpoints across auth, tasks, projects, teams, saved views, and notifications
+- **MongoDB** with **Mongoose**
+- **jsonwebtoken** — access/refresh tokens
+- **bcryptjs** — password and OTP hashing
+- **Nodemailer** — OTP and team-invitation email (falls back to logging the OTP to the server console if SMTP isn't configured)
+- **Cloudinary** — profile image storage
 
 ## 📦 Installation
 
 ### Prerequisites
 
-- Node.js 18+ installed
-- MongoDB database (local or MongoDB Atlas)
-- Email account for sending OTPs (Gmail recommended)
+- Node.js 18+
+- A MongoDB database (local or MongoDB Atlas)
+- (Optional but recommended) SMTP credentials for real email delivery, and a Cloudinary account for profile images — both degrade gracefully if omitted (OTPs log to the console; profile image upload will fail without Cloudinary)
 
-### Step 1: Clone Repository
+### Step 1: Clone & Install
 
 ```bash
 git clone https://github.com/Diffrentation/TodoList.git
-cd todolist
-```
-
-### Step 2: Install Dependencies
-
-```bash
+cd TodoList
 npm install
 ```
 
-### Step 3: Environment Setup
+### Step 2: Environment Variables
 
-**Option A: Automatic Setup (Recommended)**
-
-```bash
-npm run setup-env
-```
-
-This creates `.env.local` with auto-generated JWT secrets.
-
-**Option B: Manual Setup**
-
-```bash
-cp env.template .env.local
-```
-
-Edit `.env.local` with your configuration:
+Create `.env.local` in the project root:
 
 ```env
-# MongoDB Connection
-MONGODB_URI=mongodb://localhost:27017/todolist
-# Or MongoDB Atlas:
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/todolist
+# Required
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/taskspace
+JWT_SECRET=<32+ random characters>
+JWT_REFRESH_SECRET=<32+ random characters>
 
-# JWT Secrets (Generate strong random strings - minimum 32 characters)
-JWT_SECRET=your-super-secret-jwt-key-min-32-characters
-JWT_REFRESH_SECRET=your-super-secret-refresh-token-key-min-32-characters
+# Optional — MongoDB
+TASKSPACE_DB_NAME=taskspace        # keep this app's data isolated on a shared cluster
+MONGODB_DNS_SERVERS=8.8.8.8,1.1.1.1  # only if your network blocks Atlas SRV DNS lookups
 
-# Email Configuration (for OTP)
+# Optional — email (OTPs are logged to the server console if omitted)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your-email@gmail.com
 SMTP_PASS=your-app-specific-password
+SENDER_EMAIL=your-email@gmail.com
 
-# Environment
-NODE_ENV=development
+# Optional — profile image uploads
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
 
-**Generate Secure JWT Secrets:**
+Generate strong JWT secrets with:
 
 ```bash
-# Using Node.js
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-
-# Using OpenSSL
-openssl rand -base64 32
 ```
 
-**Gmail Setup:**
+**Gmail SMTP:** enable 2FA on the account, then generate an [App Password](https://myaccount.google.com/apppasswords) and use it as `SMTP_PASS`.
 
-1. Enable 2-factor authentication
-2. Generate an "App Password" from [Google Account Settings](https://myaccount.google.com/apppasswords)
-3. Use the app password in `SMTP_PASS`
+> `npm run setup-env` exists as a convenience script but expects an `env.template` file that isn't currently checked into the repo — create `.env.local` by hand using the block above instead.
 
-### Step 4: Run the Application
+### Step 3: Run
 
 ```bash
-# Development mode
-npm run dev
-
-# Production build
-npm run build
-npm start
+npm run dev      # development
+npm run build && npm start   # production build
 ```
 
-The application will be available at `http://localhost:3000`
+The app runs at `http://localhost:3000`.
+
+### Step 4 (optional): Seed demo data
+
+Once you've registered a real account through the app, populate it with a realistic demo workspace — a team, six projects, 500 team tasks, 300 personal tasks, thousands of dated subtasks, comments, and activity log entries:
+
+```bash
+npm run seed -- your-account@email.com
+```
+
+This **wipes and rebuilds** that account's own tasks, projects, and owned teams every time it's run — see [scripts/seed.mjs](scripts/seed.mjs).
 
 ## 📁 Project Structure
 
 ```
-todolist/
+TodoList/
 ├── src/
 │   ├── app/
-│   │   ├── api/                    # API Routes
-│   │   │   ├── auth/              # Authentication endpoints
-│   │   │   │   ├── register/
-│   │   │   │   ├── login/
-│   │   │   │   ├── logout/
-│   │   │   │   ├── profile/
-│   │   │   │   ├── refresh-token/
-│   │   │   │   ├── forgot-password/
-│   │   │   │   ├── reset-password/
-│   │   │   │   ├── change-password/
-│   │   │   │   ├── verify-register-otp/
-│   │   │   │   └── verify-forgot-password-otp/
-│   │   │   └── tasks/             # Task endpoints
-│   │   │       ├── route.js       # GET, POST /api/tasks
-│   │   │       └── [id]/route.js  # GET, PUT, DELETE /api/tasks/:id
-│   │   ├── auth/                  # Auth pages
-│   │   │   ├── login/
-│   │   │   ├── signup/
-│   │   │   ├── otp/
-│   │   │   ├── forgot-password/
-│   │   │   └── change-password/
-│   │   ├── dashboard/             # Main dashboard
-│   │   ├── profile/               # User profile
-│   │   ├── layout.js              # Root layout
-│   │   ├── page.jsx               # Home page
-│   │   └── globals.css            # Global styles
+│   │   ├── api/
+│   │   │   ├── auth/              # register, login, guest, logout, refresh-token,
+│   │   │   │                      #   profile, account, security, change-password,
+│   │   │   │                      #   forgot/reset-password, resend/verify-otp
+│   │   │   ├── tasks/             # CRUD, [id]/comments, [id]/attachments,
+│   │   │   │                      #   [id]/watch, [id]/activity
+│   │   │   ├── projects/          # CRUD, [id]/activity
+│   │   │   ├── teams/             # CRUD, [id]/members, [id]/members/[userId]
+│   │   │   ├── saved-views/       # CRUD
+│   │   │   └── notifications/     # list, mark read
+│   │   ├── auth/                  # login, signup, otp, forgot-password, change-password
+│   │   ├── dashboard/             # the board/list/task-detail app shell
+│   │   ├── profile/               # profile edit + security subpage
+│   │   ├── icon.js, apple-icon.js # generated favicon / touch icon
+│   │   └── layout.js
 │   ├── components/
-│   │   ├── ui/                    # shadcn/ui components
-│   │   │   ├── button.jsx
-│   │   │   ├── card.jsx
-│   │   │   ├── input.jsx
-│   │   │   └── ...
-│   │   ├── TaskList.js            # Task list component
-│   │   ├── TaskForm.js            # Task form component
-│   │   ├── SearchFilter.js        # Search and filter
-│   │   ├── ProtectedRoute.js      # Route protection
-│   │   ├── theme-toggle.jsx       # Dark mode toggle
-│   │   └── providers.jsx          # Ant Design & MUI providers
+│   │   ├── WorkspaceApp.jsx       # the dashboard: board, list, task detail, dialogs
+│   │   └── ui/                    # shared button/card/input/select/form primitives
 │   ├── lib/
-│   │   ├── axios.js               # Axios configuration
-│   │   ├── auth.js                # Auth utilities
-│   │   ├── db.js                  # MongoDB connection
-│   │   ├── email.js               # Email service
-│   │   ├── validation.js          # Input validation
-│   │   └── middleware/
-│   │       ├── auth.js            # Auth middleware
-│   │       ├── errorHandler.js    # Error handling
-│   │       └── rateLimiter.js     # Rate limiting
-│   ├── models/
-│   │   ├── User.js                # User model
-│   │   ├── Task.js                # Task model
-│   │   └── OTP.js                 # OTP model
-│   └── utils/
-│       └── localStorage.js        # Local storage utilities
-├── public/                        # Static assets
+│   │   ├── axios.js               # client with refresh-token interceptor
+│   │   ├── db.js                  # Mongoose connection
+│   │   ├── email.js                # Nodemailer + dev-mode console fallback
+│   │   ├── cloudinary.js          # profile image upload/destroy helpers
+│   │   ├── task-access.js         # visibility scoping shared by tasks/projects
+│   │   ├── team-invitations.js, team-work.js, collaboration.js
+│   │   └── middleware/            # auth, rate limiting, error handling
+│   ├── models/                    # User, Task, Project, Team, TeamInvitation,
+│   │                               #   Notification, ActivityLog, AuditLog, OTP, SavedView
+│   └── utils/localStorage.js
 ├── scripts/
-│   └── setup-env.js              # Environment setup script
-├── .gitignore
-├── env.template                  # Environment variables template
-├── package.json
-├── tailwind.config.js
-└── README.md
+│   ├── setup-env.js                # (see the env.template caveat above)
+│   └── seed.mjs                    # demo-data generator
+├── private-uploads/                # task attachments (served via an authenticated route)
+├── public/uploads/profiles/        # legacy local profile images (new uploads go to Cloudinary)
+└── package.json
 ```
 
-## 🚀 API Documentation
-
-### Authentication Endpoints
-
-#### Register User
-
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "firstname": "John",
-  "lastname": "Doe",
-  "email": "john@example.com",
-  "password": "password123"
-}
-```
-
-#### Verify Registration OTP
-
-```http
-POST /api/auth/verify-register-otp
-Content-Type: application/json
-
-{
-  "email": "john@example.com",
-  "otp": "123456"
-}
-```
-
-#### Login
-
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "email": "john@example.com",
-  "password": "password123"
-}
-```
-
-#### Refresh Token
-
-```http
-POST /api/auth/refresh-token
-```
-
-#### Logout
-
-```http
-POST /api/auth/logout
-```
-
-#### Get Profile
-
-```http
-GET /api/auth/profile
-```
-
-#### Update Profile
-
-```http
-PUT /api/auth/profile
-Content-Type: application/json
-
-{
-  "firstname": "John",
-  "lastname": "Updated",
-  "profileImage": "base64_image_data"
-}
-```
-
-#### Forgot Password
-
-```http
-POST /api/auth/forgot-password
-Content-Type: application/json
-
-{
-  "email": "john@example.com"
-}
-```
-
-#### Reset Password
-
-```http
-POST /api/auth/reset-password
-Content-Type: application/json
-
-{
-  "email": "john@example.com",
-  "otp": "123456",
-  "newPassword": "newpassword123"
-}
-```
-
-### Task Endpoints
-
-#### Get All Tasks
-
-```http
-GET /api/tasks?status=pending&search=meeting
-```
-
-**Query Parameters:**
-
-- `status` (optional): `pending` | `progress` | `completed`
-- `search` (optional): Search term for task title
-
-#### Create Task
-
-```http
-POST /api/tasks
-Content-Type: application/json
-
-{
-  "title": "Complete project",
-  "description": "Finish the todo list app",
-  "status": "pending"
-}
-```
-
-#### Get Single Task
-
-```http
-GET /api/tasks/:id
-```
-
-#### Update Task
-
-```http
-PUT /api/tasks/:id
-Content-Type: application/json
-
-{
-  "title": "Updated title",
-  "description": "Updated description",
-  "status": "completed"
-}
-```
-
-#### Delete Task
-
-```http
-DELETE /api/tasks/:id
-```
-
-## 🎨 UI Components
-
-### Premium Libraries Used
-
-- **Ant Design** - Statistics cards, badges, avatars, tooltips, tags
-- **Material UI** - Cards, icon buttons, chips
-- **shadcn/ui** - Base components (buttons, inputs, cards)
-- **Framer Motion** - Smooth animations and transitions
-- **Lucide React** - Beautiful icons
-
-### Features
-
-- **Dark/Light theme support** with smooth transitions
-- **Fully Responsive Design** - Adapts to all screen sizes and zoom levels (0% - 200%+)
-- **Responsive Grid System** - Tasks arranged in adaptive grid layout
-  - Mobile: 1 column
-  - Tablet: 2 columns
-  - Desktop: 3-5 columns based on screen width
-- **Smooth Animations** - All animations use ease-out/ease-in-out timing (no bouncing)
-- **Interactive Hover Effects**:
-  - All buttons change color on hover
-  - Cards highlight with border colors matching task status
-  - Statistics cards show color-coded borders
-  - Scale effects on icon buttons
-- **Color-Coded UI Elements**:
-  - 🔵 Blue: Primary actions, navigation, search
-  - 🟡 Yellow: Edit actions, pending status, settings
-  - 🟢 Green: Add/Save actions, completed status
-  - 🔴 Red: Delete/Cancel actions, logout
-- **Gradient Backgrounds**:
-  - Auth cards with gradient backgrounds
-  - Task cards with subtle gradients
-  - Statistics cards with status-colored gradients
-- **Enhanced Completion Rate Component**:
-  - Circular progress indicator
-  - Visual task breakdown
-  - Animated progress bars
-  - Gradient colors
-- **Loading skeletons** for better perceived performance
-- **Toast notifications** for user feedback
-- **Glassmorphism effects** with backdrop blur on cards
-
-## 🎨 Design Features
-
-### Responsive Grid System
-
-The application uses a custom CSS grid system that adapts to screen size and zoom level:
-
-```css
-/* Mobile (< 640px) */
-grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-
-/* Tablet (640px - 1024px) */
-grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-
-/* Desktop (1024px+) */
-grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-
-/* Large Desktop (1280px+) */
-grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-
-/* Extra Large (1536px+) */
-grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-```
-
-### Animation System
-
-All animations follow consistent patterns:
-
-- **Duration**: 200-300ms for most interactions
-- **Timing**: `ease-out` for entrances, `ease-in-out` for transitions
-- **No Bouncing**: Spring animations removed for smoother feel
-- **Opacity-based**: Prefers opacity transitions over scale where possible
-
-### Button Hover States
-
-Buttons change color on hover based on their action:
-
-- **Add/Save**: Green (`hover:bg-green-500`)
-- **Delete/Cancel**: Red (`hover:bg-red-500`)
-- **Edit**: Yellow (`hover:bg-yellow-500`)
-- **Navigation/Primary**: Blue (`hover:bg-blue-500`)
-
-### Card Styling
-
-All cards feature:
-
-- Gradient backgrounds: `bg-gradient-to-br from-card via-card/95 to-muted/20`
-- Backdrop blur: `backdrop-blur-sm`
-- Smooth transitions: `duration-200 ease-out`
-- Color-coded borders on hover matching task status
-
-## 🚀 Deployment (Vercel)
-
-### Step 1: Push to GitHub
-
-```bash
-git add .
-git commit -m "Deploy to Vercel"
-git push origin main
-```
-
-### Step 2: Connect to Vercel
-
-1. Go to [vercel.com](https://vercel.com)
-2. Sign in with GitHub
-3. Click "Add New Project"
-4. Import your GitHub repository
-5. Vercel will auto-detect Next.js settings
-
-### Step 3: Add Environment Variables
-
-In Vercel Dashboard → Your Project → Settings → Environment Variables, add:
-
-**Required Variables:**
-
-```env
-JWT_SECRET=<generate-secure-secret>
-JWT_REFRESH_SECRET=<generate-secure-secret>
-MONGODB_URI=<your-mongodb-connection-string>
-NODE_ENV=production
-```
-
-**Email Configuration (Optional but Recommended):**
-
-```env
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-app-specific-password
-```
-
-**Generate Secure Secrets:**
-
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-```
-
-**Important:**
-
-- Set variables for **Production**, **Preview**, and **Development** environments
-- Never commit `.env.local` to git
-- Use MongoDB Atlas for production database
-
-### Step 4: Deploy
-
-Vercel will automatically deploy on every push to main branch. Or manually trigger:
-
-- Go to Deployments → Click "..." → Redeploy
-
-## 🧪 Testing
-
-### Manual Testing Checklist
-
-1. **Authentication**
-
-   - [ ] Register new user
-   - [ ] Verify OTP via email
-   - [ ] Login with credentials
-   - [ ] Test password reset flow
-   - [ ] Test token refresh
-   - [ ] Test logout
-
-2. **Tasks**
-
-   - [ ] Create new task
-   - [ ] Update task status
-   - [ ] Edit task details
-   - [ ] Delete task
-   - [ ] Search tasks
-   - [ ] Filter by status
-
-3. **UI/UX**
-
-   - [ ] Test dark/light mode
-   - [ ] Test responsive design
-   - [ ] Test animations
-   - [ ] Test loading states
-
-4. **Security**
-   - [ ] Test protected routes
-   - [ ] Test token expiration
-   - [ ] Test rate limiting
-   - [ ] Test input validation
+## 🚀 API Overview
+
+All endpoints live under `/api` and are cookie-authenticated (`authenticateToken` middleware) unless noted. This is a summary, not a full request/response reference — see the route handler under `src/app/api/**` for exact payloads.
+
+### Auth
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/api/auth/register` | Create an account, send a registration OTP |
+| POST | `/api/auth/verify-register-otp` | Verify OTP, activate the account, set session cookies |
+| POST | `/api/auth/resend-otp` | Resend a registration or forgot-password OTP |
+| POST | `/api/auth/login` | Email/password login |
+| POST | `/api/auth/guest` | Start a 24-hour guest workspace, no signup |
+| POST | `/api/auth/logout` | Clear session cookies |
+| POST | `/api/auth/refresh-token` | Exchange the refresh cookie for a new access token |
+| GET / PUT | `/api/auth/profile` | Read / update profile (multipart for avatar upload) |
+| GET | `/api/auth/security` | Active sessions + recent account activity |
+| POST | `/api/auth/security` | Sign out all other sessions |
+| DELETE | `/api/auth/account` | Permanently delete the account and everything it owns |
+| POST | `/api/auth/change-password` | Change password while logged in |
+| POST | `/api/auth/forgot-password` | Send a password-reset OTP |
+| POST | `/api/auth/verify-forgot-password-otp` | Verify reset OTP, issue a short-lived reset token |
+| POST | `/api/auth/reset-password` | Set a new password using that reset token |
+
+### Tasks
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/tasks` | List tasks — filters: `status`, `priority`, `project`, `team`, `search`; pagination: `skip`, `limit` |
+| POST | `/api/tasks` | Create a task (or subtask, via `parentTask`) |
+| GET / PUT / DELETE | `/api/tasks/:id` | Read / update / delete a task |
+| GET | `/api/tasks/:id/activity` | Task activity log |
+| POST | `/api/tasks/:id/comments` | Add a comment (optionally with an attachment) |
+| POST | `/api/tasks/:id/attachments` | Upload a file attachment |
+| GET / DELETE | `/api/tasks/:id/attachments/:attachmentId` | Download / remove an attachment |
+| POST | `/api/tasks/:id/watch` | Toggle watching a task |
+
+### Projects, Teams, Saved Views, Notifications
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET / POST | `/api/projects` | List / create projects |
+| GET / PUT / DELETE | `/api/projects/:id` | Read / update / delete a project |
+| GET | `/api/projects/:id/activity` | Project activity log |
+| GET / POST | `/api/teams` | List / create teams |
+| GET / PUT / DELETE | `/api/teams/:id` | Read / rename / delete a team |
+| POST | `/api/teams/:id/members` | Invite a member by email |
+| DELETE | `/api/teams/:id/members/:userId` | Remove a member |
+| GET / POST | `/api/saved-views` | List / create saved views |
+| DELETE | `/api/saved-views/:id` | Delete a saved view |
+| GET | `/api/notifications` | List notifications |
+| PATCH | `/api/notifications` | Mark one or all as read |
+
+## 🚀 Deployment
+
+Deploys cleanly to Vercel — push to a connected repo and set the environment variables from the [Environment Variables](#step-2-environment-variables) section above in the Vercel dashboard (Production, Preview, and Development).
+
+**Known limitation:** task attachments and legacy profile images are written to the local filesystem (`private-uploads/`, `public/uploads/profiles/`). That works on a persistent server but **will not survive a serverless deploy** (Vercel's filesystem is ephemeral) — uploaded files can disappear after a redeploy or cold start. Profile images already moved to Cloudinary; task attachments have not been migrated yet.
 
 ## 🆘 Troubleshooting
 
-### MongoDB Connection Issues
+**MongoDB won't connect** — verify `MONGODB_URI`, that the cluster's network access allows your IP (or `0.0.0.0/0` for development), and try setting `MONGODB_DNS_SERVERS` if your network blocks Atlas's SRV DNS lookups.
 
-- Verify `MONGODB_URI` is correct
-- Check MongoDB is running (if local)
-- Verify network access (if Atlas)
-- Check IP whitelist in MongoDB Atlas
+**OTP emails aren't arriving** — if `SMTP_USER`/`SMTP_PASS` aren't set, OTPs are logged to the server console instead of emailed (this is expected in dev). If SMTP *is* configured and the code still isn't arriving, check spam — it can take a minute to land, and the OTP page shows a resend cooldown rather than letting you spam Resend before that.
 
-### Email Not Sending
+**Profile image upload fails** — Cloudinary credentials aren't configured; add `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
 
-- Verify SMTP credentials
-- Check Gmail app password is correct
-- Check spam folder
-- In development, check console for OTP
-- Verify SMTP_HOST and SMTP_PORT
+**Build errors** — delete `.next` and `node_modules`, then `npm install` again; confirm Node.js 18+.
 
-### Authentication Issues
+## 📝 Notes for Contributors
 
-- Verify JWT secrets are set
-- Check token expiration
-- Clear cookies and try again
-- Check browser console for errors
-
-### Build Errors
-
-- Run `npm install` again
-- Clear `.next` folder: `rm -rf .next`
-- Check Node.js version (18+)
-- Verify all environment variables are set
-
-### Vercel Deployment Issues
-
-- Ensure all environment variables are added
-- Check build logs in Vercel dashboard
-- Verify MongoDB Atlas allows Vercel IPs
-- Check that JWT secrets are properly generated
-
-## 🎯 Recent Updates & Improvements
-
-### UI/UX Enhancements
-
-- ✅ **Responsive Grid Layout** - Tasks now display in an adaptive grid that adjusts to screen size and zoom level
-- ✅ **No Max-Width Constraints** - Removed fixed max-widths for better responsiveness
-- ✅ **Smooth Animations** - All animations use ease-out/ease-in-out timing functions (no bouncing)
-- ✅ **Color-Coded Hover Effects** - All buttons and interactive elements change color on hover
-- ✅ **Gradient Backgrounds** - Beautiful gradient backgrounds on all cards
-- ✅ **Enhanced Completion Rate** - Circular progress indicator with visual task breakdown
-- ✅ **Pointer Cursor** - All buttons and interactive elements show pointer cursor
-- ✅ **Improved Accessibility** - Better contrast and hover states
-
-### Performance Improvements
-
-- ✅ Optimized animations for better performance
-- ✅ Smooth transitions with appropriate durations
-- ✅ Responsive grid using CSS auto-fill for optimal layout
-
-## 📝 Development Notes
-
-### Development Mode
-
-- OTPs are logged to console if email is not configured
-- Check server logs for OTP codes during development
-- Hot reload enabled for faster development
-
-### Responsive Design
-
-- Grid layout adapts automatically to screen size
-- Minimum column width: 250px (mobile) to 350px (desktop)
-- No fixed maximum width constraints
-- Fully responsive at all zoom levels (0% - 200%+)
-
-### Animation Guidelines
-
-- All animations use `ease-out` or `ease-in-out` timing
-- Duration typically 200-300ms for smooth feel
-- No spring animations or bouncing effects
-- Opacity transitions preferred over scale/transform where possible
-
-### Color Scheme
-
-- **Blue (#3b82f6)**: Primary actions, navigation, search, theme toggle
-- **Yellow (#eab308)**: Edit actions, pending status, settings, filter select
-- **Green (#22c55e)**: Add/Save actions, completed status, submit buttons
-- **Red (#ef4444)**: Delete/Cancel actions, logout, destructive operations
-
-### OTP Expiry
-
-- OTPs expire after 5 minutes
-- Maximum 5 verification attempts per OTP
-- Old OTPs are automatically deleted
-
-### Token Management
-
-- Access tokens expire in 15 minutes
-- Refresh tokens expire in 7 days
-- Automatic refresh handled by axios interceptor
-- Tokens stored in HTTP-only cookies
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
+- Access tokens expire in 15 minutes, refresh tokens in 7 days, both as HTTP-only cookies (see `src/lib/middleware/auth.js`).
+- OTPs expire after 5 minutes.
+- Task/project visibility is scoped in `src/lib/task-access.js` — a task is visible if you created it, or it belongs to a team you're in and (it isn't private, or you're the reporter/an assignee/on a shared project).
+- There is no automated test suite yet — changes are currently verified manually / via the `run` skill.
 
 ## 👤 Author
 
-**Bhupendra Singh**
-
-- GitHub: [@Diffrentation](https://github.com/Diffrentation)
-- Project: [TodoList](https://github.com/Diffrentation/TodoList)
-
-## 🙏 Acknowledgments
-
-- Next.js team for the amazing framework
-- Ant Design and Material UI for premium components
-- MongoDB for the database solution
-- All open-source contributors
+**Bhupendra Singh** — [@Diffrentation](https://github.com/Diffrentation) · [TodoList repository](https://github.com/Diffrentation/TodoList)
 
 ---
 
-**Built with ❤️ using Next.js, React, MongoDB, and modern web technologies**
+Built with Next.js, React, and MongoDB.
